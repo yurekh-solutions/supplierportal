@@ -15,5 +15,8 @@
         }
       ]
     }
-  ]
+  ],
+  "env": {
+    "VITE_API_URL": "https://backendmatrix.onrender.com/api"
+  }
 }
