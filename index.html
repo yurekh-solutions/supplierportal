@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Title & Branding -->
+    <title>Supplier Portal - Ritzyard</title>
+        <link rel="icon" type="image/png" href="./src/assets/dashboard-ai.jpg" />
+
+    <meta name="description" content="Ritzyard is an AI-powered procurement platform revolutionizing how businesses source raw materials — Smart. Fast. Reliable." />
+    <meta name="author" content="Ritzyard" />
+
+    <!-- SEO Meta Tags -->
+    <meta name="keywords" content="procurement, AI procurement, Ritzyard, construction materials, sourcing platform, suppliers, manufacturing, B2B, raw materials" />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#d35400" />
+
+    <!-- Open Graph (For Social Sharing) -->
+    <meta property="og:title" content="Ritzyard | AI-Powered Procurement Platform" />
+    <meta property="og:description" content="Revolutionizing how businesses source raw materials — Smart. Fast. Reliable." />
+    <meta property="og:image" content="https://yourdomain.com/assets/og-image.png" />
+    <meta property="og:url" content="https://yourdomain.com" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Ritzyard | AI-Powered Procurement Platform" />
+    <meta name="twitter:description" content="Smart. Fast. Reliable — AI-driven procurement for modern businesses." />
+    <meta name="twitter:image" content="https://yourdomain.com/assets/og-image.png" />
+    <meta name="twitter:site" content="@ritzyard" />
+
+    <!-- Favicon -->
+
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+
+    <!-- Google Translate - Hidden Implementation -->
+    <meta name="google" content="notranslate" />
+    <meta name="google-translate-customization" content="hide-all-ui" />
+    
+    <!-- Inline Critical CSS to Hide Google Translate UI -->
+    <style>
+      /* CRITICAL: Hide all Google Translate UI elements immediately including loading spinners */
+      .goog-te-banner-frame,
+      .goog-te-banner,
+      .skiptranslate,
+      iframe.skiptranslate,
+      .goog-te-gadget,
+      .goog-te-combo,
+      .goog-te-balloon-frame,
+      .goog-te-menu-frame,
+      .goog-te-spinner-pos,
+      .goog-te-spinner,
+      .goog-te-spinner-animation,
+      .goog-te-spinner-container,
+      .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+      .VIpgJd-ZVi9od-aZ2wEe,
+      img[src*="translate.google.com"],
+      img[src*="loading"],
+      [role="progressbar"],
+      body > .skiptranslate {
+        display: none !important;
+        visibility: hidden !important;
+        position: absolute !important;
+        top: -9999px !important;
+        left: -9999px !important;
+        opacity: 0 !important;
+        z-index: -9999 !important;
+      }
+      
+      body {
+        top: 0 !important;
+        position: static !important;
+      }
+    </style>
+
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

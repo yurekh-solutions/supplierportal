@@ -1,0 +1,649 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* MaterialMatrix Color Palette - Terracotta Earth Tones */
+    --background: 30 20% 97%;
+    --foreground: 15 35% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 15 35% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 15 35% 20%;
+
+    /* Primary: Rust Orange/Terracotta #c15738 */
+    --primary: 12 61% 49%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 12 71% 59%;
+    
+    /* Secondary: Deep Earth Brown #5c2d23 */
+    --secondary: 15 42% 25%;
+    --secondary-foreground: 30 20% 97%;
+
+    /* Muted: Warm Cream */
+    --muted: 30 25% 94%;
+    --muted-foreground: 15 20% 45%;
+
+    /* Accent: Warm Clay */
+    --accent: 20 40% 88%;
+    --accent-foreground: 15 35% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 20 20% 88%;
+    --input: 20 20% 88%;
+    --ring: 12 61% 49%;
+    
+    /* Glass morphism borders */
+    --glass-border: 0 0% 100% / 0.2;
+    --glass-bg: 0 0% 100% / 0.7;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-subtle: linear-gradient(180deg, hsl(30 20% 97%), hsl(30 25% 94%));
+
+    /* Shadows */
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.3);
+    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.4);
+
+    --sidebar-background: 30 20% 97%;
+    --sidebar-foreground: 15 35% 20%;
+    --sidebar-primary: 12 61% 49%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 25% 94%;
+    --sidebar-accent-foreground: 15 35% 20%;
+    --sidebar-border: 20 20% 88%;
+    --sidebar-ring: 12 61% 49%;
+  }
+
+  .dark {
+    --background: 15 35% 12%;
+    --foreground: 30 20% 97%;
+
+    --card: 15 30% 15%;
+    --card-foreground: 30 20% 97%;
+
+    --popover: 15 30% 15%;
+    --popover-foreground: 30 20% 97%;
+
+    --primary: 12 61% 49%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 12 71% 59%;
+
+    --secondary: 15 25% 22%;
+    --secondary-foreground: 30 20% 97%;
+
+    --muted: 15 25% 20%;
+    --muted-foreground: 30 15% 65%;
+
+    --accent: 15 25% 22%;
+    --accent-foreground: 30 20% 97%;
+
+    --destructive: 0 62% 45%;
+    --destructive-foreground: 30 20% 97%;
+
+    --border: 15 25% 22%;
+    --input: 15 25% 22%;
+    --ring: 12 61% 55%;
+    
+    --glass-border: 255 255 255 / 0.1;
+    --glass-bg: 0 0% 0% / 0.4;
+    
+    --sidebar-background: 15 35% 12%;
+    --sidebar-foreground: 30 20% 97%;
+    --sidebar-primary: 12 61% 49%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 15 25% 20%;
+    --sidebar-accent-foreground: 30 20% 97%;
+    --sidebar-border: 15 25% 22%;
+    --sidebar-ring: 12 61% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /* Prevent Google Translate from adding top offset */
+    top: 0 !important;
+    position: static !important;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Completely hide Google Translate UI elements - MAXIMUM SECURITY */
+  .goog-te-banner-frame,
+  .goog-te-banner,
+  .skiptranslate,
+  iframe.skiptranslate,
+  .goog-te-gadget,
+  .goog-te-combo,
+  .goog-te-balloon-frame,
+  .goog-te-menu-frame,
+  .goog-logo-link,
+  .goog-te-spinner-pos,
+  .goog-te-ftab,
+  body > .skiptranslate,
+  body > .goog-te-banner-frame,
+  iframe[src*="translate.google.com"],
+  iframe[src*="translate.googleapis.com"],
+  .goog-te-menu-value,
+  .goog-te-gadget-simple,
+  .goog-te-menu2,
+  #google_translate_element > *,
+  #\:1\.container,
+  #\:2\.container,
+  #\:3\.container,
+  .goog-te-spinner,
+  .goog-te-spinner-animation,
+  .goog-te-spinner-pos,
+  .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+  .VIpgJd-ZVi9od-aZ2wEe,
+  .goog-te-spinner-container,
+  img[src*="translate.google.com"],
+  img[src*="loading"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+    z-index: -9999 !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+  }
+}
+
+/* Glass Morphism Design System */
+@layer components {
+  .glass-card {
+    @apply bg-white/70 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-2xl shadow-lg;
+  }
+  
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:bg-white/80 hover:shadow-2xl hover:-translate-y-0.5;
+  }
+  
+  .glass-morphism {
+    @apply bg-white/60 dark:bg-black/30 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-xl;
+  }
+  
+  .glass-bg {
+    @apply bg-gradient-to-br from-[hsl(30,20%,97%)] via-white to-[hsl(30,25%,94%)] dark:from-[hsl(15,35%,12%)] dark:via-[hsl(15,30%,15%)] dark:to-[hsl(15,25%,20%)];
+  }
+  
+  .glass-stat-card {
+    @apply bg-white/80 dark:bg-black/50 backdrop-blur-2xl border border-white/30 dark:border-white/15 rounded-2xl shadow-lg p-4 md:p-6 text-center transition-all duration-300 hover:bg-white/90 hover:shadow-xl hover:-translate-y-1;
+  }
+  
+  .bg-gradient-glass {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.5));
+  }
+}
+
+/* Custom utility classes */
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent;
+  }
+
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  }
+
+  .shadow-elegant {
+    box-shadow: 0 10px 40px -10px hsl(var(--primary) / 0.2);
+  }
+   .animate-scroll {
+    animation: scroll 30s linear infinite;
+  }
+
+  .animate-scroll-reverse {
+    animation: scroll-reverse 25s linear infinite;
+  }
+
+  .animate-logo-scroll {
+    animation: logo-scroll 40s linear infinite;
+  }
+
+  .pause-animation:hover {
+    animation-play-state: paused;
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .shadow-3d {
+    box-shadow: 
+      0 10px 30px -5px rgba(0, 0, 0, 0.1),
+      0 20px 60px -10px rgba(0, 0, 0, 0.15),
+      0 0 60px -15px hsl(var(--primary) / 0.3);
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant;
+  }
+  
+  .hover-3d {
+    @apply transition-all duration-500 hover:-translate-y-2 hover:shadow-3d;
+  }
+
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+  }
+  
+  .bg-gradient-subtle {
+    @apply bg-gradient-to-br from-[hsl(30,20%,97%)] via-white to-[hsl(30,25%,94%)] dark:from-[hsl(15,35%,12%)] dark:via-[hsl(15,30%,15%)] dark:to-[hsl(15,25%,20%)];
+  }
+}
+
+/* Animations */
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-pulse-ring {
+  animation: pulseRing 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseRing {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.3;
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 3s ease-in-out infinite;
+}
+
+@keyframes bounceSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Fade In Animation */
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 3D Rotation Animation */
+@keyframes rotate3d {
+  0% {
+    transform: perspective(1000px) rotateY(0deg);
+  }
+  100% {
+    transform: perspective(1000px) rotateY(360deg);
+  }
+}
+
+.animate-rotate-3d {
+  animation: rotate3d 20s linear infinite;
+}
+
+/* Glow Pulse Animation */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--primary) / 0.6), 0 0 60px hsl(var(--primary-glow) / 0.4);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 3s infinite;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Dark chat scrollbar */
+.dark-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb {
+  background: #3a3a3a;
+  border-radius: 3px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4a;
+}
+  @keyframes scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes scroll-reverse {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes logo-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-100% - 3rem));
+    }
+  }
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* for Internet Explorer and Edge */
+  scrollbar-width: none; /* for Firefox */
+}
+
+/* 3D Effects and Perspective */
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  
+  .perspective-2000 {
+    perspective: 2000px;
+  }
+  
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .transform-style-3d {
+    transform-style: preserve-3d;
+  }
+  
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+  
+  .rotate-y-6 {
+    transform: rotateY(6deg);
+  }
+  
+  .rotate-y-8 {
+    transform: rotateY(8deg);
+  }
+  
+  .rotate-y-12 {
+    transform: rotateY(12deg);
+  }
+  
+  .transform-gpu {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  .shadow-3xl {
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      0 0 80px -20px hsl(var(--primary) / 0.4);
+  }
+  
+  .hover-3d-lift {
+    @apply transition-all duration-700 hover:-translate-y-4 hover:shadow-3xl hover:rotate-y-6;
+  }
+  
+  /* Hexagonal Cards */
+  .hexagon-card {
+    position: relative;
+    width: 100%;
+    height: 120px;
+    margin: 20px 0;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    transition: all 0.3s ease;
+  }
+  
+  .hexagon-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  @media (min-width: 640px) {
+    .hexagon-card {
+      height: 140px;
+    }
+  }
+  
+  /* Enhanced 3D Card Effects */
+  .card-3d {
+    transform: perspective(1000px) rotateX(0deg) rotateY(0deg);
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  
+  .card-3d:hover {
+    transform: perspective(1000px) rotateX(5deg) rotateY(5deg) translateZ(20px);
+  }
+  
+  /* Parallax Layers */
+  .parallax-layer {
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Smooth Hardware Acceleration */
+  .hw-accelerate {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+}
+
+
+/* Google Translate Custom Styles */
+/* Hide default Google Translate widget but keep it functional */
+#google_translate_element {
+  position: fixed !important;
+  bottom: 10px !important;
+  left: 10px !important;
+  z-index: -1 !important;
+  opacity: 0.01 !important;
+  pointer-events: none !important;
+  max-width: 50px !important;
+  max-height: 50px !important;
+  overflow: hidden !important;
+}
+
+/* Keep the select element accessible */
+.goog-te-combo {
+  pointer-events: auto !important;
+}
+
+/* Hide Google Translate top banner frame */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+body > .skiptranslate {
+  display: none !important;
+}
+
+/* Remove top margin added by Google Translate */
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
+/* Hide Google Translate iframe */
+iframe.skiptranslate {
+  display: none !important;
+}
+
+/* Ensure no layout shift when translation is active */
+html.translated-ltr,
+html.translated-rtl {
+  margin-top: 0 !important;
+}
+
+body.translated-ltr,
+body.translated-rtl {
+  top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* Hide Google branding */
+.goog-logo-link,
+.goog-te-gadget span,
+.goog-te-gadget img {
+  display: none !important;
+}
+
+.goog-te-gadget {
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+/* Style for translated content */
+.translated-rtl {
+  direction: rtl !important;
+}
+
+.translated-ltr {
+  direction: ltr !important;
+}
+
+/* Smooth transitions for translation */
+font[style*="vertical-align: inherit"] {
+  vertical-align: inherit !important;
+}
+
+/* Fix for any Google Translate positioning issues */
+.skiptranslate {
+  position: fixed !important;
+  top: -9999px !important;
+  left: -9999px !important;
+}
+
+/* Ensure the widget container doesn't interfere */
+#google_translate_element > div {
+  display: none !important;
+}
