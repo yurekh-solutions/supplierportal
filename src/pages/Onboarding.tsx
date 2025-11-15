@@ -625,7 +625,7 @@ const SupplierOnboarding = () => {
                     {/* GST Certificate */}
                     <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                           <FileText className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -676,7 +676,7 @@ const SupplierOnboarding = () => {
                     {/* CIN Certificate */}
                     <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                           <FileText className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -724,7 +724,7 @@ const SupplierOnboarding = () => {
                     {/* Business License */}
                     <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                           <FileText className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -775,7 +775,7 @@ const SupplierOnboarding = () => {
                   {formData.businessType === 'individual' && (
                     <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                           <FileText className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -824,7 +824,7 @@ const SupplierOnboarding = () => {
                   {/* Bank Proof - Optional for all */}
                   <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
                     <div className="flex items-start gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                         <FileText className="w-6 h-6 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">

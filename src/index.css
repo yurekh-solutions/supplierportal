@@ -451,6 +451,50 @@ All colors MUST be HSL.
   scrollbar-width: none; /* for Firefox */
 }
 
+/* Custom thin scrollbar with smooth transitions */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--primary) / 0.2) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary) / 0.2);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.4);
+}
+
+/* Custom scrollbar track variations */
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Shadow effects for better visuals */
+@layer utilities {
+  .shadow-4xl {
+    box-shadow: 
+      0 30px 60px -15px rgba(0, 0, 0, 0.3),
+      0 0 100px -25px hsl(var(--primary) / 0.5);
+  }
+  
+  .hover\:scale-102:hover {
+    transform: scale(1.02);
+  }
+}
+
 /* 3D Effects and Perspective */
 @layer utilities {
   .perspective-1000 {

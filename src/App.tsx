@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import ProductDashboard from './pages/ProductDashboard';
+import AddProduct from './pages/AddProduct';
 import TestPage from './pages/TestPage';
 import SupplierStatus from './pages/SupplierStatus';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -19,7 +20,7 @@ function App() {
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
@@ -27,6 +28,7 @@ function App() {
           <Route path="/status" element={<SupplierStatus />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/products" element={<ProductDashboard />} /> 
+          <Route path="/products/add" element={<AddProduct />} />
           <Route path="/test" element={<TestPage />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />

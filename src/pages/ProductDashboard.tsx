@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye, Package, TrendingUp, LogOut, MessageSquare, CheckCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Package, TrendingUp, LogOut, MessageSquare, CheckCircle, Settings, CreditCard, X, Search } from 'lucide-react';
+import { products as predefinedProducts } from '../data';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -10,9 +11,32 @@ import { Badge } from '@/pages/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/pages/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/pages/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/pages/components/ui/tabs';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+// Category interface
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  icon?: string;
+  subcategories: Subcategory[];
+}
+
+interface Subcategory {
+  _id?: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
+}
+
+// Category options (will be loaded from API)
+const INITIAL_CATEGORIES = [
+  { value: 'mild-steel', label: 'Mild Steel', icon: '🔩' },
+  { value: 'stainless-steel', label: 'Stainless Steel', icon: '⚙️' },
+  { value: 'construction', label: 'Construction Materials', icon: '🏗️' },
+  { value: 'electrical', label: 'Electrical Materials', icon: '⚡' },
+];
 
 interface Product {
   _id: string;
@@ -33,52 +57,35 @@ interface Product {
   createdAt: string;
 }
 
-interface RFQ {
-  _id: string;
-  customerName: string;
-  email: string;
-  phone: string;
-  productName: string;
-  quantity: number;
-  unit: string;
-  status: string;
-  createdAt: string;
-}
-
 const SupplierProductDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
-  const [rfqs, setRFQs] = useState<RFQ[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showProductDialog, setShowProductDialog] = useState(false);
-  const [showRFQDialog, setShowRFQDialog] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedRFQ, setSelectedRFQ] = useState<RFQ | null>(null);
-  const [quotedPrice, setQuotedPrice] = useState('');
-  const [quoteNotes, setQuoteNotes] = useState('');
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [availableSubcategories, setAvailableSubcategories] = useState<Subcategory[]>([]);
 
   const [productForm, setProductForm] = useState({
     name: '',
     category: '',
+    subcategory: '',
+    customCategory: '',
+    customSubcategory: '',
     description: '',
-    image: '',
-    applications: [''],
-    features: [''],
-    materialStandard: '',
-    packaging: '',
-    testingCertificate: '',
-    brand: [''],
-    grades: [''],
-    delivery: '',
-    quality: '',
-    availability: '',
-    priceAmount: '',
-    priceUnit: '',
-    stockQuantity: '',
-    minimumOrder: '',
-    available: true,
+    imageFile: null as File | null,
+    imagePreview: '',
+    features: [] as string[],
+    applications: [] as string[],
+    specifications: {} as any,
   });
+
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
+  const [showCustomSubcategory, setShowCustomSubcategory] = useState(false);
+  const [showProductSuggestions, setShowProductSuggestions] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState<typeof predefinedProducts>([]);
+  const productInputRef = useRef<HTMLDivElement>(null);
 
   const token = localStorage.getItem('supplierToken');
   const user = JSON.parse(localStorage.getItem('supplierUser') || '{}');
@@ -88,8 +95,110 @@ const SupplierProductDashboard = () => {
       navigate('/login');
       return;
     }
+    fetchCategories();
     fetchProducts();
-    fetchRFQs();
+  }, []);
+
+  useEffect(() => {
+    if (productForm.category) {
+      const selectedCategory = categories.find(cat => cat.slug === productForm.category);
+      if (selectedCategory) {
+        setAvailableSubcategories(selectedCategory.subcategories || []);
+      } else {
+        setAvailableSubcategories([]);
+      }
+    }
+  }, [productForm.category, categories]);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(`${API_URL}/categories/public`);
+      const data = await response.json();
+      if (data.success) {
+        setCategories(data.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories');
+    }
+  };
+
+  const handleProductNameChange = (value: string) => {
+    setProductForm({ ...productForm, name: value });
+    
+    if (value.trim().length > 0) {
+      const filtered = predefinedProducts.filter(product => 
+        product.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+      setShowProductSuggestions(true);
+    } else {
+      setShowProductSuggestions(false);
+    }
+  };
+
+  const handleSelectPredefinedProduct = async (product: typeof predefinedProducts[0]) => {
+    // Map category slugs
+    const categoryMap: Record<string, string> = {
+      'mild-steel': 'mild-steel',
+      'stainless-steel': 'stainless-steel',
+      'construction': 'construction',
+      'electrical': 'electrical'
+    };
+
+    const mappedCategory = categoryMap[product.category] || product.category;
+
+    // Convert image import to File object for upload
+    let imageFile: File | null = null;
+    let imagePreview = '';
+
+    // Fetch the image and convert to File
+    try {
+      const response = await fetch(product.image);
+      const blob = await response.blob();
+      const fileName = product.name.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.jpg';
+      imageFile = new File([blob], fileName, { type: blob.type });
+      imagePreview = URL.createObjectURL(blob);
+    } catch (error) {
+      console.error('Failed to load product image:', error);
+      // Fallback: use image URL directly
+      imagePreview = product.image;
+    }
+
+    setProductForm({
+      ...productForm,
+      name: product.name,
+      category: mappedCategory,
+      subcategory: '',
+      customCategory: '',
+      customSubcategory: '',
+      description: product.description,
+      features: product.features || [],
+      applications: product.applications || [],
+      specifications: product.specifications || {},
+      imageFile,
+      imagePreview
+    });
+
+    setShowProductSuggestions(false);
+    
+    // Show success toast
+    toast({
+      title: '✨ Product Details Auto-Filled',
+      description: `Loaded complete information for "${product.name}"`,
+      variant: 'default',
+    });
+  };
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (productInputRef.current && !productInputRef.current.contains(event.target as Node)) {
+        setShowProductSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchProducts = async () => {
@@ -108,63 +217,36 @@ const SupplierProductDashboard = () => {
     }
   };
 
-  const fetchRFQs = async () => {
-    try {
-      const response = await fetch(`${API_URL}/rfqs/supplier/my-rfqs`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await response.json();
-      if (data.success) {
-        setRFQs(data.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch RFQs');
-    }
-  };
+  // ... existing code ...
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const formDataToSend = new FormData();
+      
+      // Basic fields
+      formDataToSend.append('name', productForm.name);
+      formDataToSend.append('category', productForm.category === 'custom' ? productForm.customCategory : productForm.category);
+      formDataToSend.append('subcategory', productForm.subcategory === 'custom' ? productForm.customSubcategory : productForm.subcategory);
+      formDataToSend.append('description', productForm.description);
+      
+      // Image file
+      if (productForm.imageFile) {
+        formDataToSend.append('productImage', productForm.imageFile);
+      }
+
       const response = await fetch(`${API_URL}/products`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          name: productForm.name,
-          category: productForm.category,
-          description: productForm.description,
-          image: productForm.image,
-          applications: productForm.applications.filter(a => a.trim()),
-          features: productForm.features.filter(f => f.trim()),
-          specifications: {
-            materialStandard: productForm.materialStandard,
-            packaging: productForm.packaging,
-            testingCertificate: productForm.testingCertificate,
-            brand: productForm.brand.filter(b => b.trim()),
-            grades: productForm.grades.filter(g => g.trim()),
-            delivery: productForm.delivery,
-            quality: productForm.quality,
-            availability: productForm.availability,
-          },
-          price: {
-            amount: parseFloat(productForm.priceAmount),
-            currency: 'INR',
-            unit: productForm.priceUnit,
-          },
-          stock: {
-            available: productForm.available,
-            quantity: productForm.stockQuantity ? parseInt(productForm.stockQuantity) : undefined,
-            minimumOrder: productForm.minimumOrder ? parseInt(productForm.minimumOrder) : undefined,
-          },
-        }),
+        body: formDataToSend,
       });
 
       const data = await response.json();
       if (data.success) {
-        toast({ title: 'Success', description: data.message });
         setShowProductDialog(false);
+        setShowSuccessPopup(true);
         resetProductForm();
         fetchProducts();
       } else {
@@ -194,58 +276,24 @@ const SupplierProductDashboard = () => {
     }
   };
 
-  const handleRespondRFQ = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedRFQ) return;
-
-    try {
-      const response = await fetch(`${API_URL}/rfqs/supplier/${selectedRFQ._id}/respond`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          quotedPrice: parseFloat(quotedPrice),
-          notes: quoteNotes,
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        toast({ title: 'Success', description: 'Quote submitted successfully' });
-        setShowRFQDialog(false);
-        setQuotedPrice('');
-        setQuoteNotes('');
-        fetchRFQs();
-      }
-    } catch (error) {
-      toast({ title: 'Error', description: 'Failed to submit quote', variant: 'destructive' });
-    }
-  };
+  // ... existing code ...
 
   const resetProductForm = () => {
     setProductForm({
       name: '',
       category: '',
+      subcategory: '',
+      customCategory: '',
+      customSubcategory: '',
       description: '',
-      image: '',
-      applications: [''],
-      features: [''],
-      materialStandard: '',
-      packaging: '',
-      testingCertificate: '',
-      brand: [''],
-      grades: [''],
-      delivery: '',
-      quality: '',
-      availability: '',
-      priceAmount: '',
-      priceUnit: '',
-      stockQuantity: '',
-      minimumOrder: '',
-      available: true,
+      imageFile: null,
+      imagePreview: '',
+      features: [],
+      applications: [],
+      specifications: {},
     });
+    setShowCustomCategory(false);
+    setShowCustomSubcategory(false);
   };
 
   const handleLogout = () => {
@@ -266,7 +314,7 @@ const SupplierProductDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-subtle relative overflow-hidden">
-      {/* Animated Background */}
+      {/* Animated Background - Match Login Page */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/10"></div>
         <div className="absolute top-20 left-10 w-96 h-96 bg-gradient-to-br from-primary/30 to-primary-glow/20 rounded-full blur-3xl opacity-60 animate-float"></div>
@@ -284,8 +332,8 @@ const SupplierProductDashboard = () => {
                 <Package className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Supplier Dashboard</h1>
-                <p className="text-muted-foreground text-sm">{user.companyName}</p>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Supplier Portal</h1>
+                <p className="text-muted-foreground text-sm">{user.companyName || 'Business Ventures'}</p>
               </div>
             </div>
             <Button
@@ -301,42 +349,30 @@ const SupplierProductDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
         {/* Statistics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="glass-card border-2 border-primary/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-300 group">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <Package className="w-7 h-7 text-white" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="glass-card border-2 border-primary/30 p-6 rounded-3xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <Package className="w-8 h-8 text-white" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground font-medium">Total Products</p>
-                <p className="text-3xl font-bold text-foreground">{products.length}</p>
+                <p className="text-4xl font-bold text-foreground">{products.length}</p>
               </div>
             </div>
           </div>
 
-          <div className="glass-card border-2 border-green-300/50 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-300 group bg-green-50/30">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <TrendingUp className="w-7 h-7 text-white" />
+          <div className="glass-card border-2 border-green-300/50 p-6 rounded-3xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-green-50/30 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10 flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="w-8 h-8 text-white" />
               </div>
               <div>
                 <p className="text-sm text-green-700 font-medium">Active Products</p>
-                <p className="text-3xl font-bold text-green-600">
+                <p className="text-4xl font-bold text-green-600">
                   {products.filter((p) => p.status === 'active').length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card border-2 border-yellow-300/50 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-300 group bg-yellow-50/30">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <MessageSquare className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-yellow-700 font-medium">Pending RFQs</p>
-                <p className="text-3xl font-bold text-yellow-600">
-                  {rfqs.filter((r) => r.status === 'pending').length}
                 </p>
               </div>
             </div>
@@ -344,38 +380,19 @@ const SupplierProductDashboard = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 glass-card border-2 border-white/30 backdrop-blur-2xl p-2 h-auto">
-            <TabsTrigger 
-              value="products" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg h-12 rounded-lg transition-all"
-            >
-              <Package className="w-4 h-4 mr-2" />
-              My Products
-            </TabsTrigger>
-            <TabsTrigger 
-              value="rfqs" 
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-secondary data-[state=active]:text-white data-[state=active]:shadow-lg h-12 rounded-lg transition-all"
-            >
-              <MessageSquare className="w-4 h-4 mr-2" />
-              RFQ Requests
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Products Tab */}
-          <TabsContent value="products">
+        <div className="space-y-6">
             <div className="glass-card border-2 border-white/30 shadow-2xl rounded-3xl overflow-hidden backdrop-blur-2xl">
-              <div className="bg-gradient-to-r from-primary/10 via-primary-glow/10 to-secondary/10 border-b border-white/20 p-6">
+              <div className="bg-gradient-to-r from-primary/10 via-primary-glow/10 to-secondary/10 border-b border-white/20 p-6 rounded-t-3xl">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <h2 className="text-2xl font-bold text-foreground mb-1">Product Management</h2>
-                    <p className="text-muted-foreground text-sm">Manage your product listings</p>
+                    <h2 className="text-3xl font-bold text-foreground mb-2">Product Management</h2>
+                    <p className="text-muted-foreground text-base">Manage your product listings and track performance</p>
                   </div>
                   <Button
-                    onClick={() => setShowProductDialog(true)}
-                    className="bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl hover:scale-105 text-white font-semibold transition-all duration-300"
+                    onClick={() => navigate('/products/add')}
+                    className="bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl hover:scale-105 text-white font-semibold px-6 py-5 transition-all duration-300 rounded-xl text-lg"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="w-5 h-5 mr-2" />
                     Add Product
                   </Button>
                 </div>
@@ -388,418 +405,447 @@ const SupplierProductDashboard = () => {
                   </div>
                 ) : products.length === 0 ? (
                   <div className="text-center py-16">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-4">
-                      <Package className="w-10 h-10 text-primary" />
+                    <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-6 shadow-xl animate-float">
+                      <Package className="w-12 h-12 text-primary" />
                     </div>
-                    <p className="text-foreground font-semibold mb-2">No products yet</p>
-                    <p className="text-muted-foreground text-sm">Add your first product to get started!</p>
+                    <h3 className="text-2xl font-bold text-foreground mb-2">No products yet</h3>
+                    <p className="text-muted-foreground text-base mb-6 max-w-md mx-auto">Add your first product to showcase your offerings to potential customers!</p>
+                    <Button
+                      onClick={() => navigate('/products/add')}
+                      className="bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl hover:scale-105 text-white font-semibold px-8 py-6 rounded-xl transition-all duration-300 text-lg"
+                    >
+                      <Plus className="w-5 h-5 mr-2" />
+                      Add Your First Product
+                    </Button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {products.map((product) => (
                       <div
                         key={product._id}
-                        className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:shadow-2xl transition-all duration-300 backdrop-blur-xl group hover:-translate-y-1"
+                        className="glass-card border-2 border-white/30 rounded-3xl p-6 hover:shadow-3xl transition-all duration-500 backdrop-blur-2xl group hover:-translate-y-2 relative overflow-hidden"
                       >
-                        <div className="flex justify-between items-start mb-3">
-                          <h3 className="font-bold text-foreground text-lg group-hover:text-primary transition-colors">{product.name}</h3>
-                          {getStatusBadge(product.status)}
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2 font-medium">{product.category}</p>
-                        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{product.description}</p>
-                        <div className="flex justify-between items-center mb-4 pb-4 border-b border-border/50">
-                          <div>
-                            <p className="text-xl font-bold text-gradient">
-                              ₹{product.price.amount}/{product.price.unit}
-                            </p>
-                            {product.stock.quantity && (
-                              <p className="text-xs text-muted-foreground mt-1">Stock: {product.stock.quantity}</p>
-                            )}
+                        {/* Animated background gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        
+                        <div className="relative z-10">
+                          <div className="flex justify-between items-start mb-4">
+                            <h3 className="font-bold text-foreground text-xl group-hover:text-primary transition-colors duration-300">{product.name}</h3>
+                            {getStatusBadge(product.status)}
                           </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex-1 border-2 border-red-500/50 text-red-600 hover:bg-red-50 hover:border-red-500 transition-all"
-                            onClick={() => handleDeleteProduct(product._id)}
-                          >
-                            <Trash2 className="w-4 h-4 mr-1" />
-                            Delete
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* RFQs Tab */}
-          <TabsContent value="rfqs">
-            <div className="glass-card border-2 border-white/30 shadow-2xl rounded-3xl overflow-hidden backdrop-blur-2xl">
-              <div className="bg-gradient-to-r from-primary/10 via-primary-glow/10 to-secondary/10 border-b border-white/20 p-6">
-                <h2 className="text-2xl font-bold text-foreground mb-1">RFQ Requests</h2>
-                <p className="text-muted-foreground text-sm">Respond to customer inquiries</p>
-              </div>
-              <div className="p-6">
-                {rfqs.length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 flex items-center justify-center mx-auto mb-4">
-                      <MessageSquare className="w-10 h-10 text-yellow-600" />
-                    </div>
-                    <p className="text-foreground font-semibold mb-2">No RFQ requests yet</p>
-                    <p className="text-muted-foreground text-sm">Customer inquiries will appear here</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {rfqs.map((rfq) => (
-                      <div
-                        key={rfq._id}
-                        className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:shadow-2xl transition-all duration-300 backdrop-blur-xl"
-                      >
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <h3 className="font-bold text-foreground text-lg">{rfq.productName}</h3>
-                            <p className="text-sm text-muted-foreground">{rfq.customerName}</p>
+                          
+                          <div className="flex items-center gap-2 mb-3">
+                            <Package className="w-4 h-4 text-primary" />
+                            <p className="text-sm text-muted-foreground font-medium capitalize">{product.category.replace('-', ' ')}</p>
                           </div>
-                          <Badge className={rfq.status === 'pending' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' : 'bg-green-100 text-green-800 border border-green-200'}>
-                            {rfq.status}
-                          </Badge>
-                        </div>
-                        <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
-                          <div className="glass-card border border-white/20 p-3 rounded-lg backdrop-blur-sm">
-                            <p className="text-muted-foreground text-xs mb-1">Quantity</p>
-                            <p className="text-foreground font-semibold">{rfq.quantity} {rfq.unit}</p>
-                          </div>
-                          <div className="glass-card border border-white/20 p-3 rounded-lg backdrop-blur-sm">
-                            <p className="text-muted-foreground text-xs mb-1">Date</p>
-                            <p className="text-foreground font-semibold">{new Date(rfq.createdAt).toLocaleDateString()}</p>
-                          </div>
-                          <div className="glass-card border border-white/20 p-3 rounded-lg backdrop-blur-sm">
-                            <p className="text-muted-foreground text-xs mb-1">Email</p>
-                            <p className="text-foreground font-semibold text-xs truncate">{rfq.email}</p>
-                          </div>
-                          <div className="glass-card border border-white/20 p-3 rounded-lg backdrop-blur-sm">
-                            <p className="text-muted-foreground text-xs mb-1">Phone</p>
-                            <p className="text-foreground font-semibold">{rfq.phone}</p>
-                          </div>
-                        </div>
-                        {rfq.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              className="flex-1 bg-gradient-to-r from-primary to-secondary text-white hover:shadow-xl transition-all"
-                              onClick={() => {
-                                setSelectedRFQ(rfq);
-                                setShowRFQDialog(true);
-                              }}
-                            >
-                              Submit Quote
-                            </Button>
+                          
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{product.description}</p>
+                          
+                          <div className="flex gap-2 mt-4">
                             <Button
                               size="sm"
                               variant="outline"
-                              className="flex-1 border-2 border-green-500/50 text-green-600 hover:bg-green-50 hover:border-green-500 transition-all"
-                              onClick={() => {
-                                window.open(`https://wa.me/${rfq.phone.replace(/[^0-9]/g, '')}?text=Hello ${rfq.customerName}, I received your RFQ for ${rfq.productName}. I would like to discuss further.`, '_blank');
-                              }}
+                              className="flex-1 border-2 border-red-500/50 text-red-600 hover:bg-red-50 hover:border-red-500 transition-all duration-300 rounded-xl"
+                              onClick={() => handleDeleteProduct(product._id)}
                             >
-                              WhatsApp
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Delete
                             </Button>
                           </div>
-                        )}
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+        </div>
       </div>
 
       {/* Add Product Dialog */}
       <Dialog open={showProductDialog} onOpenChange={setShowProductDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glass-card border-2 border-white/30 backdrop-blur-2xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto glass-card border-2 border-white/30 rounded-3xl bg-white/70 dark:bg-black/40 backdrop-blur-3xl shadow-4xl">
           <DialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-                <Plus className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-xl animate-glow-pulse transform transition-transform hover:scale-105">
+                <Plus className="w-8 h-8 text-white" />
               </div>
               <div>
-                <DialogTitle className="text-2xl font-bold text-gradient">Add New Product</DialogTitle>
-                <DialogDescription className="text-muted-foreground">Product will be pending until admin approves it. Fill in all required fields marked with *</DialogDescription>
+                <DialogTitle className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Add New Product</DialogTitle>
+                <DialogDescription className="text-muted-foreground mt-1 text-sm">Submit your product for admin review and approval</DialogDescription>
               </div>
             </div>
           </DialogHeader>
           <form onSubmit={handleAddProduct} className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gradient border-b-2 border-primary/20 pb-3">Basic Information</h3>
-              <div>
+              <h3 className="text-lg font-bold text-gradient border-b-2 border-primary/20 pb-3 flex items-center gap-2">
+                <Package className="w-5 h-5 text-primary" />
+                Basic Information
+              </h3>
+              <div className="relative" ref={productInputRef}>
                 <Label htmlFor="name">Product Name *</Label>
-                <Input
-                  id="name"
-                  placeholder="e.g., MS Round Bars IS 2062"
-                  value={productForm.name}
-                  onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="category">Category *</Label>
-                  <Select value={productForm.category} onValueChange={(value) => setProductForm({ ...productForm, category: value })} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="mild-steel">Mild Steel</SelectItem>
-                      <SelectItem value="stainless-steel">Stainless Steel</SelectItem>
-                      <SelectItem value="construction">Construction Materials</SelectItem>
-                      <SelectItem value="electrical">Electrical Materials</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="image">Product Image URL *</Label>
+                <div className="relative">
                   <Input
-                    id="image"
-                    placeholder="https://example.com/product-image.jpg"
-                    value={productForm.image}
-                    onChange={(e) => setProductForm({ ...productForm, image: e.target.value })}
+                    id="name"
+                    placeholder="e.g., MS Round Bars IS 2062"
+                    value={productForm.name}
+                    onChange={(e) => handleProductNameChange(e.target.value)}
                     required
+                    className="h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg transition-all duration-300 pr-10"
                   />
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1">
+                  <Package className="w-3 h-3" />
+                  Start typing to see product suggestions with pre-filled data
+                </p>
+                
+                {/* Autocomplete Suggestions Dropdown */}
+                {showProductSuggestions && filteredProducts.length > 0 && (
+                  <div className="absolute z-50 w-full mt-2 max-h-80 overflow-y-auto bg-white dark:bg-gray-900 border-2 border-primary/30 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2">
+                    <div className="p-2 border-b border-border/50 bg-primary/5">
+                      <p className="text-xs font-semibold text-primary flex items-center gap-2">
+                        <Package className="w-4 h-4" />
+                        {filteredProducts.length} Products Found - Click to auto-fill
+                      </p>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto">
+                      {filteredProducts.slice(0, 10).map((product) => (
+                        <button
+                          key={product.id}
+                          type="button"
+                          onClick={() => handleSelectPredefinedProduct(product)}
+                          className="w-full p-3 hover:bg-primary/10 border-b border-border/30 last:border-0 text-left transition-all duration-200 flex items-start gap-3 group"
+                        >
+                          <div className="w-12 h-12 rounded-lg overflow-hidden border-2 border-primary/20 flex-shrink-0 group-hover:border-primary/50 transition-all">
+                            <img 
+                              src={product.image} 
+                              alt={product.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                // Fallback to a placeholder if image fails to load
+                                target.src = 'https://placehold.co/100x100/6366f1/ffffff?text=Product';
+                              }}
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors truncate">
+                              {product.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5 capitalize">
+                              {product.category.replace('-', ' ')}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                              {product.description}
+                            </p>
+                          </div>
+                          <CheckCircle className="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                        </button>
+                      ))}
+                    </div>
+                    {filteredProducts.length > 10 && (
+                      <div className="p-2 border-t border-border/50 bg-muted/50">
+                        <p className="text-xs text-center text-muted-foreground">
+                          Showing 10 of {filteredProducts.length} results. Type more to refine search.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              {/* Category Selection as Chips */}
+              <div>
+                <Label className="font-semibold text-foreground mb-2 block">Category *</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.slug}
+                      type="button"
+                      className={`px-4 py-2 rounded-full border-2 transition-all duration-300 flex items-center gap-2 ${productForm.category === cat.slug
+                        ? 'border-primary bg-primary/10 text-primary font-semibold' 
+                        : 'border-border/50 hover:border-primary/50 hover:bg-primary/5'}`}
+                      onClick={() => setProductForm({ ...productForm, category: cat.slug, subcategory: '', customSubcategory: '' })}
+                    >
+                      <span>{cat.icon || '📦'}</span>
+                      <span>{cat.name}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded-full border-2 border-dashed border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                    onClick={() => setShowCustomCategory(true)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Category</span>
+                  </button>
+                </div>
+              </div>
+                                
+              {/* Custom Category Input */}
+              {showCustomCategory && (
+                <div className="mt-2 p-4 border-2 border-primary/30 rounded-xl bg-primary/5">
+                  <Label className="font-semibold text-foreground mb-2 block">Request New Category</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter new category name"
+                      value={productForm.customCategory}
+                      onChange={(e) => setProductForm({ ...productForm, customCategory: e.target.value })}
+                      className="flex-1 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg transition-all duration-300"
+                    />
+                    <Button 
+                      type="button"
+                      className="bg-gradient-to-r from-primary to-secondary text-white"
+                      onClick={() => {
+                        if (productForm.customCategory.trim()) {
+                          setProductForm({ ...productForm, category: 'custom' });
+                        }
+                      }}
+                    >
+                      Request
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowCustomCategory(false);
+                        setProductForm({ ...productForm, customCategory: '' });
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">Your category will be reviewed by admin before it becomes available.</p>
+                </div>
+              )}
+                                
+              {/* Subcategory Selection */}
+              {productForm.category && productForm.category !== 'custom' && !showCustomCategory && (
+                <div>
+                  <Label className="font-semibold text-foreground mb-2 block">Subcategory (Optional)</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {availableSubcategories.map((sub) => (
+                      <button
+                        key={sub.slug}
+                        type="button"
+                        className={`px-4 py-2 rounded-full border-2 transition-all duration-300 ${productForm.subcategory === sub.slug
+                          ? 'border-primary bg-primary/10 text-primary font-semibold' 
+                          : 'border-border/50 hover:border-primary/50 hover:bg-primary/5'}`}
+                        onClick={() => setProductForm({ ...productForm, subcategory: sub.slug, customSubcategory: '' })}
+                      >
+                        <span>{sub.name}</span>
+                      </button>
+                    ))}
+                    <button
+                      type="button"
+                      className="px-4 py-2 rounded-full border-2 border-dashed border-border/50 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                      onClick={() => setShowCustomSubcategory(true)}
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>Add Subcategory</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+                                
+              {/* Custom Subcategory Input */}
+              {showCustomSubcategory && (
+                <div className="mt-2 p-4 border-2 border-primary/30 rounded-xl bg-primary/5">
+                  <Label className="font-semibold text-foreground mb-2 block">Request New Subcategory</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Enter new subcategory name"
+                      value={productForm.customSubcategory}
+                      onChange={(e) => setProductForm({ ...productForm, customSubcategory: e.target.value })}
+                      className="flex-1 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg transition-all duration-300"
+                    />
+                    <Button 
+                      type="button"
+                      className="bg-gradient-to-r from-primary to-secondary text-white"
+                      onClick={() => {
+                        if (productForm.customSubcategory.trim()) {
+                          setProductForm({ ...productForm, subcategory: 'custom' });
+                        }
+                      }}
+                    >
+                      Request
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowCustomSubcategory(false);
+                        setProductForm({ ...productForm, customSubcategory: '' });
+                      }}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">Your subcategory will be reviewed by admin before it becomes available.</p>
+                </div>
+              )}
+                                
+              {/* Image Upload */}
+              <div>
+                <Label className="font-semibold text-foreground mb-2 block">Product Image (Optional)</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  {productForm.imagePreview && (
+                    <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-primary/30">
+                      <img 
+                        src={productForm.imagePreview} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setProductForm({ ...productForm, imageFile: null, imagePreview: '' })}
+                        className="absolute top-1 right-1 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setProductForm({ 
+                            ...productForm, 
+                            imageFile: e.target.files[0],
+                            imagePreview: URL.createObjectURL(e.target.files[0])
+                          });
+                        }
+                      }}
+                      className="h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg transition-all duration-300"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1.5">
+                      Upload product image or it will use a default placeholder
+                    </p>
+                  </div>
                 </div>
               </div>
               <div>
-                <Label htmlFor="description">Description *</Label>
+                <Label htmlFor="description" className="font-semibold text-foreground mb-2 block">AI Recommended Summary</Label>
                 <Textarea
                   id="description"
                   placeholder="Detailed product description including key features and specifications"
                   value={productForm.description}
                   onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                   rows={4}
-                  required
+                  className="border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg transition-all duration-300"
                 />
               </div>
-            </div>
 
-            {/* Applications & Features */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gradient border-b-2 border-primary/20 pb-3">Applications & Features</h3>
-              <div>
-                <Label>Applications (one per line)</Label>
-                <Textarea
-                  placeholder="e.g.,\nHigh-Rise Buildings\nBridge Construction\nIndustrial Structures"
-                  value={productForm.applications.join('\n')}
-                  onChange={(e) => setProductForm({ ...productForm, applications: e.target.value.split('\n').filter(a => a.trim()) })}
-                  rows={4}
-                />
-              </div>
-              <div>
-                <Label>Features (one per line)</Label>
-                <Textarea
-                  placeholder="e.g.,\nHigh Tensile Strength\nCorrosion Resistant\nEasy Installation"
-                  value={productForm.features.join('\n')}
-                  onChange={(e) => setProductForm({ ...productForm, features: e.target.value.split('\n').filter(f => f.trim()) })}
-                  rows={4}
-                />
-              </div>
-            </div>
+              {/* Auto-filled Features */}
+              {productForm.features.length > 0 && (
+                <div className="mt-6 p-4 border-2 border-green-500/30 rounded-xl bg-green-50/50 dark:bg-green-900/10 animate-in slide-in-from-bottom-4 duration-500">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <Label className="font-bold text-green-700 dark:text-green-400 text-base">Features (Auto-filled)</Label>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {productForm.features.map((feature, index) => (
+                      <div
+                        key={index}
+                        className="px-3 py-1.5 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 rounded-lg text-sm font-medium text-green-800 dark:text-green-300 flex items-center gap-1.5"
+                      >
+                        <span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            {/* Specifications */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gradient border-b-2 border-primary/20 pb-3">Specifications</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="materialStandard">Material Standard</Label>
-                  <Input
-                    id="materialStandard"
-                    placeholder="e.g., IS 2062 / ASTM A36"
-                    value={productForm.materialStandard}
-                    onChange={(e) => setProductForm({ ...productForm, materialStandard: e.target.value })}
-                  />
+              {/* Auto-filled Applications */}
+              {productForm.applications.length > 0 && (
+                <div className="mt-4 p-4 border-2 border-blue-500/30 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 animate-in slide-in-from-bottom-4 duration-500 delay-100">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Package className="w-5 h-5 text-blue-600" />
+                    <Label className="font-bold text-blue-700 dark:text-blue-400 text-base">Applications (Auto-filled)</Label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {productForm.applications.map((app, index) => (
+                      <div
+                        key={index}
+                        className="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700 rounded-lg text-sm text-blue-800 dark:text-blue-300"
+                      >
+                        • {app}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="packaging">Packaging</Label>
-                  <Input
-                    id="packaging"
-                    placeholder="e.g., Bundle / Crate"
-                    value={productForm.packaging}
-                    onChange={(e) => setProductForm({ ...productForm, packaging: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="testingCertificate">Testing Certificate</Label>
-                  <Input
-                    id="testingCertificate"
-                    placeholder="e.g., Mill Test Available"
-                    value={productForm.testingCertificate}
-                    onChange={(e) => setProductForm({ ...productForm, testingCertificate: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="delivery">Delivery</Label>
-                  <Input
-                    id="delivery"
-                    placeholder="e.g., Pan India"
-                    value={productForm.delivery}
-                    onChange={(e) => setProductForm({ ...productForm, delivery: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="quality">Quality Certification</Label>
-                  <Input
-                    id="quality"
-                    placeholder="e.g., ISO Certified"
-                    value={productForm.quality}
-                    onChange={(e) => setProductForm({ ...productForm, quality: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="availability">Availability</Label>
-                  <Input
-                    id="availability"
-                    placeholder="e.g., In Stock"
-                    value={productForm.availability}
-                    onChange={(e) => setProductForm({ ...productForm, availability: e.target.value })}
-                  />
-                </div>
-              </div>
-              <div>
-                <Label>Brand (comma separated)</Label>
-                <Input
-                  placeholder="e.g., JSW Steel, Tata Steel, SAIL"
-                  value={productForm.brand.join(', ')}
-                  onChange={(e) => setProductForm({ ...productForm, brand: e.target.value.split(',').map(b => b.trim()).filter(b => b) })}
-                />
-              </div>
-              <div>
-                <Label>Grades (comma separated)</Label>
-                <Input
-                  placeholder="e.g., Grade A, Grade B, E250A"
-                  value={productForm.grades.join(', ')}
-                  onChange={(e) => setProductForm({ ...productForm, grades: e.target.value.split(',').map(g => g.trim()).filter(g => g) })}
-                />
-              </div>
-            </div>
+              )}
 
-            {/* Pricing & Stock */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold text-gradient border-b-2 border-primary/20 pb-3">Pricing & Stock</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="priceAmount">Price (₹) *</Label>
-                  <Input
-                    id="priceAmount"
-                    type="number"
-                    step="0.01"
-                    placeholder="Enter price"
-                    value={productForm.priceAmount}
-                    onChange={(e) => setProductForm({ ...productForm, priceAmount: e.target.value })}
-                    required
-                  />
+              {/* Auto-filled Specifications */}
+              {productForm.specifications && Object.keys(productForm.specifications).length > 0 && (
+                <div className="mt-4 p-4 border-2 border-purple-500/30 rounded-xl bg-purple-50/50 dark:bg-purple-900/10 animate-in slide-in-from-bottom-4 duration-500 delay-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Settings className="w-5 h-5 text-purple-600" />
+                    <Label className="font-bold text-purple-700 dark:text-purple-400 text-base">Product Specifications (Auto-filled)</Label>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {Object.entries(productForm.specifications).map(([key, value]) => (
+                      <div key={key} className="flex items-start gap-2">
+                        <span className="text-xs font-semibold text-purple-700 dark:text-purple-400 uppercase mt-0.5">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                        <span className="text-sm text-purple-900 dark:text-purple-200 flex-1">
+                          {Array.isArray(value) ? value.join(', ') : String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="priceUnit">Unit *</Label>
-                  <Input
-                    id="priceUnit"
-                    placeholder="e.g., Ton, Kg, Piece, MT"
-                    value={productForm.priceUnit}
-                    onChange={(e) => setProductForm({ ...productForm, priceUnit: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="stockQuantity">Stock Quantity</Label>
-                  <Input
-                    id="stockQuantity"
-                    type="number"
-                    placeholder="Available quantity"
-                    value={productForm.stockQuantity}
-                    onChange={(e) => setProductForm({ ...productForm, stockQuantity: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="minimumOrder">Minimum Order Quantity</Label>
-                  <Input
-                    id="minimumOrder"
-                    type="number"
-                    placeholder="Minimum order"
-                    value={productForm.minimumOrder}
-                    onChange={(e) => setProductForm({ ...productForm, minimumOrder: e.target.value })}
-                  />
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="flex justify-end gap-3 pt-6 border-t border-border/50">
               <Button type="button" variant="outline" onClick={() => setShowProductDialog(false)} className="border-2 border-border/50">
                 Cancel
               </Button>
-              <Button type="submit" className="bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl hover:scale-105 text-white font-semibold px-8 transition-all duration-300">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Product
+              <Button type="submit" className="bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl hover:scale-105 text-white font-semibold px-8 transition-all duration-300 rounded-xl">
+                <CheckCircle className="w-4 h-4 mr-2" />
+                Submit Product
               </Button>
             </div>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* RFQ Response Dialog */}
-      <Dialog open={showRFQDialog} onOpenChange={setShowRFQDialog}>
-        <DialogContent className="glass-card border-2 border-white/30 backdrop-blur-2xl">
-          <DialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
-                <MessageSquare className="w-6 h-6 text-white" />
+      {/* Success Popup - Glass Style */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="glass-card border-2 border-white/20 rounded-3xl p-8 max-w-md w-full bg-white/60 dark:bg-black/40 backdrop-blur-2xl shadow-3xl animate-scale-in relative overflow-hidden">
+            {/* Animated background orbs */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary/20 rounded-full blur-3xl"></div>
+            
+            <div className="relative z-10 text-center">
+              {/* Success Icon */}
+              <div className="flex justify-center mb-6">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-xl animate-glow-pulse">
+                  <CheckCircle className="w-10 h-10 text-white" />
+                </div>
               </div>
-              <div>
-                <DialogTitle className="text-2xl font-bold text-gradient">Submit Quote</DialogTitle>
-                <DialogDescription className="text-muted-foreground">Provide your pricing for this RFQ</DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-          <form onSubmit={handleRespondRFQ} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="quotedPrice" className="text-foreground font-semibold">Quoted Price (₹) *</Label>
-              <Input
-                id="quotedPrice"
-                type="number"
-                step="0.01"
-                value={quotedPrice}
-                onChange={(e) => setQuotedPrice(e.target.value)}
-                className="h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
-                placeholder="Enter your quoted price"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="quoteNotes" className="text-foreground font-semibold">Notes (Optional)</Label>
-              <Textarea
-                id="quoteNotes"
-                value={quoteNotes}
-                onChange={(e) => setQuoteNotes(e.target.value)}
-                rows={4}
-                className="border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg resize-none"
-                placeholder="Any additional information, delivery terms, etc..."
-              />
-            </div>
-            <div className="flex justify-end gap-3 pt-4 border-t border-border/50">
-              <Button type="button" variant="outline" onClick={() => setShowRFQDialog(false)} className="border-2 border-border/50">
-                Cancel
-              </Button>
-              <Button type="submit" className="bg-gradient-to-r from-green-600 to-emerald-600 hover:shadow-xl hover:scale-105 text-white font-semibold px-8 transition-all duration-300">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Submit Quote
+              
+              <h3 className="text-2xl font-bold text-foreground mb-2">Product Submitted!</h3>
+              <p className="text-muted-foreground mb-6">Your product listing is under admin review. You will be notified once approved.</p>
+              
+              <Button 
+                className="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold py-6 rounded-xl hover:shadow-xl transition-all duration-300"
+                onClick={() => {
+                  setShowSuccessPopup(false);
+                }}
+              >
+                Continue
               </Button>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

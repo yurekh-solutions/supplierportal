@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Menu, X, Package, FileCheck, Zap, Users, Phone, Mail, MapPin, Star, Sparkles, TrendingUp, Award, Globe, ChevronRight, Clock, BarChart3, Headphones, Truck, ShoppingCart, Target, Lock, MessageCircle, BadgeCheck, CheckCircle2, Percent, DollarSign, Boxes, TrendingDown } from 'lucide-react';
+import { ArrowRight, Menu, X, Package, FileCheck, Zap, Users, Phone, ShieldCheck, Mail, MapPin, Star, Sparkles, TrendingUp, Award, Globe, ChevronRight, Clock, BarChart3, Headphones, Truck, ShoppingCart, Target, Lock, MessageCircle, BadgeCheck, CheckCircle2, Percent, DollarSign, Boxes, TrendingDown } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Card } from '@/pages/components/ui/card';
 import gsap from 'gsap';
@@ -89,36 +89,40 @@ const LandingPage = () => {
     {
       icon: Award,
       title: 'Quality Assured',
-      description: 'Verified suppliers and products with quality certification standards'
+      description: 'Verified buyer and products with quality certification standards'
     }
   ];
 
   const whyChooseUs = [
-    {
-      icon: Target,
-      title: 'Supplier Matching',
-      description: 'AI connects you with buyers actively seeking your products',
-      badge: 'Smart'
-    },
-    {
-      icon: Percent,
-      title: 'Price Intelligence',
-      description: 'Real-time market analysis for competitive pricing strategies',
-      badge: 'Data-Driven'
-    },
-    {
-      icon: BadgeCheck,
-      title: 'Quality Assurance',
-      description: 'Verified platform builds trust with serious buyers',
-      badge: '99.8%'
-    },
-    {
-      icon: Clock,
-      title: 'Real-time Tracking',
-      description: 'Complete visibility into orders, quotes, and deliveries',
-      badge: '24/7'
-    }
-  ];
+  {
+    icon: Users,
+    title: "Supplier Matching",
+    badge: "Smart",
+    description:
+      "Instantly connect with high-intent, verified buyers searching for your products and increase your conversion rate.",
+  },
+  {
+    icon: Percent,
+    title: "Price Intelligence",
+    badge: "Data-Driven",
+    description:
+      "Access real-time market pricing insights and competitor trends to quote smarter and stay competitive.",
+  },
+  {
+    icon:  ShieldCheck,
+    title: "Quality Assurance",
+    badge: "99.8%",
+    description:
+      "Work only with trusted and verified buyers, ensuring transparency and reducing fake or low-quality inquiries.",
+  },
+  {
+    icon: Clock,
+    title: "Real-time Tracking",
+    badge: "24/7",
+    description:
+      "Track RFQs, quotations, orders, and deliveries with complete visibility throughout the procurement lifecycle.",
+  },
+];
 
   const trustFactors = [
     { icon: Users, value: '500+', label: 'Active Suppliers' },
@@ -169,10 +173,7 @@ const LandingPage = () => {
       question: 'How do I get started as a supplier?',
       answer: 'Simply click "Get Started", fill in your business details, verify your documents (GST certificate), and once approved, you can start listing products immediately.'
     },
-    {
-      question: 'Is there any registration fee?',
-      answer: 'Registration is completely free! We only charge a small commission on successful transactions to keep the platform running smoothly.'
-    },
+   
     {
       question: 'How long does verification take?',
       answer: 'Document verification typically takes 24-48 hours. Our team reviews each application carefully to maintain quality standards.'
@@ -508,61 +509,72 @@ const LandingPage = () => {
 
       {/* Why Choose Us - Split Layout with Image */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-        <div className="container mx-auto max-w-6xl">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Content */}
-            <div>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
-                <Sparkles className="w-4 h-4" />
-                Why Join RitzYard
+  <div className="container mx-auto max-w-6xl">
+    <div className="grid lg:grid-cols-2 gap-12 items-center">
+      {/* Left: Content */}
+      <div>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
+          <Sparkles className="w-4 h-4" />
+          Why Join RitzYard
+        </div>
+
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
+          AI-Driven <span className="text-primary">Supplier</span> Growth Platform
+        </h2>
+
+        {/* SEO Friendly Paragraph */}
+        <p className="text-lg text-muted-foreground mb-8">
+          Grow your supply business with an AI-driven procurement ecosystem that helps you reach verified buyers, 
+          optimize pricing, and gain complete visibility across RFQs, orders, and deliveries.
+        </p>
+
+        <div className="space-y-4">
+          {whyChooseUs.map((item, i) => (
+            <div
+              key={i}
+              className="flex items-start gap-4 p-4 rounded-lg hover:bg-accent/50 transition-all group"
+            >
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary group-hover:scale-110 transition-transform flex-shrink-0">
+                <item.icon className="w-6 h-6" />
               </div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6">
-                AI-Powered <span className="text-primary">Procurement</span> Platform
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                Transform your business with intelligent solutions designed for speed, efficiency, and real-time visibility
-              </p>
-              <div className="space-y-4">
-                {whyChooseUs.map((item, i) => (
-                  <div key={i} className="flex items-start gap-4 p-4 rounded-lg hover:bg-accent/50 transition-all group">
-                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 text-primary group-hover:scale-110 transition-transform flex-shrink-0">
-                      <item.icon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold text-foreground">{item.title}</h3>
-                        <span className="text-xs font-bold text-primary">{item.badge}</span>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-foreground">{item.title}</h3>
+                  <span className="text-xs font-bold text-primary">{item.badge}</span>
+                </div>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
               </div>
             </div>
-            {/* Right: Image */}
-            <div className="relative">
-              <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl">
-                <img
-                  src="https://images.unsplash.com/photo-1664575602276-acd073f104c1?w=600&h=600&fit=crop"
-                  alt="AI Procurement"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl border border-border">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <TrendingUp className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">40%</div>
-                    <div className="text-sm text-muted-foreground">Growth Rate</div>
-                  </div>
-                </div>
-              </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Right: Image */}
+      <div className="relative">
+        <div className="aspect-square rounded-2xl overflow-hidden shadow-2xl">
+          <img
+            src="https://images.unsplash.com/photo-1664575602276-acd073f104c1?w=600&h=600&fit=crop"
+            alt="AI Procurement"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-xl border border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-primary">40%</div>
+              <div className="text-sm text-muted-foreground">Growth Rate</div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+
+    </div>
+  </div>
+</section>
 
       {/* Trust Stats - Horizontal Bar */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
