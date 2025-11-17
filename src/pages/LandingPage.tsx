@@ -467,6 +467,17 @@ const LandingPage = () => {
             </Button>
           </div>
 
+          {/* Browse Marketplace Button */}
+          <div className="flex justify-center mb-12">
+            <Button
+              onClick={() => navigate('/marketplace')}
+              className="px-8 py-4 text-base font-semibold bg-gradient-to-r from-secondary/80 to-primary/80 text-white hover:from-secondary hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl"
+            >
+              <ShoppingCart className="w-5 h-5 mr-2" />
+              Browse Products & Suppliers
+            </Button>
+          </div>
+
           {/* Showcase Image Grid */}
           <div className="hero-carousel relative w-full max-w-5xl mx-auto">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">

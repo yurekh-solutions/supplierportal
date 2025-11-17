@@ -17,6 +17,7 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import ProductDashboard from './pages/ProductDashboard';
 import AddProduct from './pages/AddProduct';
+import Marketplace from './pages/Marketplace';
 import TestPage from './pages/TestPage';
 import SupplierStatus from './pages/SupplierStatus';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -62,6 +63,7 @@ function App() {
           
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/status" element={<SupplierStatus />} />

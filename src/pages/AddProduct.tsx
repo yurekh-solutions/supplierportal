@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, X, Upload, Send, Package, Home, Zap, Award, TrendingUp, CheckCircle, MapPin, Clock, Lightbulb } from 'lucide-react';
+import { ArrowLeft, X, Upload, Send, Package, Home, Zap, Award, TrendingUp, CheckCircle, MapPin, Clock, Lightbulb, Star, Globe } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -16,10 +16,19 @@ interface Category {
   slug: string;
 }
 
+interface Supplier {
+  _id: string;
+  companyName: string;
+  location?: string;
+  rating?: number;
+  verified?: boolean;
+}
+
 const AddProduct = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [suggestions, setSuggestions] = useState<typeof predefinedProducts>([]);
@@ -53,6 +62,7 @@ const AddProduct = () => {
       return;
     }
     fetchCategories();
+    fetchSuppliers();
   }, []);
 
   const fetchCategories = async () => {
@@ -67,12 +77,62 @@ const AddProduct = () => {
     }
   };
 
+  const fetchSuppliers = async () => {
+    // Suppliers will be dynamically fetched based on selected product
+    // No static data needed - will be populated from product data
+  };
+
+  const getSupplierSuggestionsForProduct = (productCategory: string) => {
+    // Get the selected product from predefinedProducts
+    const selectedProduct = predefinedProducts.find(p => p.name === productForm.name);
+    
+    if (!selectedProduct || !selectedProduct.specifications?.brand) {
+      return [];
+    }
+    
+    // Convert brand names to supplier objects
+    return selectedProduct.specifications.brand.map((brandName, idx) => ({
+      _id: String(idx),
+      companyName: brandName,
+      location: '', // Can be enhanced later
+      rating: undefined,
+      verified: true
+    })).slice(0, 3); // Show first 3 suppliers
+  };
+
+  const getRecommendedProducts = () => {
+    // Get the selected product
+    const selectedProduct = predefinedProducts.find(p => p.name === productForm.name);
+    
+    if (!selectedProduct) {
+      return [];
+    }
+    
+    // Get all products in the same category, excluding the current product
+    const recommendedProducts = predefinedProducts
+      .filter(p => p.category === selectedProduct.category && p.name !== selectedProduct.name);
+    
+    return recommendedProducts; // Return ALL products, not just 4
+  };
+
+  const getRecommendedProductsForDropdown = () => {
+    // For dropdown: show related products based on first suggestion's category
+    if (suggestions.length === 0) return [];
+    
+    const firstSuggestion = suggestions[0];
+    return predefinedProducts
+      .filter(p => p.category === firstSuggestion.category && p.name !== firstSuggestion.name)
+      .slice(0, 4);
+  };
+
   const handleSearch = (value: string) => {
     setSearchInput(value);
     if (value.trim().length >= 1) {
       const searchTerm = value.toLowerCase().trim();
+      // Filter by product name AND category (if category is selected)
       const results = predefinedProducts.filter(product =>
-        product.name.toLowerCase().includes(searchTerm)
+        product.name.toLowerCase().includes(searchTerm) &&
+        (productForm.category === '' || product.category === productForm.category)
       );
       setSuggestions(results);
     } else {
@@ -215,16 +275,92 @@ const AddProduct = () => {
                     />
                   </div>
 
-                  {/* Suggestions Grid - Hidden, only functionality remains */}
-                  {searchInput.trim().length >= 1 && suggestions.length > 0 && (
-                    <div style={{ display: 'none' }}>
-                      {suggestions.slice(0, 12).map((product) => (
-                        <div key={product.id}>
-                          {/* Suggestion functionality only, no visual display */}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  {/* Suggestions Dropdown */}
+{searchInput.trim().length >= 1 &&
+ (suggestions.length > 0 ||
+  getSupplierSuggestionsForProduct(productForm.category).length > 0 ||
+  getRecommendedProducts().length > 0) && (
+  <div
+    className="mt-2 p-3 border rounded-lg shadow-lg overflow-y-auto no-scrollbar"
+    style={{
+      borderColor: '#e8dcd0',
+      backgroundColor: 'white',
+      maxHeight: '400px',
+    }}
+  >
+    {/* Matching Products */}
+    {suggestions.length > 0 && (
+      <div className="mb-4">
+        <p
+          className="text-xs font-bold mb-3 px-2 overflow-hidden"
+          style={{ color: '#c1482b' }}
+        >
+          Products ({suggestions.length})
+        </p>
+
+        {/* 2 Column Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {suggestions.slice(0, 8).map((product) => (
+            <div
+              key={product.id}
+              onClick={() => handleSelectProduct(product)}
+              className="p-3 rounded-lg cursor-pointer transition-all hover:shadow-md border group"
+              style={{ borderColor: '#e8dcd0', backgroundColor: '#faf9f8' }}
+            >
+              <div className="flex items-start gap-3">
+                {/* Product Image */}
+                <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-white flex-shrink-0 overflow-hidden">
+                  <img
+                    src={product.image}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://placehold.co/64x64?text=${encodeURIComponent(
+                        product.name.substring(0, 10)
+                      )}`;
+                    }}
+                  />
+                </div>
+
+                {/* Product Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+                    {product.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                    {product.description}
+                  </p>
+
+                  <div className="flex gap-2 mt-2">
+                    <span
+                      className="text-xs px-2 py-0.5 rounded"
+                      style={{
+                        backgroundColor: '#e8dcd0',
+                        color: '#6b5d54',
+                      }}
+                    >
+                      {product.category}
+                    </span>
+                    <span
+                      className="text-xs px-2 py-0.5 rounded"
+                      style={{
+                        backgroundColor: '#d4f7e8',
+                        color: '#10B981',
+                      }}
+                    >
+                      ✓ Verified
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+)}
+
 
                   {/* Category - 2 Column Grid */}
                   <div>
@@ -595,7 +731,90 @@ const AddProduct = () => {
                   })}
                 </div>
 
-                {/* SEO-Friendly Content Sections */}
+                {/* Two Section Container - Attractive Glass Design */}
+                <div className="mt-6 space-y-6">
+                  {/* Supplier Suggestions - Glass Card Design */}
+                  {productForm.name.trim().length > 0 && getSupplierSuggestionsForProduct(productForm.category).length > 0 && (
+                    <div className="pt-6 border-t" style={{ borderColor: '#e8dcd0' }}>
+                      <p className="text-xs font-bold mb-3 px-2" style={{ color: '#c1482b' }}>🏢 Suppliers Available</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {getSupplierSuggestionsForProduct(productForm.category).map((supplier) => (
+                          <div
+                            key={supplier._id}
+                            className="group perspective-1000 h-full"
+                          >
+                            <div
+                              className="relative p-4 rounded-xl border-2 border-white/30 backdrop-blur-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
+                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: '#e8dcd0' }}
+                            >
+                              {/* Icon */}
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white group-hover:scale-110 transition-transform mx-auto mb-2">
+                                <Globe className="w-5 h-5" />
+                              </div>
+                              {/* Name */}
+                              <p className="font-bold text-xs text-center text-foreground group-hover:text-primary transition-colors line-clamp-2">{supplier.companyName}</p>
+                              {/* Badge */}
+                              {supplier.verified && (
+                                <div className="flex justify-center mt-2">
+                                  <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ backgroundColor: '#d4f7e8', color: '#10B981' }}>
+                                    ✓ Verified
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recommended Products - Glass Card Design with AI Label */}
+                  {productForm.name.trim().length > 0 && getRecommendedProducts().length > 0 && (
+                    <div className="pt-6 border-t" style={{ borderColor: '#e8dcd0' }}>
+                      <div className="flex items-center gap-2 mb-3 px-2">
+                        <p className="text-xs font-bold" style={{ color: '#c1482b' }}>✨ Recommended by AI</p>
+                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ffe4d4', color: '#c1482b' }}>Smart Match</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 max-h-80 overflow-hidden">
+                        {getRecommendedProducts().map((product) => (
+                          <div
+                            key={product.id}
+                            onClick={() => handleSelectProduct(product)}
+                            className="group perspective-1000 h-full"
+                          >
+                            <div
+                              className="relative rounded-xl border-2 border-white/30 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer h-40"
+                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: '#e8dcd0' }}
+                            >
+                              {/* Image Container */}
+                              <div className="relative h-20 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
+                                <img
+                                  src={product.image}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                />
+                              </div>
+                              {/* Content */}
+                              <div className="p-3 flex flex-col justify-between h-20">
+                                <p className="font-bold text-xs text-foreground group-hover:text-primary transition-colors line-clamp-2">
+                                  {product.name}
+                                </p>
+                                <button
+                                  className="mt-auto text-xs font-semibold py-1 px-2 rounded-lg transition-all w-full"
+                                  style={{ color: '#fff', backgroundColor: '#c1482b' }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#a53019'; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#c1482b'; }}
+                                >
+                                  Add
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 
                 {/* Why List Your Products - Info Card Style */}
                 <div className="border rounded-2xl p-6 mt-8" style={{ borderColor: '#e8dcd0', backgroundColor: 'white' }}>
