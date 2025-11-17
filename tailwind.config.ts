@@ -80,6 +80,34 @@ export default {
             height: "0",
           },
         },
+        slideInRight: {
+          from: {
+            opacity: "0",
+            transform: "translateX(50px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateX(0)",
+          },
+        },
+        slideInLeft: {
+          from: {
+            opacity: "0",
+            transform: "translateX(-50px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateX(0)",
+          },
+        },
+        pulseSlow: {
+          "0%, 100%": {
+            opacity: "1",
+          },
+          "50%": {
+            opacity: "0.7",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -87,6 +115,11 @@ export default {
         "float": "float 6s ease-in-out infinite",
         "slide-up": "slideUp 0.6s ease-out",
         "scale-in": "scaleIn 0.4s ease-out",
+        "fade-in": "fadeIn 0.5s ease-out",
+        "slide-in-right": "slideInRight 0.6s ease-out",
+        "slide-in-left": "slideInLeft 0.6s ease-out",
+        "bounce-slow": "bounceSlow 3s ease-in-out infinite",
+        "pulse-slow": "pulseSlow 3s ease-in-out infinite",
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
