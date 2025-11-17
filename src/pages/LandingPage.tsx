@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ArrowRight, Menu, X, Package, FileCheck, Zap, Users, Phone, ShieldCheck, Mail, MapPin, Star, Sparkles, TrendingUp, Award, Globe, ChevronRight, Clock, BarChart3, Headphones, Truck, ShoppingCart, Target, Lock, MessageCircle, BadgeCheck, CheckCircle2, Percent, DollarSign, Boxes, TrendingDown } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Card } from '@/pages/components/ui/card';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -346,6 +348,7 @@ const LandingPage = () => {
 
             {/* Desktop Buttons */}
             <div className="hidden md:flex items-center space-x-3">
+              <LanguageSwitcher />
               <Button
                 variant="ghost"
                 onClick={() => navigate('/login')}
@@ -380,7 +383,8 @@ const LandingPage = () => {
               <a href="#features" className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>Features</a>
               <a href="#process" className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
               <a href="#contact" className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>Contact</a>
-              <div className="space-y-2 pt-2">
+              <div className="space-y-2 pt-2 border-t border-border">
+                <div className="py-2"><LanguageSwitcher /></div>
                 <Button variant="outline" onClick={() => { setMobileMenuOpen(false); navigate('/login'); }} className="w-full border-2 border-primary text-primary hover:bg-primary/10">Login</Button>
                 <Button onClick={() => { setMobileMenuOpen(false); navigate('/onboarding'); }} className="w-full bg-gradient-to-r from-primary to-secondary text-white shadow-lg">Get Started</Button>
               </div>
@@ -508,7 +512,7 @@ const LandingPage = () => {
       </section>
 
       {/* Why Choose Us - Split Layout with Image */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+      <section className=" py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
   <div className="container mx-auto max-w-6xl">
     <div className="grid lg:grid-cols-2 gap-12 items-center">
       {/* Left: Content */}
@@ -842,7 +846,7 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      <section className="  bg-[#f3f0ec] py-16 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-4xl text-center">
           <div className="border border-border rounded-2xl p-10 bg-card">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">

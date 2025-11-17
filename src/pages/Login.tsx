@@ -4,7 +4,7 @@ import { Lock, Mail, Shield, LogIn, Eye, EyeOff, Sparkles, ArrowLeft } from 'luc
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
-
+import LanguageSwitcher from './components/LanguageSwitcher';
 import { useToast } from '@/hooks/use-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -121,7 +121,13 @@ const SupplierLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen  bg-[#f3f0ec] flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Language Switcher */}
+      <div className="absolute top-6 right-6 z-20">
+        <LanguageSwitcher />
+      </div>
+
+      {/* ... existing background and content ...
       {/* Animated Background - Match Landing Page */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/10"></div>

@@ -193,7 +193,7 @@ const SupplierOnboarding = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#f3f0ec] flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background - Match Login Page */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/10"></div>

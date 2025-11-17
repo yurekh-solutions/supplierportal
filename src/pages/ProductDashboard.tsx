@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/pag
 import { Badge } from '@/pages/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/pages/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/pages/components/ui/select';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import { useToast } from '@/hooks/use-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -313,7 +314,7 @@ const SupplierProductDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-subtle relative overflow-hidden">
+    <div className="min-h-screen bg-[#f3f0ec] relative overflow-hidden">
       {/* Animated Background - Match Login Page */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/10"></div>
@@ -333,16 +334,19 @@ const SupplierProductDashboard = () => {
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Supplier Portal</h1>
-                <p className="text-muted-foreground text-sm">{user.companyName || 'Business Ventures'}</p>
+                {/* <p className="text-muted-foreground text-sm">{user.companyName || 'Business Ventures'}</p> */}
               </div>
             </div>
-            <Button
-              className="bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-xl hover:scale-105 transition-all"
-              onClick={handleLogout}
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
+            <div className="flex gap-3 items-center flex-col sm:flex-row">
+              <LanguageSwitcher />
+              <Button
+                className="bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-xl hover:scale-105 transition-all"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -385,7 +389,11 @@ const SupplierProductDashboard = () => {
               <div className="bg-gradient-to-r from-primary/10 via-primary-glow/10 to-secondary/10 border-b border-white/20 p-6 rounded-t-3xl">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <h2 className="text-3xl font-bold text-foreground mb-2">Product Management</h2>
+                <h2 className="text-gradient text-3xl font-bold mb-2 bg-clip-text text-transparent">
+                  Product Management
+             
+              </h2>
+                    {/* <h2 className="text-3xl font-bold text-foreground mb-2">Product Management</h2> */}
                     <p className="text-muted-foreground text-base">Manage your product listings and track performance</p>
                   </div>
                   <Button

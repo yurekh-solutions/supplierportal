@@ -4,20 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Title & Branding -->
-    <title>Supplier Portal - Ritzyard</title>
-        <link rel="icon" type="image/png" href="./src/assets/dashboard-ai.jpg" />
-
-    <meta name="description" content="Ritzyard is an AI-powered procurement platform revolutionizing how businesses source raw materials — Smart. Fast. Reliable." />
-    <meta name="author" content="Ritzyard" />
+    <!-- Title & Branding - Will be updated by React app -->
+    <title>RitzYard | AI-Powered Procurement Platform</title>
+    <link rel="icon" type="image/png" href="./src/assets/dashboard-ai.jpg" />
 
     <!-- SEO Meta Tags -->
-    <meta name="keywords" content="procurement, AI procurement, Ritzyard, construction materials, sourcing platform, suppliers, manufacturing, B2B, raw materials" />
+    <meta name="description" content="RitzYard is an AI-powered procurement platform revolutionizing how businesses source raw materials — Smart. Fast. Reliable." />
+    <meta name="author" content="RitzYard" />
+    <meta name="keywords" content="procurement, AI procurement, RitzYard, construction materials, sourcing platform, suppliers, manufacturing, B2B, raw materials" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#d35400" />
 
     <!-- Open Graph (For Social Sharing) -->
-    <meta property="og:title" content="Ritzyard | AI-Powered Procurement Platform" />
+    <meta property="og:title" content="RitzYard | AI-Powered Procurement Platform" />
     <meta property="og:description" content="Revolutionizing how businesses source raw materials — Smart. Fast. Reliable." />
     <meta property="og:image" content="https://yourdomain.com/assets/og-image.png" />
     <meta property="og:url" content="https://yourdomain.com" />
@@ -25,23 +24,21 @@
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Ritzyard | AI-Powered Procurement Platform" />
+    <meta name="twitter:title" content="RitzYard | AI-Powered Procurement Platform" />
     <meta name="twitter:description" content="Smart. Fast. Reliable — AI-driven procurement for modern businesses." />
     <meta name="twitter:image" content="https://yourdomain.com/assets/og-image.png" />
     <meta name="twitter:site" content="@ritzyard" />
 
     <!-- Favicon -->
-
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
 
-    <!-- Google Translate - Hidden Implementation -->
+    <!-- Hide Google Translate -->
     <meta name="google" content="notranslate" />
     <meta name="google-translate-customization" content="hide-all-ui" />
     
-    <!-- Inline Critical CSS to Hide Google Translate UI -->
+    <!-- Hide Google Translate UI -->
     <style>
-      /* CRITICAL: Hide all Google Translate UI elements immediately including loading spinners */
       .goog-te-banner-frame,
       .goog-te-banner,
       .skiptranslate,
@@ -80,5 +77,61 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Script to update page title and meta tags based on language -->
+    <script>
+      function updatePageMetadata() {
+        const language = localStorage.getItem('preferredLanguage') || 'en';
+        
+        const translations = {
+          en: {
+            title: 'RitzYard | AI-Powered Procurement Platform',
+            description: 'RitzYard is an AI-powered procurement platform revolutionizing how businesses source raw materials — Smart. Fast. Reliable.',
+            twitterDescription: 'Smart. Fast. Reliable — AI-driven procurement for modern businesses.'
+          },
+          hi: {
+            title: 'RitzYard | AI-संचालित खरीद प्लेटफॉर्म',
+            description: 'RitzYard एक AI-संचालित खरीद प्लेटफॉर्म है जो व्यवसायों को कच्चे माल खरीदने के तरीके को बदल रहा है — स्मार्ट। तेज़। विश्वसनीय।',
+            twitterDescription: 'स्मार्ट। तेज़। विश्वसनीय — आधुनिक व्यवसायों के लिए AI-संचालित खरीद।'
+          }
+        };
+        
+        const currentLang = translations[language] || translations.en;
+        
+        // Update title
+        document.title = currentLang.title;
+        
+        // Update meta description
+        let descMeta = document.querySelector('meta[name="description"]');
+        if (descMeta) descMeta.setAttribute('content', currentLang.description);
+        
+        // Update og:title
+        let ogTitle = document.querySelector('meta[property="og:title"]');
+        if (ogTitle) ogTitle.setAttribute('content', currentLang.title);
+        
+        // Update og:description
+        let ogDesc = document.querySelector('meta[property="og:description"]');
+        if (ogDesc) ogDesc.setAttribute('content', currentLang.description);
+        
+        // Update twitter:title
+        let twTitle = document.querySelector('meta[name="twitter:title"]');
+        if (twTitle) twTitle.setAttribute('content', currentLang.title);
+        
+        // Update twitter:description
+        let twDesc = document.querySelector('meta[name="twitter:description"]');
+        if (twDesc) twDesc.setAttribute('content', currentLang.twitterDescription);
+        
+        // Update document language
+        document.documentElement.lang = language === 'hi' ? 'hi' : 'en';
+      }
+      
+      // Update on load
+      updatePageMetadata();
+      
+      // Listen for language changes in localStorage
+      window.addEventListener('storage', () => {
+        updatePageMetadata();
+      });
+    </script>
   </body>
 </html>
