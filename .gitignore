@@ -16,7 +16,8 @@ node_modules
 .env.local
 .env.development.local
 .env.test.local
-.env.production.local
+# Keep production env for Vercel
+# .env.production.local
 
 # Logs
 npm-debug.log*
