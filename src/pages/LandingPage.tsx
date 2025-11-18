@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Menu, X, Package, FileCheck, Zap, Users, Phone, ShieldCheck, Mail, MapPin, Star, Sparkles, TrendingUp, Award, Globe, ChevronRight, Clock, BarChart3, Headphones, Truck, ShoppingCart, Target, Lock, MessageCircle, BadgeCheck, CheckCircle2, Percent, DollarSign, Boxes, TrendingDown, Lightbulb } from 'lucide-react';
+import { ArrowRight, Menu, X, Package, FileCheck, Zap, Users, Phone, ShieldCheck, Mail, MapPin, Star, Sparkles, TrendingUp, Award, Globe, ChevronRight, Clock, BarChart3, Headphones, Truck, ShoppingCart, Target, Lock, MessageCircle, BadgeCheck, CheckCircle2, Percent, DollarSign, Boxes, TrendingDown, Lightbulb, Rocket, Network, Megaphone, LineChart, Building2, Handshake, Search, UserPlus, ShieldAlert, CircleDollarSign } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Card } from '@/pages/components/ui/card';
 import LanguageSwitcher from './components/LanguageSwitcher';
@@ -19,6 +19,9 @@ const LandingPage = () => {
   const processRef = useRef<HTMLDivElement>(null);
   const metricsRef = useRef<HTMLDivElement>(null);
   const benefitsRef = useRef<HTMLDivElement>(null);
+  const growthRef = useRef<HTMLDivElement>(null);
+  const leadGenRef = useRef<HTMLDivElement>(null);
+  const procurementRef = useRef<HTMLDivElement>(null);
 
   const carouselImages = [
     {
@@ -128,19 +131,7 @@ const LandingPage = () => {
   },
 ];
 
-  const trustFactors = [
-    { icon: Users, value: '500+', label: 'Active Suppliers' },
-    { icon: Package, value: '10K+', label: 'Products Listed' },
-    { icon: ShoppingCart, value: '2K+', label: 'Daily Orders' },
-    { icon: Star, value: '98%', label: 'Satisfaction' }
-  ];
-
-  const stats = [
-    { label: 'Active Suppliers', value: '500+', icon: Users },
-    { label: 'Products Listed', value: '10,000+', icon: Package },
-    { label: 'Daily Orders', value: '2,000+', icon: ShoppingCart },
-    { label: 'Customer Satisfaction', value: '98%', icon: Star }
-  ];
+ 
 
   const supplierTestimonials = [
     {
@@ -172,39 +163,7 @@ const LandingPage = () => {
     }
   ];
 
-  const supplierBenefits = [
-    {
-      icon: TrendingUp,
-      title: 'Boost Sales & Revenue',
-      description: 'Reach thousands of verified buyers instantly and increase your sales by an average of 50% in the first quarter.'
-    },
-    {
-      icon: BarChart3,
-      title: 'Real-Time Analytics',
-      description: 'Track inventory, monitor order trends, and get actionable insights to optimize your product offerings and pricing.'
-    },
-    {
-      icon: Headphones,
-      title: 'Dedicated Support',
-      description: 'Get 24/7 assistance from our expert team through phone, email, and live chat. We are here to help you succeed.'
-    },
-    {
-      icon: Truck,
-      title: 'Seamless Logistics',
-      description: 'Integrated with leading logistics partners for efficient fulfillment and transparent shipping tracking for every order.'
-    },
-    {
-      icon: ShieldCheck,
-      title: 'Secure Transactions',
-      description: 'Bank-grade security with encrypted payments, fraud protection, and secure data storage for your peace of mind.'
-    },
-    {
-      icon: Award,
-      title: 'Premium Visibility',
-      description: 'Featured placement for quality products, premium marketing support, and exclusive buyer access to top suppliers.'
-    }
-  ];
-
+ 
   const faqs = [
     {
       question: 'How do I get started as a supplier?',
@@ -228,6 +187,14 @@ const LandingPage = () => {
       answer: 'We offer 24/7 customer support via phone, email, and live chat. Our dedicated team is always ready to help you succeed.'
     }
   ];
+
+  // Business Growth Features
+
+  // Lead Generation Features
+  
+
+  // Procurement Excellence Features
+  
 
 
 
@@ -610,6 +577,8 @@ const LandingPage = () => {
         </div>
       </section>
 
+
+
       {/* Why Choose Us - Split Layout with Image */}
       <section className=" py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 via-background to-secondary/5">
   <div className="container mx-auto max-w-6xl">
@@ -680,23 +649,7 @@ const LandingPage = () => {
 </section>
 
       {/* Trust Stats - Horizontal Bar */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="container mx-auto max-w-6xl">
-          <div className="glass-card border border-border rounded-2xl p-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-              {trustFactors.map((stat, i) => (
-                <div key={i} className="text-center">
-                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary mb-3">
-                    <stat.icon className="w-5 h-5" />
-                  </div>
-                  <div className="text-3xl font-bold text-primary mb-1">{stat.value}</div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+   
 
       {/* Features - Unique Asymmetric Layout */}
       <section id="features" ref={featuresRef} className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8">
@@ -845,108 +798,14 @@ const LandingPage = () => {
       </section>
 
       {/* Supplier Success Metrics - GSAP Animated */}
-      <section ref={metricsRef} className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-primary/5 via-background to-secondary/5 relative overflow-hidden">
-        {/* Decorative background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/3 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/3 -right-40 w-80 h-80 bg-secondary/5 rounded-full blur-3xl"></div>
-        </div>
-
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
-              <TrendingUp className="w-4 h-4" />
-              Supplier Success
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              Suppliers Are <span className="text-gradient">Growing Fast</span>
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Join hundreds of suppliers who have increased their revenue and expanded their business
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { label: '500+', desc: 'Active Suppliers', icon: Users },
-              { label: '10K+', desc: 'Products Listed', icon: Package },
-              { label: '2K+', desc: 'Daily Orders', icon: ShoppingCart }
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <div key={idx} className="metrics-card">
-                  <div className="relative p-8 rounded-2xl glass-card border border-border/40 h-full hover:border-primary/40 transition-all duration-300 group overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-secondary/0 opacity-0 group-hover:opacity-5 transition-opacity duration-300"></div>
-                    
-                    <div className="relative z-10 text-center space-y-4">
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 group-hover:scale-110 transition-transform duration-300">
-                        <Icon className="w-8 h-8 text-primary" />
-                      </div>
-                      <div>
-                        <div className="counter-value text-4xl sm:text-5xl font-bold text-primary mb-2" data-target={parseInt(item.label)}>{item.label}</div>
-                        <p className="text-muted-foreground font-medium">{item.desc}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+     
 
       {/* Supplier Benefits - GSAP Animated Grid */}
-      <section ref={benefitsRef} className="py-20 sm:py-28 px-4 sm:px-6 lg:px-8 relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5">
-        <div className="container mx-auto max-w-7xl relative z-10">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-6">
-              <Lightbulb className="w-4 h-4" />
-              Why Suppliers Love Us
-            </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-              <span className="text-gradient">Complete Supplier</span> Solution
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-3xl mx-auto">
-              Everything you need to manage, grow, and scale your business in one powerful platform
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {supplierBenefits.map((benefit, idx) => {
-              const Icon = benefit.icon;
-              return (
-                <div key={idx} className="benefit-card">
-                  <div className="relative rounded-2xl p-8 glass-card border border-border/40 h-full hover:border-primary/40 transition-all duration-300 group overflow-hidden hover:shadow-2xl">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-secondary/0 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
-                    
-                    <div className="relative z-10 space-y-4 flex flex-col h-full">
-                      <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 group-hover:scale-110 group-hover:shadow-lg transition-all duration-300">
-                        <Icon className="w-7 h-7 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors">
-                          {benefit.title}
-                        </h3>
-                        <p className="text-muted-foreground mt-2 leading-relaxed text-sm">
-                          {benefit.description}
-                        </p>
-                      </div>
-                      <div className="pt-4 border-t border-border/30">
-                        <button className="flex items-center gap-2 text-primary font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                          <span>Learn more</span>
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
       
+
+
+
+      {/* Testimonials Section */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-secondary/5 via-background to-primary/5">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
@@ -960,17 +819,17 @@ const LandingPage = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {supplierTestimonials.map((testimonial, i) => (
-              <div key={i} className="relative">
-                <div className="absolute -top-4 left-6 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+              <div key={i} className="relative group perspective-1000">
+                <div className="absolute -top-4 left-6 w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center z-10 group-hover:scale-110 transition-transform">
                   <Star className="w-6 h-6 text-primary fill-primary" />
                 </div>
-                <div className="pt-8 px-6 pb-6 border border-border rounded-2xl bg-card hover:shadow-xl transition-all">
+                <div className="pt-8 px-6 pb-6 border-2 border-border rounded-2xl glass-card hover:shadow-3xl transition-all duration-500 hover:-translate-y-2 transform-style-3d">
                   <p className="text-muted-foreground leading-relaxed mb-6 italic">"{testimonial.text}"</p>
                   <div className="flex items-center gap-3">
                     <img
                       src={testimonial.avatar}
                       alt={testimonial.name}
-                      className="w-12 h-12 rounded-full object-cover"
+                      className="w-12 h-12 rounded-full object-cover ring-2 ring-primary/20"
                     />
                     <div>
                       <div className="flex items-center gap-2">
@@ -986,6 +845,9 @@ const LandingPage = () => {
           </div>
         </div>
       </section>
+
+      {/* Interactive Platform Features - 3D Showcase */}
+    
 
       {/* FAQ Section */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-secondary/5 via-background to-primary/5">
