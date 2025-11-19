@@ -241,13 +241,48 @@ const SupplierProductDashboard = () => {
     setAutoReplyMessages(prev => [...prev, userMessage]);
 
     if (action.toUpperCase() === 'YES') {
-      setTimeout(() => {
-        addBotMessage('✅ Auto-reply saved successfully! Your response will now be sent automatically when customers inquire about ' + autoReplyConfig.messageType + '.');
-        setTimeout(() => {
-          addBotMessage('Would you like to set up another auto-reply? Reply YES or NO.');
-          setAutoReplyStep('menu');
-        }, 600);
-      }, 300);
+      // Save to backend
+      const messageTypeMap: Record<string, string> = {
+        'General Inquiry': 'general-inquiry',
+        'Price Quote Request': 'price-quote',
+        'Product Availability': 'product-availability',
+        'Custom Message': 'custom'
+      };
+
+      const saveAutoReply = async () => {
+        try {
+          const response = await fetch(`${API_URL}/auto-replies`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              messageType: messageTypeMap[autoReplyConfig.messageType] || 'custom',
+              responseText: autoReplyConfig.response,
+              triggerKeywords: []
+            })
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            setTimeout(() => {
+              addBotMessage('✅ Auto-reply saved successfully! Your response will now be sent automatically when customers inquire about ' + autoReplyConfig.messageType + '.');
+              setTimeout(() => {
+                addBotMessage('Would you like to set up another auto-reply? Reply YES or NO.');
+                setAutoReplyStep('menu');
+              }, 600);
+            }, 300);
+          } else {
+            addBotMessage('❌ Failed to save auto-reply. Please try again.');
+          }
+        } catch (error) {
+          console.error('Error saving auto-reply:', error);
+          addBotMessage('❌ Error saving auto-reply. Please try again.');
+        }
+      };
+
+      saveAutoReply();
     } else {
       setTimeout(() => {
         addBotMessage('No problem! Let\'s try again. What should the response be?');
@@ -1671,15 +1706,17 @@ const SupplierProductDashboard = () => {
               <div className="flex flex-col gap-2 mt-4">
                 <Button
                   onClick={() => handleAutoReplyAction('Create New Response')}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm py-2 transition-all"
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl text-sm py-3 font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                 >
-                  ✨ Create New Response
+                  <span className="text-lg">✨</span>
+                  <span>Create Auto-Reply</span>
                 </Button>
                 <Button
                   onClick={() => handleAutoReplyAction('View Existing Responses')}
-                  className="w-full bg-secondary/80 hover:bg-secondary text-white rounded-xl text-sm py-2 transition-all"
+                  className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary text-white rounded-xl text-sm py-3 font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
                 >
-                  📋 View Existing Responses
+                  <span className="text-lg">📋</span>
+                  <span>View Saved Replies</span>
                 </Button>
               </div>
             )}
