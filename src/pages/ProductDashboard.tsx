@@ -1811,18 +1811,17 @@ Does this look good? Reply YES to save or NO to edit.`);
             {autoReplyMessages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap ${
+                  className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
                     msg.sender === 'user'
                       ? 'bg-primary text-white rounded-br-none'
-                      : 'bg-white/20 text-foreground rounded-bl-none'
+                      : 'bg-transparent border-2 border-dashed border-foreground/30 text-foreground rounded-bl-none'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
                   <p className="text-xs mt-1 opacity-70">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                 </div>
               </div>
-            ))}
-            
+            ))}            
             {/* Quick Action Buttons for Menu */}
             {autoReplyStep === 'menu' && autoReplyMessages.length > 0 && (
               <div className="flex flex-col gap-2 mt-4">
