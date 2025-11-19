@@ -1835,7 +1835,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                 </Button>
                 <Button
                   onClick={() => handleAutoReplyAction('View Saved Replies')}
-                  className="w-full bg-gradient-to-r from-primary/20 via-primary/10 to-secondary/20 hover:from-primary/30 hover:via-primary/20 hover:to-secondary/30 text-foreground rounded-2xl text-sm py-3 font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 border-2 border-primary/30"
+                  className="w-full bg-transparent hover:bg-white/10 text-foreground rounded-2xl text-sm py-3 font-semibold transition-all shadow-none hover:shadow-md flex items-center justify-center gap-2 border-2 border-dashed border-foreground/30 hover:border-foreground/50"
                 >
                   <span className="text-lg">📋</span>
                   <span>View Saved Replies</span>
