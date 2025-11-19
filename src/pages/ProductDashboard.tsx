@@ -584,24 +584,22 @@ const SupplierProductDashboard = () => {
                   </div>
                 </div>
 
-                {/* Rejected Progress */}
-                {analytics.rejected > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" style={{animationDelay: '0.4s'}}></div>
-                        <span className="text-muted-foreground font-medium">Rejected</span>
-                      </div>
-                      <span className="font-bold text-foreground">{analytics.rejected} / {analytics.total}</span>
+                {/* Rejected Progress - Always Show */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                      <span className="text-muted-foreground font-medium">Rejected</span>
                     </div>
-                    <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden">
-                      <div 
-                        className="h-full bg-gradient-to-r from-red-500 to-pink-500 rounded-full transition-all duration-1000 ease-out animate-in slide-in-from-left"
-                        style={{width: `${analytics.total > 0 ? (analytics.rejected / analytics.total) * 100 : 0}%`, animationDelay: '0.4s'}}
-                      ></div>
-                    </div>
+                    <span className="font-bold text-foreground">{analytics.rejected} / {analytics.total}</span>
                   </div>
-                )}
+                  <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-red-500 to-pink-500 rounded-full transition-all duration-1000 ease-out animate-in slide-in-from-left"
+                      style={{width: `${analytics.total > 0 ? (analytics.rejected / analytics.total) * 100 : 0}%`, animationDelay: '0.4s'}}
+                    ></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
