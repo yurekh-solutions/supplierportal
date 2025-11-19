@@ -1813,8 +1813,8 @@ Does this look good? Reply YES to save or NO to edit.`);
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
                     msg.sender === 'user'
-                      ? 'bg-primary text-white rounded-br-none'
-                      : 'bg-transparent border-2 border-dashed border-foreground/30 text-foreground rounded-bl-none'
+                      ? 'bg-primary text-white rounded-br-none shadow-md'
+                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
