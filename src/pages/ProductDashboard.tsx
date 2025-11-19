@@ -105,22 +105,27 @@ const SupplierProductDashboard = () => {
   // Lead Scoring Chatbox
   const [showLeadScoringChatbox, setShowLeadScoringChatbox] = useState(false);
   const [leadScoringMessages, setLeadScoringMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  const [leadScoringInput, setLeadScoringInput] = useState('');
   
   // Order Automation Chatbox
   const [showOrderAutomationChatbox, setShowOrderAutomationChatbox] = useState(false);
   const [orderAutomationMessages, setOrderAutomationMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  const [orderAutomationInput, setOrderAutomationInput] = useState('');
   
   // Smart Inventory Chatbox
   const [showSmartInventoryChatbox, setShowSmartInventoryChatbox] = useState(false);
   const [smartInventoryMessages, setSmartInventoryMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  const [smartInventoryInput, setSmartInventoryInput] = useState('');
   
   // Price Optimizer Chatbox
   const [showPriceOptimizerChatbox, setShowPriceOptimizerChatbox] = useState(false);
   const [priceOptimizerMessages, setPriceOptimizerMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  const [priceOptimizerInput, setPriceOptimizerInput] = useState('');
   
   // Analytics Hub Chatbox
   const [showAnalyticsHubChatbox, setShowAnalyticsHubChatbox] = useState(false);
   const [analyticsHubMessages, setAnalyticsHubMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  const [analyticsHubInput, setAnalyticsHubInput] = useState('');
   const productInputRef = useRef<HTMLDivElement>(null);
 
   const token = localStorage.getItem('supplierToken');
@@ -523,6 +528,187 @@ Does this look good? Reply YES to save or NO to edit.`);
 
   const handleAnalyticsHubClose = () => {
     setShowAnalyticsHubChatbox(false);
+  };
+
+  // Lead Scoring Submit Handler
+  const handleLeadScoringSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!leadScoringInput.trim()) return;
+
+    const userMessage = {
+      id: leadScoringMessages.length + 1,
+      text: leadScoringInput,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setLeadScoringMessages(prev => [...prev, userMessage]);
+    setLeadScoringInput('');
+
+    // Simulate bot response based on input
+    setTimeout(() => {
+      let response = '';
+      const input = leadScoringInput.toLowerCase();
+      
+      if (input.includes('score') || input.includes('analyze')) {
+        response = '🎯 Analyzing your leads...\n\n📊 Lead Score Analysis:\n• Hot Leads: 5 (45% conversion potential)\n• Warm Leads: 8 (25% conversion potential)\n• Cold Leads: 12 (5% conversion potential)\n\nTop Priority: Enterprise inquiry from manufacturing sector';
+      } else if (input.includes('criteria')) {
+        response = '⚙️ Current Scoring Criteria:\n• Budget Size: 30%\n• Company Size: 25%\n• Industry Match: 20%\n• Response Time: 15%\n• Product Interest: 10%\n\nYou can customize these weights based on your business needs!';
+      } else {
+        response = '✅ Got it! You can ask me to:\n• Score and analyze your leads\n• Show scoring criteria\n• Identify high-value prospects\n• Set up auto-tagging rules';
+      }
+
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: response,
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setLeadScoringMessages(prev => [...prev, botMessage]);
+    }, 300);
+  };
+
+  // Order Automation Submit Handler
+  const handleOrderAutomationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!orderAutomationInput.trim()) return;
+
+    const userMessage = {
+      id: orderAutomationMessages.length + 1,
+      text: orderAutomationInput,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setOrderAutomationMessages(prev => [...prev, userMessage]);
+    setOrderAutomationInput('');
+
+    setTimeout(() => {
+      let response = '';
+      const input = orderAutomationInput.toLowerCase();
+      
+      if (input.includes('status') || input.includes('pending')) {
+        response = '📦 Order Status Overview:\n• Pending Orders: 3\n• Processing: 5\n• Ready to Ship: 2\n• Shipped: 18\n\n⏱️ Average Processing Time: 12 hours\n✅ On-time Delivery Rate: 98%';
+      } else if (input.includes('setup') || input.includes('configure')) {
+        response = '⚙️ Automation Setup:\n1. Email Confirmations ✅ Enabled\n2. Invoice Generation ✅ Enabled\n3. Shipment Tracking ✅ Enabled\n4. Payment Reminders ✅ Enabled\n\nAll systems are active and working!';
+      } else {
+        response = '📧 Ask me about:\n• Current order status\n• Automation setup\n• Processing times\n• Email templates\n• Shipment tracking';
+      }
+
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: response,
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setOrderAutomationMessages(prev => [...prev, botMessage]);
+    }, 300);
+  };
+
+  // Smart Inventory Submit Handler
+  const handleSmartInventorySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!smartInventoryInput.trim()) return;
+
+    const userMessage = {
+      id: smartInventoryMessages.length + 1,
+      text: smartInventoryInput,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setSmartInventoryMessages(prev => [...prev, userMessage]);
+    setSmartInventoryInput('');
+
+    setTimeout(() => {
+      let response = '';
+      const input = smartInventoryInput.toLowerCase();
+      
+      if (input.includes('stock') || input.includes('inventory')) {
+        response = '📊 Current Inventory Status:\n• Total SKUs: 24\n• In Stock: 19\n• Low Stock Alert: 4\n• Out of Stock: 1\n\n⚠️ Low Stock Items:\n• Product A: 3 units (reorder suggested)\n• Product B: 2 units (urgent)\n• Product C: 5 units (normal)\n• Product D: 1 unit (reorder NOW)';
+      } else if (input.includes('forecast') || input.includes('predict')) {
+        response = '🔮 Demand Forecast (Next 30 Days):\n• Expected Orders: 150\n• Recommended Stock Level: 200 units\n• Predicted Stockout Risk: LOW\n• Reorder Deadline: Day 15\n\nPredictive accuracy: 94%';
+      } else {
+        response = '📦 Track your inventory by asking about:\n• Current stock levels\n• Low stock alerts\n• Demand forecasts\n• Reorder suggestions\n• Historical trends';
+      }
+
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: response,
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setSmartInventoryMessages(prev => [...prev, botMessage]);
+    }, 300);
+  };
+
+  // Price Optimizer Submit Handler
+  const handlePriceOptimizerSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!priceOptimizerInput.trim()) return;
+
+    const userMessage = {
+      id: priceOptimizerMessages.length + 1,
+      text: priceOptimizerInput,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setPriceOptimizerMessages(prev => [...prev, userMessage]);
+    setPriceOptimizerInput('');
+
+    setTimeout(() => {
+      let response = '';
+      const input = priceOptimizerInput.toLowerCase();
+      
+      if (input.includes('recommend') || input.includes('suggest')) {
+        response = '💰 Price Recommendations:\n\n• Product A: Current $450 → Recommended $480 (+6.7%)\n• Product B: Current $320 → Recommended $300 (-6.3%)\n• Product C: Current $680 → Recommended $720 (+5.9%)\n\nPotential Revenue Increase: +$4,200/month';
+      } else if (input.includes('market') || input.includes('competitor')) {
+        response = '🔍 Market Analysis:\n• Your Average Price: $500\n• Competitor Average: $520\n• Market Average: $510\n• Demand Index: 8.5/10\n\nYou are 3.9% below market - room to increase prices!';
+      } else {
+        response = '💎 Get pricing insights by asking about:\n• Price recommendations\n• Competitor analysis\n• Seasonal pricing\n• Revenue optimization\n• Market trends';
+      }
+
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: response,
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setPriceOptimizerMessages(prev => [...prev, botMessage]);
+    }, 300);
+  };
+
+  // Analytics Hub Submit Handler
+  const handleAnalyticsHubSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!analyticsHubInput.trim()) return;
+
+    const userMessage = {
+      id: analyticsHubMessages.length + 1,
+      text: analyticsHubInput,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setAnalyticsHubMessages(prev => [...prev, userMessage]);
+    setAnalyticsHubInput('');
+
+    setTimeout(() => {
+      let response = '';
+      const input = analyticsHubInput.toLowerCase();
+      
+      if (input.includes('sales') || input.includes('revenue')) {
+        response = '📈 Sales & Revenue Report:\n\n• This Month: $24,500\n• Last Month: $19,200\n• Growth: +27.6%\n\n📊 Revenue by Tool:\n• Auto Reply: +$3,200 (time saved)\n• Lead Scoring: +$4,100 (better conversions)\n• Order Automation: +$2,800 (efficiency)\n• Others: +$14,400';
+      } else if (input.includes('trend') || input.includes('insight')) {
+        response = '🎯 Key Insights:\n\n✅ Strengths:\n• High customer satisfaction (4.8/5)\n• Fast response time (avg 2hr)\n• Strong repeat customer rate (67%)\n\n⚠️ Opportunities:\n• Peak demand: Wed-Thu\n• Best products: Steel & Materials\n• Growth potential: +40% Q4';
+      } else {
+        response = '📊 Analyze your business with:\n• Sales & revenue trends\n• Customer insights\n• Performance metrics\n• Tool ROI analysis\n• Export reports (PDF/CSV)';
+      }
+
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: response,
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setAnalyticsHubMessages(prev => [...prev, botMessage]);
+    }, 300);
   };
 
   useEffect(() => {
@@ -2012,17 +2198,17 @@ Does this look good? Reply YES to save or NO to edit.`);
             ))}
           </div>
           <div className="border-t border-white/20 p-4 bg-white/5">
-            <form className="flex gap-2">
+            <form onSubmit={handleLeadScoringSubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about lead scoring..."
-                disabled
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+                value={leadScoringInput}
+                onChange={(e) => setLeadScoringInput(e.target.value)}
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
               />
               <Button
                 type="submit"
-                disabled
-                className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
               >
                 <span className="text-lg">↑</span>
               </Button>
@@ -2068,17 +2254,17 @@ Does this look good? Reply YES to save or NO to edit.`);
             ))}
           </div>
           <div className="border-t border-white/20 p-4 bg-white/5">
-            <form className="flex gap-2">
+            <form onSubmit={handleOrderAutomationSubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about order automation..."
-                disabled
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+                value={orderAutomationInput}
+                onChange={(e) => setOrderAutomationInput(e.target.value)}
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
               />
               <Button
                 type="submit"
-                disabled
-                className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+                className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
               >
                 <span className="text-lg">↑</span>
               </Button>
@@ -2124,17 +2310,17 @@ Does this look good? Reply YES to save or NO to edit.`);
             ))}
           </div>
           <div className="border-t border-white/20 p-4 bg-white/5">
-            <form className="flex gap-2">
+            <form onSubmit={handleSmartInventorySubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about inventory..."
-                disabled
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+                value={smartInventoryInput}
+                onChange={(e) => setSmartInventoryInput(e.target.value)}
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
               />
               <Button
                 type="submit"
-                disabled
-                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
               >
                 <span className="text-lg">↑</span>
               </Button>
@@ -2180,17 +2366,17 @@ Does this look good? Reply YES to save or NO to edit.`);
             ))}
           </div>
           <div className="border-t border-white/20 p-4 bg-white/5">
-            <form className="flex gap-2">
+            <form onSubmit={handlePriceOptimizerSubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about pricing..."
-                disabled
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+                value={priceOptimizerInput}
+                onChange={(e) => setPriceOptimizerInput(e.target.value)}
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
               />
               <Button
                 type="submit"
-                disabled
-                className="bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+                className="bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
               >
                 <span className="text-lg">↑</span>
               </Button>
@@ -2236,17 +2422,17 @@ Does this look good? Reply YES to save or NO to edit.`);
             ))}
           </div>
           <div className="border-t border-white/20 p-4 bg-white/5">
-            <form className="flex gap-2">
+            <form onSubmit={handleAnalyticsHubSubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about analytics..."
-                disabled
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+                value={analyticsHubInput}
+                onChange={(e) => setAnalyticsHubInput(e.target.value)}
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
               />
               <Button
                 type="submit"
-                disabled
-                className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+                className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
               >
                 <span className="text-lg">↑</span>
               </Button>
