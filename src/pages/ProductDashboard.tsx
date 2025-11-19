@@ -11,6 +11,7 @@ import { Badge } from '@/pages/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/pages/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/pages/components/ui/select';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import AIInsightsPanel from '@/components/AIInsightsPanel';
 import { useToast } from '@/hooks/use-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -428,6 +429,9 @@ const SupplierProductDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* AI-Powered Insights */}
+        <AIInsightsPanel />
 
         {/* Compact Analytics - Single Row - Enhanced Design */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
