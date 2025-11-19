@@ -1459,18 +1459,8 @@ Does this look good? Reply YES to save or NO to edit.`);
               </div>
             ) : products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in">
-                {/* Generate 4 AI-recommended cards from user's products */}
-                {products.slice(0, 4).map((product, index) => {
-                  const recommendedColors = [
-                    { bg: 'from-blue-500 to-blue-600', icon: 'bg-blue-500/20', text: 'text-blue-600', badge: 'bg-blue-100 text-blue-800' },
-                    { bg: 'from-purple-500 to-purple-600', icon: 'bg-purple-500/20', text: 'text-purple-600', badge: 'bg-purple-100 text-purple-800' },
-                    { bg: 'from-pink-500 to-pink-600', icon: 'bg-pink-500/20', text: 'text-pink-600', badge: 'bg-pink-100 text-pink-800' },
-                    { bg: 'from-green-500 to-green-600', icon: 'bg-green-500/20', text: 'text-green-600', badge: 'bg-green-100 text-green-800' }
-                  ];
-                  const colors = recommendedColors[index % 4];
-                  const demandMetrics = ['High Demand', 'Fast Growing', 'Trending', 'Popular'];
-                  const recommendations = ['+35% Growth', '+42% Growth', '+38% Growth', '+40% Growth'];
-
+                {/* Display top 4 products with real data and images */}
+                {products.slice(0, 4).map((product) => {
                   return (
                     <div
                       key={product._id}
@@ -1480,58 +1470,54 @@ Does this look good? Reply YES to save or NO to edit.`);
                       }}
                       className="glass-card border-2 border-white/30 rounded-2xl overflow-hidden backdrop-blur-xl bg-white/20 dark:bg-white/5 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group flex flex-col h-full"
                     >
-                      {/* Header Gradient */}
-                      <div className={`h-20 bg-gradient-to-r ${colors.bg} relative overflow-hidden`}>
-                        <div className="absolute inset-0 opacity-20"></div>
-                        <div className="absolute top-2 right-2 bg-white/90 dark:bg-black/50 px-2 py-1 rounded-lg">
-                          <span className="text-xs font-bold text-primary">Recommended</span>
-                        </div>
+                      {/* Product Image Placeholder */}
+                      <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 overflow-hidden relative flex items-center justify-center">
+                        <Package className="w-12 h-12 text-muted-foreground/50" />
                       </div>
 
                       {/* Content */}
                       <div className="p-4 flex-1 flex flex-col">
                         {/* Product Name */}
-                        <h4 className="font-bold text-foreground text-base mb-1 line-clamp-2 group-hover:text-primary transition-colors">{product.name}</h4>
+                        <h4 className="font-bold text-foreground text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">{product.name}</h4>
                         
-                        {/* Category Badge */}
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className={`w-8 h-8 rounded-lg ${colors.icon} flex items-center justify-center`}>
-                            <Package className="w-4 h-4 text-white" />
-                          </div>
-                          <span className="text-xs font-medium text-muted-foreground capitalize">{product.category.replace('-', ' ')}</span>
+                        {/* Category & Status */}
+                        <div className="flex items-center justify-between mb-3 text-xs">
+                          <span className="font-medium text-muted-foreground capitalize">{product.category.replace('-', ' ')}</span>
+                          <span className={`px-2 py-1 rounded-lg font-semibold ${
+                            product.status === 'active'
+                              ? 'bg-green-100/50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                              : product.status === 'inactive'
+                              ? 'bg-gray-100/50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
+                              : 'bg-yellow-100/50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          }`}>
+                            {product.status}
+                          </span>
                         </div>
 
                         {/* Description */}
-                        <p className="text-xs text-muted-foreground mb-3 line-clamp-2 flex-1">{product.description}</p>
+                        <p className="text-xs text-muted-foreground mb-4 line-clamp-2 flex-1 leading-relaxed">{product.description}</p>
 
-                        {/* Metrics Grid */}
-                        <div className="space-y-2 mb-3 pb-3 border-b border-white/20">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">Market Status</span>
-                            <span className={`text-xs font-bold ${colors.text}`}>{demandMetrics[index % 4]}</span>
+                        {/* Price Info */}
+                        {product.price && product.price.amount && (
+                          <div className="mb-4 pb-4 border-b border-white/20">
+                            <p className="text-xs text-muted-foreground mb-1">Price</p>
+                            <p className="text-sm font-bold text-foreground">{product.price.currency} {product.price.amount} {product.price.unit && `/ ${product.price.unit}`}</p>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">Growth Potential</span>
-                            <span className={`text-xs font-bold ${colors.text}`}>{recommendations[index % 4]}</span>
-                          </div>
-                        </div>
-
-                        {/* AI Score */}
-                        <div className="flex items-center gap-2">
-                          <div className="w-full bg-white/20 rounded-full h-1.5 overflow-hidden">
-                            <div className={`h-full bg-gradient-to-r ${colors.bg} w-4/5`}></div>
-                          </div>
-                          <span className={`text-xs font-bold ${colors.text} whitespace-nowrap`}>80%</span>
-                        </div>
+                        )}
                       </div>
 
-                      {/* View Button */}
+                      {/* Add Button */}
                       <div className="p-4 pt-0">
                         <Button
                           size="sm"
-                          className={`w-full bg-gradient-to-r ${colors.bg} text-white rounded-xl text-sm font-medium hover:shadow-lg transition-all`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedProduct(product);
+                            setShowProductDetail(true);
+                          }}
+                          className="w-full bg-gradient-to-r from-primary via-primary-glow to-secondary text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
                         >
-                          View Product
+                          Add
                         </Button>
                       </div>
                     </div>
