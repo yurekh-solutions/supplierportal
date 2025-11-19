@@ -749,60 +749,20 @@ const SupplierProductDashboard = () => {
                           
                           <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
                           
-                          {/* Product Stats */}
-                          <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-white/40 dark:bg-black/20 rounded-xl">
+                          {/* Status Grid - Always Visible */}
+                          <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-white/40 dark:bg-black/20 rounded-xl border border-white/20">
                             <div className="text-center">
-                              <p className="text-xs text-muted-foreground uppercase font-semibold">Status</p>
+                              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide">Status</p>
                               <p className="text-sm font-bold text-foreground mt-1 capitalize">{product.status}</p>
                             </div>
                             <div className="text-center border-l border-r border-border/30">
-                              <p className="text-xs text-muted-foreground uppercase font-semibold">Category</p>
+                              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide">Category</p>
                               <p className="text-sm font-bold text-foreground mt-1">{product.category.replace('-', ' ')}</p>
                             </div>
                             <div className="text-center">
-                              <p className="text-xs text-muted-foreground uppercase font-semibold">Added</p>
+                              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide">Added</p>
                               <p className="text-sm font-bold text-foreground mt-1">Recently</p>
                             </div>
-                          </div>
-                          
-                          {/* Action Buttons - Only Meaningful Ones */}
-                          <div className="flex gap-2 mt-4 pt-4 border-t border-border/30">
-                            {/* Edit - Only for pending products */}
-                            {product.status === 'pending' && (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="flex-1 border-2 border-yellow-500/50 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-300 rounded-xl font-medium"
-                                onClick={() => navigate(`/products/add?edit=${product._id}`)}
-                              >
-                                <Edit className="w-4 h-4 mr-1" />
-                                Edit
-                              </Button>
-                            )}
-                            
-                            {/* View Details - Always available */}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="flex-1 border-2 border-primary/50 text-primary hover:bg-primary/10 transition-all duration-300 rounded-xl font-medium"
-                              onClick={() => {
-                                setSelectedProduct(product as Product);
-                                setShowProductDetail(true);
-                              }}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              Details
-                            </Button>
-                            
-                            {/* Delete - Always available */}
-                            <Button
-                              size="sm"
-                              className="flex-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-2 border-red-200/50 dark:border-red-200/30 hover:border-red-500 hover:shadow-lg transition-all duration-300 rounded-xl font-medium"
-                              onClick={() => handleDeleteProduct(product._id)}
-                            >
-                              <Trash2 className="w-4 h-4 mr-1" />
-                              Delete
-                            </Button>
                           </div>
 
         {/* Product Detail Modal */}
