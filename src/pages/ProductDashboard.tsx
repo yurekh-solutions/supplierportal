@@ -789,14 +789,12 @@ const SupplierProductDashboard = () => {
         {/* Tabs */}
         <div className="space-y-6">
             <div className="glass-card border-2 border-white/30 shadow-2xl rounded-3xl overflow-hidden backdrop-blur-2xl">
-              <div className="bg-gradient-to-r from-primary/10 via-primary-glow/10 to-secondary/10 border-b border-white/20 p-6 rounded-t-3xl">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+              <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-white/20 p-6 rounded-t-3xl">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                <h2 className="text-gradient text-3xl font-bold mb-2 bg-clip-text text-transparent">
-                  Product Management
-             
-              </h2>
-                    {/* <h2 className="text-3xl font-bold text-foreground mb-2">Product Management</h2> */}
+                    <h2 className="text-3xl font-bold text-foreground mb-2">
+                      Product Management
+                    </h2>
                     <p className="text-muted-foreground text-base">Manage your product listings and track performance</p>
                   </div>
                   <Button
@@ -809,7 +807,7 @@ const SupplierProductDashboard = () => {
                 </div>
                 
                 {/* Search Bar */}
-                <div className="relative">
+                <div className="relative mt-6">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     placeholder="Search products by name or category..."
@@ -847,8 +845,8 @@ const SupplierProductDashboard = () => {
                         key={product._id}
                         className="glass-card border-2 border-white/30 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 backdrop-blur-2xl group relative overflow-hidden"
                       >
-                        {/* Subtle background gradient - Color-synced to category */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryColor(product.category).bg}/5 via-transparent to-secondary/5`}></div>
+                        {/* Subtle uniform background - no colorful gradient */}
+                        <div className="absolute inset-0 bg-white/5 dark:bg-white/3"></div>
                         
                         <div className="relative z-10">
                           <div className="flex justify-between items-start mb-4">
