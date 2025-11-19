@@ -788,11 +788,11 @@ const AddProduct = () => {
                   {userProducts.length > 0 && (
                     <div className="pt-6 border-t" style={{ borderColor: '#e8dcd0' }}>
                       <div className="flex items-center gap-2 mb-4 px-2">
-                        <p className="text-sm font-bold" style={{ color: '#c1482b' }}>✨ Recommended by AI</p>
+                        <p className="text-lg font-bold" style={{ color: '#c1482b' }}>✨ Recommended by AI</p>
                         <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ffe4d4', color: '#c1482b' }}>Smart Match</span>
                       </div>
-                      <p className="text-xs mb-3 px-2" style={{ color: '#6b5d54' }}>AI-powered product recommendations based on your latest additions</p>
-                      <div className="grid grid-cols-2 gap-2">
+                      <p className="text-xs mb-4 px-2" style={{ color: '#6b5d54' }}>AI-powered product recommendations based on your latest additions</p>
+                      <div className="grid grid-cols-1 gap-4">
                         {userProducts.map((product) => (
                           <div
                             key={product._id}
@@ -804,44 +804,48 @@ const AddProduct = () => {
                               image: product.image || '',
                               features: [],
                               specifications: {}
-                            })}
-                            className="group perspective-1000 h-full cursor-pointer"
+                            } as any)}
+                            className="group cursor-pointer rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg"
+                            style={{ borderColor: '#e8dcd0', backgroundColor: 'white', border: '2px solid #e8dcd0' }}
                           >
-                            <div
-                              className="relative rounded-xl border-2 border-white/30 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-40"
-                              style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: '#e8dcd0' }}
-                            >
-                              {/* Image Container */}
-                              <div className="relative h-20 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
-                                {(product as any)?.image ? (
-                                  <img
-                                    src={(product as any)?.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                    onError={(e) => {
-                                      e.currentTarget.src = `https://placehold.co/64x64?text=${encodeURIComponent(product.name.substring(0, 10))}`;
-                                    }}
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#f3f0ec' }}>
-                                    <Package className="w-6 h-6" style={{ color: '#c1482b' }} />
-                                  </div>
-                                )}
-                              </div>
-                              {/* Content */}
-                              <div className="p-3 flex flex-col justify-between h-20">
-                                <p className="font-bold text-xs text-foreground group-hover:text-primary transition-colors line-clamp-2">
-                                  {product.name}
-                                </p>
-                                <button
-                                  className="mt-auto text-xs font-semibold py-1 px-2 rounded-lg transition-all w-full"
-                                  style={{ color: '#fff', backgroundColor: '#c1482b' }}
-                                  onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#a53019'; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#c1482b'; }}
-                                >
-                                  Add
-                                </button>
-                              </div>
+                            {/* Image Container - Large */}
+                            <div className="relative w-full h-40 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
+                              {(product as any)?.image ? (
+                                <img
+                                  src={(product as any)?.image}
+                                  alt={product.name}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                  onError={(e) => {
+                                    e.currentTarget.src = `https://placehold.co/300x200?text=${encodeURIComponent(product.name.substring(0, 15))}`;
+                                  }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#f3f0ec' }}>
+                                  <Package className="w-12 h-12" style={{ color: '#c1482b' }} />
+                                </div>
+                              )}
+                            </div>
+                            {/* Content Section */}
+                            <div className="p-4">
+                              <p className="font-bold text-sm text-foreground mb-1 line-clamp-2">
+                                {product.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                                {product.description}
+                              </p>
+                              {product.category && (
+                                <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: '#e8dcd0', color: '#6b5d54' }}>
+                                  {product.category}
+                                </span>
+                              )}
+                              <button
+                                className="mt-3 text-xs font-semibold py-2 px-3 rounded-lg transition-all w-full text-white"
+                                style={{ backgroundColor: '#c1482b' }}
+                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#a53019'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#c1482b'; }}
+                              >
+                                Add Product
+                              </button>
                             </div>
                           </div>
                         ))}
