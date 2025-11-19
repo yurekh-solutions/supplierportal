@@ -33,6 +33,7 @@ const AddProduct = () => {
   const [searchInput, setSearchInput] = useState('');
   const [suggestions, setSuggestions] = useState<typeof predefinedProducts>([]);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
+  const [userProducts, setUserProducts] = useState<any[]>([]);
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -63,6 +64,7 @@ const AddProduct = () => {
     }
     fetchCategories();
     fetchSuppliers();
+    fetchUserProducts();
   }, []);
 
   const fetchCategories = async () => {
@@ -80,6 +82,20 @@ const AddProduct = () => {
   const fetchSuppliers = async () => {
     // Suppliers will be dynamically fetched based on selected product
     // No static data needed - will be populated from product data
+  };
+
+  const fetchUserProducts = async () => {
+    try {
+      const response = await fetch(`${API_URL}/products`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setUserProducts(data.data.slice(0, 4)); // Get latest 4 products
+      }
+    } catch (error) {
+      console.error('Failed to fetch user products:', error);
+    }
   };
 
   const getSupplierSuggestionsForProduct = (productCategory: string) => {
@@ -768,31 +784,49 @@ const AddProduct = () => {
                     </div>
                   )}
 
-                  {/* Recommended Products - Glass Card Design with AI Label */}
-                  {productForm.name.trim().length > 0 && getRecommendedProducts().length > 0 && (
+                  {/* Recommended Products by AI - Enhanced Design */}
+                  {userProducts.length > 0 && (
                     <div className="pt-6 border-t" style={{ borderColor: '#e8dcd0' }}>
-                      <div className="flex items-center gap-2 mb-3 px-2">
-                        <p className="text-xs font-bold" style={{ color: '#c1482b' }}>✨ Recommended by AI</p>
+                      <div className="flex items-center gap-2 mb-4 px-2">
+                        <p className="text-sm font-bold" style={{ color: '#c1482b' }}>✨ Recommended by AI</p>
                         <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ffe4d4', color: '#c1482b' }}>Smart Match</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-2 max-h-80 overflow-hidden">
-                        {getRecommendedProducts().map((product) => (
+                      <p className="text-xs mb-3 px-2" style={{ color: '#6b5d54' }}>AI-powered product recommendations based on your latest additions</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {userProducts.map((product) => (
                           <div
-                            key={product.id}
-                            onClick={() => handleSelectProduct(product)}
-                            className="group perspective-1000 h-full"
+                            key={product._id}
+                            onClick={() => handleSelectProduct({
+                              id: product._id,
+                              name: product.name,
+                              category: product.category,
+                              description: product.description,
+                              image: product.image || '',
+                              features: [],
+                              specifications: {}
+                            })}
+                            className="group perspective-1000 h-full cursor-pointer"
                           >
                             <div
-                              className="relative rounded-xl border-2 border-white/30 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer h-40"
+                              className="relative rounded-xl border-2 border-white/30 backdrop-blur-md overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-40"
                               style={{ backgroundColor: 'rgba(255, 255, 255, 0.6)', borderColor: '#e8dcd0' }}
                             >
                               {/* Image Container */}
                               <div className="relative h-20 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
-                                <img
-                                  src={product.image}
-                                  alt={product.name}
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                />
+                                {(product as any)?.image ? (
+                                  <img
+                                    src={(product as any)?.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                    onError={(e) => {
+                                      e.currentTarget.src = `https://placehold.co/64x64?text=${encodeURIComponent(product.name.substring(0, 10))}`;
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#f3f0ec' }}>
+                                    <Package className="w-6 h-6" style={{ color: '#c1482b' }} />
+                                  </div>
+                                )}
                               </div>
                               {/* Content */}
                               <div className="p-3 flex flex-col justify-between h-20">
