@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/pages/components/ui/select';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import AIInsightsPanel from '@/components/AIInsightsPanel';
+import ProductDetailModal from '@/components/ProductDetailModal';
 import { useToast } from '@/hooks/use-toast';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -88,6 +89,8 @@ const SupplierProductDashboard = () => {
   const [showCustomSubcategory, setShowCustomSubcategory] = useState(false);
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
   const [productSuggestions, setProductSuggestions] = useState<typeof predefinedProducts>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [showProductDetail, setShowProductDetail] = useState(false);
   const productInputRef = useRef<HTMLDivElement>(null);
 
   const token = localStorage.getItem('supplierToken');
@@ -752,7 +755,10 @@ const SupplierProductDashboard = () => {
                               size="sm"
                               variant="outline"
                               className="flex-1 border-2 border-primary/50 text-primary hover:bg-primary/10 transition-all duration-300 rounded-xl font-medium"
-                              onClick={() => toast({title: 'View', description: `Viewing ${product.name}`, duration: 2000})}
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                setShowProductDetail(true);
+                              }}
                             >
                               <Eye className="w-4 h-4 mr-1" />
                               View
@@ -761,7 +767,10 @@ const SupplierProductDashboard = () => {
                               size="sm"
                               variant="outline"
                               className="flex-1 border-2 border-yellow-500/50 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-300 rounded-xl font-medium"
-                              onClick={() => toast({title: 'Edit', description: `Editing ${product.name}`, duration: 2000})}
+                              onClick={() => {
+                                setSelectedProduct(product);
+                                toast({ title: 'Edit Mode', description: `Editing ${product.name}` });
+                              }}
                             >
                               <Edit className="w-4 h-4 mr-1" />
                               Edit
@@ -775,6 +784,17 @@ const SupplierProductDashboard = () => {
                               Remove
                             </Button>
                           </div>
+
+        {/* Product Detail Modal */}
+        <ProductDetailModal 
+          product={selectedProduct}
+          open={showProductDetail}
+          onOpenChange={setShowProductDetail}
+          onEdit={(product) => {
+            setSelectedProduct(product);
+            toast({ title: 'Edit', description: `Now editing: ${product.name}` });
+          }}
+        />
                         </div>
                       </div>
                     ))}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, TrendingUp, AlertCircle, Target, Zap, Award } from 'lucide-react';
-import { Badge } from './ui/badge';
 
 interface AIInsights {
   demographics: {
