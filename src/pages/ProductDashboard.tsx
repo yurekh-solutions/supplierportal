@@ -2082,25 +2082,27 @@ Does this look good? Reply YES to save or NO to edit.`);
 
       {/* Auto Reply Manager Chatbox */}
       {showAutoReplyChatbox && (
-        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-primary/20 to-secondary/20 border-b border-white/20 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                <MessageSquare className="w-5 h-5 text-blue-600" />
+        <>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={handleAutoReplyClose}></div>
+          <div className="fixed bottom-0 right-0 w-full sm:w-96 h-screen sm:h-[600px] sm:rounded-t-3xl sm:rounded-br-none rounded-none glass-card border-2 border-white/30 bg-white dark:bg-slate-950 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 border-b border-blue-400/30 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-400/30 flex items-center justify-center">
+                  <MessageSquare className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Auto Reply Manager</h3>
+                  <p className="text-xs text-blue-100">Set up auto-responses</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-foreground">Auto Reply Manager</h3>
-                <p className="text-xs text-muted-foreground">Set up auto-responses</p>
-              </div>
+              <button
+                onClick={handleAutoReplyClose}
+                className="p-2 hover:bg-blue-400/30 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
-            <button
-              onClick={handleAutoReplyClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-foreground" />
-            </button>
-          </div>
 
           {/* Messages Container */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -2109,8 +2111,8 @@ Does this look good? Reply YES to save or NO to edit.`);
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
                     msg.sender === 'user'
-                      ? 'bg-primary text-white rounded-br-none shadow-md'
-                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                      ? 'bg-blue-500 text-white rounded-br-none shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-foreground rounded-bl-none shadow-sm'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
@@ -2123,7 +2125,7 @@ Does this look good? Reply YES to save or NO to edit.`);
               <div className="flex flex-col gap-2 mt-4">
                 <Button
                   onClick={() => handleAutoReplyAction('Create Auto-Reply')}
-                  className="w-full bg-gradient-to-r from-primary via-primary/90 to-secondary hover:from-primary/90 hover:via-primary/80 hover:to-secondary/90 text-white rounded-2xl text-sm py-3 font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 border border-white/20"
+                  className="w-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 text-white rounded-2xl text-sm py-3 font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 border border-blue-400/30"
                 >
                   <span className="text-lg">✨</span>
                   <span>Create Auto-Reply</span>
@@ -2140,7 +2142,7 @@ Does this look good? Reply YES to save or NO to edit.`);
           </div>
 
           {/* Input Area */}
-          <div className="border-t border-white/20 p-4 bg-white/5">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900">
             <form onSubmit={handleAutoReplySubmit} className="flex gap-2">
               <Input
                 ref={chatInputRef}
@@ -2148,47 +2150,50 @@ Does this look good? Reply YES to save or NO to edit.`);
                 placeholder="Type your message..."
                 value={autoReplyInput}
                 onChange={(e) => setAutoReplyInput(e.target.value)}
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
+                className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full text-foreground"
               />
               <Button
                 type="submit"
-                className="bg-gradient-to-r from-primary to-secondary text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
               >
                 <span className="text-lg">↑</span>
               </Button>
             </form>
           </div>
         </div>
+        </>
       )}
 
       {/* Lead Scoring Chatbox */}
       {showLeadScoringChatbox && (
-        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
-          <div className="bg-gradient-to-r from-green-500/20 to-green-400/20 border-b border-white/20 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
-                <Target className="w-5 h-5 text-green-600" />
+        <>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={handleLeadScoringClose}></div>
+          <div className="fixed bottom-0 right-0 w-full sm:w-96 h-screen sm:h-[600px] sm:rounded-t-3xl sm:rounded-br-none rounded-none glass-card border-2 border-white/30 bg-white dark:bg-slate-950 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+            <div className="bg-gradient-to-r from-green-500 to-green-600 border-b border-green-400/30 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-green-400/30 flex items-center justify-center">
+                  <Target className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Lead Scoring</h3>
+                  <p className="text-xs text-green-100">Identify high-value leads</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-foreground">Lead Scoring</h3>
-                <p className="text-xs text-muted-foreground">Identify high-value leads</p>
-              </div>
+              <button
+                onClick={handleLeadScoringClose}
+                className="p-2 hover:bg-green-400/30 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
-            <button
-              onClick={handleLeadScoringClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-foreground" />
-            </button>
-          </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {leadScoringMessages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
                     msg.sender === 'user'
-                      ? 'bg-primary text-white rounded-br-none shadow-md'
-                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                      ? 'bg-green-500 text-white rounded-br-none shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-foreground rounded-bl-none shadow-sm'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
@@ -2197,14 +2202,14 @@ Does this look good? Reply YES to save or NO to edit.`);
               </div>
             ))}
           </div>
-          <div className="border-t border-white/20 p-4 bg-white/5">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900">
             <form onSubmit={handleLeadScoringSubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about lead scoring..."
                 value={leadScoringInput}
                 onChange={(e) => setLeadScoringInput(e.target.value)}
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
+                className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full text-foreground"
               />
               <Button
                 type="submit"
@@ -2215,36 +2220,39 @@ Does this look good? Reply YES to save or NO to edit.`);
             </form>
           </div>
         </div>
+        </>
       )}
 
       {/* Order Automation Chatbox */}
       {showOrderAutomationChatbox && (
-        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
-          <div className="bg-gradient-to-r from-purple-500/20 to-purple-400/20 border-b border-white/20 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5 text-purple-600" />
+        <>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={handleOrderAutomationClose}></div>
+          <div className="fixed bottom-0 right-0 w-full sm:w-96 h-screen sm:h-[600px] sm:rounded-t-3xl sm:rounded-br-none rounded-none glass-card border-2 border-white/30 bg-white dark:bg-slate-950 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+            <div className="bg-gradient-to-r from-purple-500 to-purple-600 border-b border-purple-400/30 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-purple-400/30 flex items-center justify-center">
+                  <ShoppingBag className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Order Automation</h3>
+                  <p className="text-xs text-purple-100">Auto-process & fulfill orders</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-foreground">Order Automation</h3>
-                <p className="text-xs text-muted-foreground">Auto-process & fulfill orders</p>
-              </div>
+              <button
+                onClick={handleOrderAutomationClose}
+                className="p-2 hover:bg-purple-400/30 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
-            <button
-              onClick={handleOrderAutomationClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-foreground" />
-            </button>
-          </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {orderAutomationMessages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
                     msg.sender === 'user'
-                      ? 'bg-primary text-white rounded-br-none shadow-md'
-                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                      ? 'bg-purple-500 text-white rounded-br-none shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-foreground rounded-bl-none shadow-sm'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
@@ -2253,14 +2261,14 @@ Does this look good? Reply YES to save or NO to edit.`);
               </div>
             ))}
           </div>
-          <div className="border-t border-white/20 p-4 bg-white/5">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900">
             <form onSubmit={handleOrderAutomationSubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about order automation..."
                 value={orderAutomationInput}
                 onChange={(e) => setOrderAutomationInput(e.target.value)}
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
+                className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full text-foreground"
               />
               <Button
                 type="submit"
@@ -2271,36 +2279,39 @@ Does this look good? Reply YES to save or NO to edit.`);
             </form>
           </div>
         </div>
+        </>
       )}
 
       {/* Smart Inventory Chatbox */}
       {showSmartInventoryChatbox && (
-        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
-          <div className="bg-gradient-to-r from-amber-500/20 to-amber-400/20 border-b border-white/20 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-amber-600" />
+        <>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={handleSmartInventoryClose}></div>
+          <div className="fixed bottom-0 right-0 w-full sm:w-96 h-screen sm:h-[600px] sm:rounded-t-3xl sm:rounded-br-none rounded-none glass-card border-2 border-white/30 bg-white dark:bg-slate-950 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+            <div className="bg-gradient-to-r from-amber-500 to-amber-600 border-b border-amber-400/30 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-amber-400/30 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Smart Inventory</h3>
+                  <p className="text-xs text-amber-100">Real-time stock tracking</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-foreground">Smart Inventory</h3>
-                <p className="text-xs text-muted-foreground">Real-time stock tracking</p>
-              </div>
+              <button
+                onClick={handleSmartInventoryClose}
+                className="p-2 hover:bg-amber-400/30 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
-            <button
-              onClick={handleSmartInventoryClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-foreground" />
-            </button>
-          </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {smartInventoryMessages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
                     msg.sender === 'user'
-                      ? 'bg-primary text-white rounded-br-none shadow-md'
-                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                      ? 'bg-amber-500 text-white rounded-br-none shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-foreground rounded-bl-none shadow-sm'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
@@ -2309,14 +2320,14 @@ Does this look good? Reply YES to save or NO to edit.`);
               </div>
             ))}
           </div>
-          <div className="border-t border-white/20 p-4 bg-white/5">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900">
             <form onSubmit={handleSmartInventorySubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about inventory..."
                 value={smartInventoryInput}
                 onChange={(e) => setSmartInventoryInput(e.target.value)}
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
+                className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full text-foreground"
               />
               <Button
                 type="submit"
@@ -2327,36 +2338,39 @@ Does this look good? Reply YES to save or NO to edit.`);
             </form>
           </div>
         </div>
+        </>
       )}
 
       {/* Price Optimizer Chatbox */}
       {showPriceOptimizerChatbox && (
-        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
-          <div className="bg-gradient-to-r from-rose-500/20 to-rose-400/20 border-b border-white/20 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-rose-600" />
+        <>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={handlePriceOptimizerClose}></div>
+          <div className="fixed bottom-0 right-0 w-full sm:w-96 h-screen sm:h-[600px] sm:rounded-t-3xl sm:rounded-br-none rounded-none glass-card border-2 border-white/30 bg-white dark:bg-slate-950 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+            <div className="bg-gradient-to-r from-rose-500 to-rose-600 border-b border-rose-400/30 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-rose-400/30 flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Price Optimizer</h3>
+                  <p className="text-xs text-rose-100">Dynamic pricing engine</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-foreground">Price Optimizer</h3>
-                <p className="text-xs text-muted-foreground">Dynamic pricing engine</p>
-              </div>
+              <button
+                onClick={handlePriceOptimizerClose}
+                className="p-2 hover:bg-rose-400/30 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
-            <button
-              onClick={handlePriceOptimizerClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-foreground" />
-            </button>
-          </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {priceOptimizerMessages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
                     msg.sender === 'user'
-                      ? 'bg-primary text-white rounded-br-none shadow-md'
-                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                      ? 'bg-rose-500 text-white rounded-br-none shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-foreground rounded-bl-none shadow-sm'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
@@ -2365,14 +2379,14 @@ Does this look good? Reply YES to save or NO to edit.`);
               </div>
             ))}
           </div>
-          <div className="border-t border-white/20 p-4 bg-white/5">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900">
             <form onSubmit={handlePriceOptimizerSubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about pricing..."
                 value={priceOptimizerInput}
                 onChange={(e) => setPriceOptimizerInput(e.target.value)}
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
+                className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full text-foreground"
               />
               <Button
                 type="submit"
@@ -2383,36 +2397,39 @@ Does this look good? Reply YES to save or NO to edit.`);
             </form>
           </div>
         </div>
+        </>
       )}
 
       {/* Analytics Hub Chatbox */}
       {showAnalyticsHubChatbox && (
-        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
-          <div className="bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 border-b border-white/20 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                <PieChart className="w-5 h-5 text-cyan-600" />
+        <>
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40" onClick={handleAnalyticsHubClose}></div>
+          <div className="fixed bottom-0 right-0 w-full sm:w-96 h-screen sm:h-[600px] sm:rounded-t-3xl sm:rounded-br-none rounded-none glass-card border-2 border-white/30 bg-white dark:bg-slate-950 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+            <div className="bg-gradient-to-r from-cyan-500 to-cyan-600 border-b border-cyan-400/30 p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-cyan-400/30 flex items-center justify-center">
+                  <PieChart className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">Analytics Hub</h3>
+                  <p className="text-xs text-cyan-100">Business insights & reports</p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-foreground">Analytics Hub</h3>
-                <p className="text-xs text-muted-foreground">Business insights & reports</p>
-              </div>
+              <button
+                onClick={handleAnalyticsHubClose}
+                className="p-2 hover:bg-cyan-400/30 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
             </div>
-            <button
-              onClick={handleAnalyticsHubClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-foreground" />
-            </button>
-          </div>
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {analyticsHubMessages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
                     msg.sender === 'user'
-                      ? 'bg-primary text-white rounded-br-none shadow-md'
-                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                      ? 'bg-cyan-500 text-white rounded-br-none shadow-md'
+                      : 'bg-gray-100 dark:bg-gray-800 text-foreground rounded-bl-none shadow-sm'
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
@@ -2421,14 +2438,14 @@ Does this look good? Reply YES to save or NO to edit.`);
               </div>
             ))}
           </div>
-          <div className="border-t border-white/20 p-4 bg-white/5">
+          <div className="border-t border-gray-200 dark:border-gray-700 p-4 bg-gray-50 dark:bg-gray-900">
             <form onSubmit={handleAnalyticsHubSubmit} className="flex gap-2">
               <Input
                 type="text"
                 placeholder="Ask about analytics..."
                 value={analyticsHubInput}
                 onChange={(e) => setAnalyticsHubInput(e.target.value)}
-                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
+                className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full text-foreground"
               />
               <Button
                 type="submit"
@@ -2439,6 +2456,7 @@ Does this look good? Reply YES to save or NO to edit.`);
             </form>
           </div>
         </div>
+        </>
       )}
 
     </div>
