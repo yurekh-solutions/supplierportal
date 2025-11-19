@@ -1459,20 +1459,34 @@ Does this look good? Reply YES to save or NO to edit.`);
               </div>
             ) : products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in">
-                {/* Display top 4 products with real data and images */}
+                {/* Display top 4 products with real data including images */}
                 {products.slice(0, 4).map((product) => {
+                  // Try to get image from various possible sources
+                  const productImage = (product as any)?.image || (product as any)?.imagePreview || (product as any)?.images?.[0];
+                  
                   return (
                     <div
                       key={product._id}
                       onClick={() => {
-                        setSelectedProduct(product);
+                        setSelectedProduct(product as any);
                         setShowProductDetail(true);
                       }}
                       className="glass-card border-2 border-white/30 rounded-2xl overflow-hidden backdrop-blur-xl bg-white/20 dark:bg-white/5 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group flex flex-col h-full"
                     >
-                      {/* Product Image Placeholder */}
-                      <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 overflow-hidden relative flex items-center justify-center">
-                        <Package className="w-12 h-12 text-muted-foreground/50" />
+                      {/* Product Image */}
+                      <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 overflow-hidden relative flex items-center justify-center group-hover:brightness-110 transition-all">
+                        {productImage ? (
+                          <img
+                            src={productImage}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <Package className="w-12 h-12 text-muted-foreground/50" />
+                        )}
                       </div>
 
                       {/* Content */}
@@ -1506,18 +1520,18 @@ Does this look good? Reply YES to save or NO to edit.`);
                         )}
                       </div>
 
-                      {/* Add Button */}
+                      {/* View Details Button */}
                       <div className="p-4 pt-0">
                         <Button
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedProduct(product);
+                            setSelectedProduct(product as any);
                             setShowProductDetail(true);
                           }}
                           className="w-full bg-gradient-to-r from-primary via-primary-glow to-secondary text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
                         >
-                          Add
+                          View Details
                         </Button>
                       </div>
                     </div>
