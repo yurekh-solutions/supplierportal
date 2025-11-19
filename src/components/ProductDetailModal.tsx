@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { X, Sparkles, TrendingUp, Award } from 'lucide-react';
+import { X, Sparkles, TrendingUp, Award, Loader, Users, DollarSign, Tag, Lightbulb, FileText, Settings } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/pages/components/ui/dialog';
 import { Button } from '@/pages/components/ui/button';
 import { Badge } from '@/pages/components/ui/badge';
 import AIRecommendationEngine from './AIRecommendationEngine';
 import SmartProductSearch from './SmartProductSearch';
 
-interface Product {
+interface ProductDetail {
   _id: string;
   name: string;
   category: string;
@@ -14,6 +14,9 @@ interface Product {
   image?: string;
   status: string;
   specifications?: Record<string, any>;
+  price?: { amount: number; currency: string; unit: string };
+  stock?: { available: boolean; quantity?: number };
+  createdAt?: string;
   enrichment?: {
     qualityScore: number;
     keywords: string[];
@@ -26,10 +29,10 @@ interface Product {
 }
 
 interface Props {
-  product: Product | null;
+  product: ProductDetail | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit?: (product: Product) => void;
+  onEdit?: (product: ProductDetail) => void;
 }
 
 export default function ProductDetailModal({ product, open, onOpenChange, onEdit }: Props) {
@@ -202,16 +205,63 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
               </div>
             </div>
           ) : (
-            <div className="glass-card border-2 border-primary/30 p-6 rounded-xl text-center">
-              <Sparkles className="w-8 h-8 text-primary mx-auto mb-3" />
-              <p className="text-muted-foreground mb-4">Enrich this product with AI analysis to unlock insights</p>
-              <Button
-                onClick={handleEnrich}
-                disabled={enriching}
-                className="bg-gradient-to-r from-primary to-secondary text-white hover:shadow-lg"
-              >
-                {enriching ? 'Analyzing...' : 'Enrich with AI'}
-              </Button>
+            <div className="space-y-4">
+              <div className="glass-card border-2 border-primary/30 p-6 rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5">
+                <div className="flex items-start gap-4">
+                  <Sparkles className="w-10 h-10 text-primary flex-shrink-0 mt-1" />
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-foreground mb-2">Unlock AI-Powered Insights</h3>
+                    <p className="text-sm text-muted-foreground mb-4">Analyze this product with artificial intelligence to get:</p>
+                    <ul className="text-sm text-muted-foreground space-y-2 mb-5">
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                        <span><strong>Quality Score</strong> - How good your product is (0-100)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                        <span><strong>Market Appeal</strong> - Why buyers will want it</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                        <span><strong>Target Buyers</strong> - Who should buy this (e.g., Builders, Contractors)</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                        <span><strong>SEO Keywords</strong> - Best search terms for visibility</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                        <span><strong>Pricing Recommendation</strong> - Competitive price range</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                        <span><strong>Improvements</strong> - How to make your product better</span>
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0"></span>
+                        <span><strong>Cross-Sell Ideas</strong> - Products to bundle together</span>
+                      </li>
+                    </ul>
+                    <Button
+                      onClick={handleEnrich}
+                      disabled={enriching}
+                      className="w-full bg-gradient-to-r from-primary to-secondary text-white font-semibold py-6 hover:shadow-lg text-base"
+                    >
+                      {enriching ? (
+                        <>
+                          <Loader className="w-4 h-4 mr-2 animate-spin" />
+                          Analyzing with AI... (2-3 seconds)
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5 mr-2" />
+                          Start AI Analysis
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
