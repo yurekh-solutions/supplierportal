@@ -96,8 +96,9 @@ const SupplierProductDashboard = () => {
   const [showAutoReplyChatbox, setShowAutoReplyChatbox] = useState(false);
   const [autoReplyMessages, setAutoReplyMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
   const [autoReplyInput, setAutoReplyInput] = useState('');
-  const [autoReplyStep, setAutoReplyStep] = useState<'menu' | 'select-type' | 'write-response' | 'confirm'>('menu');
-  const [autoReplyConfig, setAutoReplyConfig] = useState({messageType: '', response: '', triggerKeywords: ''});
+  const [autoReplyStep, setAutoReplyStep] = useState<'menu' | 'select-type' | 'write-response' | 'confirm' | 'ai-suggestion'>('menu');
+  const [autoReplyConfig, setAutoReplyConfig] = useState({messageType: '', response: '', triggerKeywords: '', useAI: false});
+  const [autoReplyLoading, setAutoReplyLoading] = useState(false);
   const chatInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLDivElement>(null);
 
@@ -206,9 +207,89 @@ const SupplierProductDashboard = () => {
     setAutoReplyConfig({...autoReplyConfig, messageType: selectedType});
 
     setTimeout(() => {
-      setAutoReplyStep('write-response');
-      addBotMessage(`Perfect! Now, what should the automatic response be for ${selectedType}? Please type your message.`);
+      setAutoReplyStep('ai-suggestion');
+      addBotMessage(`Great choice! 🤖 Would you like me to generate an AI-powered response for ${selectedType}, or would you prefer to write it yourself?\n\n1️⃣ Generate with AI\n2️⃣ Write manually`);
     }, 300);
+  };
+
+  const generateAIResponse = async (messageType: string) => {
+    setAutoReplyLoading(true);
+    try {
+      const prompts: Record<string, string> = {
+        'General Inquiry': 'Generate a professional, friendly auto-reply for a general product inquiry. Keep it concise (50-100 words) and include gratitude and next steps.',
+        'Price Quote Request': 'Generate a professional auto-reply for a price quote request. Include thanks, mention custom quote availability, and timeline. Keep it 50-100 words.',
+        'Product Availability': 'Generate a professional auto-reply for product availability inquiries. Mention current availability, alternatives if needed, and contact info. Keep it 50-100 words.',
+        'Custom Message': 'Generate a professional and friendly auto-reply for customer messages. Be warm and helpful. Keep it 50-100 words.'
+      };
+
+      const response = await fetch(`${API_URL}/ai/generate-auto-reply`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          messageType,
+          prompt: prompts[messageType] || prompts['Custom Message']
+        })
+      });
+
+      const data = await response.json();
+      if (data.success && data.reply) {
+        const userMessage = {
+          id: autoReplyMessages.length + 1,
+          text: `Generate with AI`,
+          sender: 'user' as const,
+          timestamp: new Date()
+        };
+        setAutoReplyMessages(prev => [...prev, userMessage]);
+        setAutoReplyConfig({...autoReplyConfig, response: data.reply, useAI: true});
+        
+        setTimeout(() => {
+          setAutoReplyStep('confirm');
+          addBotMessage(`✨ AI-Generated Response:
+
+"${data.reply}"
+
+Does this look good? Reply YES to save or NO to edit.`);
+        }, 300);
+      } else {
+        addBotMessage('❌ Failed to generate AI response. Please write manually instead.');
+        setAutoReplyStep('write-response');
+      }
+    } catch (error) {
+      console.error('Error generating AI response:', error);
+      addBotMessage('❌ Error generating response. Please write it manually.');
+      setAutoReplyStep('write-response');
+    } finally {
+      setAutoReplyLoading(false);
+    }
+  };
+
+  const handleAISuggestionChoice = (choice: string) => {
+    if (choice === '1') {
+      const userMsg = {
+        id: autoReplyMessages.length + 1,
+        text: 'Generate with AI',
+        sender: 'user' as const,
+        timestamp: new Date()
+      };
+      setAutoReplyMessages(prev => [...prev, userMsg]);
+      addBotMessage('⏳ Generating AI response for you...');
+      generateAIResponse(autoReplyConfig.messageType);
+    } else {
+      const userMsg = {
+        id: autoReplyMessages.length + 1,
+        text: 'Write manually',
+        sender: 'user' as const,
+        timestamp: new Date()
+      };
+      setAutoReplyMessages(prev => [...prev, userMsg]);
+      setAutoReplyStep('write-response');
+      setTimeout(() => {
+        addBotMessage(`Perfect! What should the automatic response be for ${autoReplyConfig.messageType}? Please type your message.`);
+      }, 300);
+    }
   };
 
   const handleResponseText = (e: React.FormEvent) => {
@@ -265,6 +346,7 @@ const SupplierProductDashboard = () => {
           });
 
           const data = await response.json();
+          console.log('Auto-reply response:', { status: response.status, data });
           if (data.success) {
             setTimeout(() => {
               addBotMessage('✅ Auto-reply saved successfully! Your response will now be sent automatically when customers inquire about ' + autoReplyConfig.messageType + '.');
@@ -274,7 +356,8 @@ const SupplierProductDashboard = () => {
               }, 600);
             }, 300);
           } else {
-            addBotMessage('❌ Failed to save auto-reply. Please try again.');
+            console.error('Auto-reply save failed:', data);
+            addBotMessage(`❌ Failed to save auto-reply: ${data.message || 'Unknown error'}`);
           }
         } catch (error) {
           console.error('Error saving auto-reply:', error);
@@ -298,6 +381,8 @@ const SupplierProductDashboard = () => {
       handleAutoReplyAction(autoReplyInput);
     } else if (autoReplyStep === 'select-type') {
       handleMessageTypeSelect(autoReplyInput);
+    } else if (autoReplyStep === 'ai-suggestion') {
+      handleAISuggestionChoice(autoReplyInput);
     } else if (autoReplyStep === 'write-response') {
       handleResponseText(e);
       return;
