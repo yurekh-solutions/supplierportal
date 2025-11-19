@@ -390,98 +390,80 @@ const SupplierProductDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
-        {/* AI Insights Banner */}
-        {aiInsights.recommendations.length > 0 && (
-          <div className="glass-card border-2 border-primary/30 p-4 rounded-2xl backdrop-blur-2xl mb-6 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-purple-500/10 to-secondary/10"></div>
-            <div className="relative z-10 flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 animate-pulse">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-foreground mb-2 flex items-center gap-2">
-                  AI-Powered Insights
-                  <Badge className="bg-gradient-to-r from-primary to-secondary text-white text-xs">SMART</Badge>
-                </h3>
-                <div className="space-y-1.5">
-                  {aiInsights.recommendations.slice(0, 2).map((rec, idx) => (
-                    <p key={idx} className="text-sm text-muted-foreground leading-relaxed">{rec}</p>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Compact Analytics - Single Row */}
+        {/* Compact Analytics - Single Row - Enhanced Design */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           {/* Total Products */}
-          <div className="glass-card border-2 border-white/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+          <div className="glass-card border-2 border-white/30 p-5 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden bg-gradient-to-br from-slate-50/50 to-slate-100/30 dark:from-slate-900/30 dark:to-slate-800/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-secondary/8 group-hover:from-primary/12 group-hover:to-secondary/12 transition-colors duration-300"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Package className="w-4 h-4 text-primary" />
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <Package className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-xs text-muted-foreground font-medium">Total</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Total</p>
               </div>
-              <p className="text-2xl font-bold text-foreground">{analytics.total}</p>
+              <p className="text-4xl font-bold text-gradient bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{analytics.total}</p>
+              <p className="text-xs text-muted-foreground mt-2">Products</p>
             </div>
           </div>
 
           {/* Active */}
-          <div className="glass-card border-2 border-white/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5"></div>
+          <div className="glass-card border-2 border-white/30 p-5 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden bg-gradient-to-br from-green-50/50 to-emerald-100/30 dark:from-green-900/20 dark:to-emerald-800/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/8 via-transparent to-emerald-500/8 group-hover:from-green-500/12 group-hover:to-emerald-500/12 transition-colors duration-300"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <CheckCircle className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-xs text-green-700 dark:text-green-400 font-medium">Active</p>
+                <p className="text-xs text-green-700 dark:text-green-400 font-semibold uppercase tracking-wide">Active</p>
               </div>
-              <p className="text-2xl font-bold text-green-600">{analytics.active}</p>
+              <p className="text-4xl font-bold text-green-600 dark:text-green-400">{analytics.active}</p>
+              <p className="text-xs text-green-700/70 dark:text-green-400/70 mt-2">Published</p>
             </div>
           </div>
 
           {/* Pending */}
-          <div className="glass-card border-2 border-white/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-orange-500/5"></div>
+          <div className="glass-card border-2 border-white/30 p-5 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden bg-gradient-to-br from-yellow-50/50 to-orange-100/30 dark:from-yellow-900/20 dark:to-orange-800/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/8 via-transparent to-orange-500/8 group-hover:from-yellow-500/12 group-hover:to-orange-500/12 transition-colors duration-300"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-yellow-600" />
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <Clock className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-xs text-yellow-700 dark:text-yellow-400 font-medium">Pending</p>
+                <p className="text-xs text-yellow-700 dark:text-yellow-400 font-semibold uppercase tracking-wide">Pending</p>
               </div>
-              <p className="text-2xl font-bold text-yellow-600">{analytics.pending}</p>
+              <p className="text-4xl font-bold text-yellow-600 dark:text-yellow-400">{analytics.pending}</p>
+              <p className="text-xs text-yellow-700/70 dark:text-yellow-400/70 mt-2">In Review</p>
             </div>
           </div>
 
           {/* Rejected */}
-          <div className="glass-card border-2 border-white/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-pink-500/5"></div>
+          <div className="glass-card border-2 border-white/30 p-5 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden bg-gradient-to-br from-red-50/50 to-pink-100/30 dark:from-red-900/20 dark:to-pink-800/10">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/8 via-transparent to-pink-500/8 group-hover:from-red-500/12 group-hover:to-pink-500/12 transition-colors duration-300"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
-                  <AlertCircle className="w-4 h-4 text-red-600" />
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+                  <AlertCircle className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-xs text-red-700 dark:text-red-400 font-medium">Rejected</p>
+                <p className="text-xs text-red-700 dark:text-red-400 font-semibold uppercase tracking-wide">Rejected</p>
               </div>
-              <p className="text-2xl font-bold text-red-600">{analytics.rejected}</p>
+              <p className="text-4xl font-bold text-red-600 dark:text-red-400">{analytics.rejected}</p>
+              <p className="text-xs text-red-700/70 dark:text-red-400/70 mt-2">Needs Update</p>
             </div>
           </div>
 
-          {/* Approval Rate - AI Metric */}
-          <div className="glass-card border-2 border-primary/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10"></div>
+          {/* Approval Rate - Premium Highlight */}
+          <div className="glass-card border-2 border-primary/40 p-5 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden bg-gradient-to-br from-primary/10 via-purple-500/5 to-secondary/10 dark:from-primary/20 dark:to-secondary/20">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 group-hover:from-primary/15 group-hover:to-secondary/15 transition-colors duration-300"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                  <Target className="w-4 h-4 text-primary" />
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300 animate-pulse">
+                  <Target className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-xs text-primary font-medium">Success</p>
+                <p className="text-xs text-primary font-semibold uppercase tracking-wide">Success Rate</p>
               </div>
-              <p className="text-2xl font-bold text-primary">{aiInsights.approvalRate}%</p>
+              <p className="text-4xl font-bold text-primary">{aiInsights.approvalRate}%</p>
+              <p className="text-xs text-primary/70 mt-2">Approval Rate</p>
             </div>
           </div>
         </div>
@@ -603,29 +585,37 @@ const SupplierProductDashboard = () => {
           </div>
         </div>
 
-        {/* Category Breakdown - Compact Grid */}
+        {/* Category Breakdown - Attractive Premium Grid */}
         {Object.keys(categoryBreakdown).length > 0 && (
-          <div className="glass-card border-2 border-white/30 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 mb-6 relative overflow-hidden">
+          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 mb-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
             <div className="relative z-10">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <ShoppingBag className="w-5 h-5 text-primary" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center border-2 border-primary/50 shadow-lg">
+                    <ShoppingBag className="w-6 h-6 text-white" />
                   </div>
-                  <h3 className="font-bold text-lg text-foreground">Category Distribution</h3>
+                  <div>
+                    <h3 className="font-bold text-xl text-white">Category Distribution</h3>
+                    <p className="text-xs text-white/70">Product breakdown by category</p>
+                  </div>
                 </div>
-                <Badge className="bg-primary/10 text-primary border-0">{Object.keys(categoryBreakdown).length} Categories</Badge>
+                <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0 font-bold text-sm px-3 py-1 shadow-lg">{Object.keys(categoryBreakdown).length}</Badge>
               </div>
               
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {Object.entries(categoryBreakdown).map(([category, count]) => (
-                  <div key={category} className="glass-card border border-white/20 p-3 rounded-xl hover:border-primary/30 transition-all duration-300 group text-center">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
-                      <Package className="w-4 h-4 text-primary" />
+                  <div key={category} className="glass-card border-2 border-white/40 p-4 rounded-xl hover:border-primary/80 hover:shadow-xl transition-all duration-300 group relative overflow-hidden backdrop-blur-xl bg-white/10 dark:bg-white/5">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="relative z-10 flex flex-col items-center text-center space-y-3">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center border-2 border-white/50 group-hover:scale-110 transition-transform duration-300 group-hover:shadow-lg shadow-md">
+                        <Package className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-3xl font-bold text-white mb-1">{count}</p>
+                        <p className="text-xs text-white/70 font-medium capitalize truncate" title={category.replace('-', ' ')}>{category.replace('-', ' ')}</p>
+                      </div>
                     </div>
-                    <p className="text-xl font-bold text-foreground mb-0.5">{count}</p>
-                    <p className="text-xs text-muted-foreground font-medium capitalize truncate" title={category.replace('-', ' ')}>{category.replace('-', ' ')}</p>
                   </div>
                 ))}
               </div>
@@ -717,7 +707,7 @@ const SupplierProductDashboard = () => {
                           <div className="flex gap-2 mt-4 pt-4 border-t border-border/30">
                             <Button
                               size="sm"
-                              className="flex-1 bg-gradient-to-r from-rgba(193, 72, 43, 0.2) to-rgba(193, 72, 43, 0.15) text-[#c1482b] border-2 border-[#c1482b]/30 hover:border-[#c1482b]/50 hover:shadow-lg transition-all duration-300 rounded-xl font-medium"
+                              className="flex-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-2 border-red-200/50 dark:border-red-200/30 hover:border-red-500 hover:shadow-lg transition-all duration-300 rounded-xl font-medium"
                               onClick={() => handleDeleteProduct(product._id)}
                             >
                               <Trash2 className="w-4 h-4 mr-1" />
