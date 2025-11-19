@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, Target, Zap, ArrowRight, Sparkles } from 'lucide-react';
+import { TrendingUp, Target, Zap, ArrowRight, Sparkles, Loader } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Badge } from '@/pages/components/ui/badge';
-import { Spinner } from '@/pages/components/ui/spinner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -66,7 +65,7 @@ export default function AIRecommendationEngine({ product, onSelectProduct }: Pro
   if (loading) {
     return (
       <div className="glass-card border-2 border-primary/30 p-6 rounded-xl flex items-center justify-center gap-3">
-        <Spinner className="w-5 h-5" />
+        <Loader className="w-5 h-5 animate-spin text-primary" />
         <p className="text-muted-foreground">Analyzing product opportunities...</p>
       </div>
     );

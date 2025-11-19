@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, TrendingUp, Filter, Zap, Brain, Network } from 'lucide-react';
+import { Search, TrendingUp, Filter, Zap, Brain, Network, Loader } from 'lucide-react';
 import { Input } from '@/pages/components/ui/input';
 import { Button } from '@/pages/components/ui/button';
 import { Badge } from '@/pages/components/ui/badge';
-import { Spinner } from '@/pages/components/ui/spinner';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -184,7 +183,7 @@ export default function SmartProductSearch({ onSelectProduct, onOpenModal }: Pro
             onChange={(e) => handleSearch(e.target.value)}
             className="pl-10 h-12 rounded-xl border-2 border-white/20 focus:border-primary/50 bg-white/50 dark:bg-black/20"
           />
-          {searching && <Spinner className="absolute right-3 top-3 w-5 h-5" />}
+          {searching && <Loader className="absolute right-3 top-3 w-5 h-5 animate-spin text-primary" />}
         </div>
       </div>
 
