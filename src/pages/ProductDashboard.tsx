@@ -584,7 +584,7 @@ const SupplierProductDashboard = () => {
                   </div>
                 </div>
 
-                {/* Rejected Progress - Always Show */}
+                {/* Rejected Progress */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
@@ -597,6 +597,23 @@ const SupplierProductDashboard = () => {
                     <div 
                       className="h-full bg-gradient-to-r from-red-500 to-pink-500 rounded-full transition-all duration-1000 ease-out animate-in slide-in-from-left"
                       style={{width: `${analytics.total > 0 ? (analytics.rejected / analytics.total) * 100 : 0}%`, animationDelay: '0.4s'}}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Inactive Progress */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-gray-500 animate-pulse" style={{animationDelay: '0.6s'}}></div>
+                      <span className="text-muted-foreground font-medium">Inactive</span>
+                    </div>
+                    <span className="font-bold text-foreground">{analytics.inactive} / {analytics.total}</span>
+                  </div>
+                  <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-gray-500 to-slate-500 rounded-full transition-all duration-1000 ease-out animate-in slide-in-from-left"
+                      style={{width: `${analytics.total > 0 ? (analytics.inactive / analytics.total) * 100 : 0}%`, animationDelay: '0.6s'}}
                     ></div>
                   </div>
                 </div>
