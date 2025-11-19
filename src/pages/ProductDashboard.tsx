@@ -668,237 +668,138 @@ const SupplierProductDashboard = () => {
           </div>
         </div>
 
-        {/* RitzYard AI Suggestions - Global Research */}
+        {/* Supplier Growth Toolkit - Dynamic Automation Features */}
         <div className="glass-card border-2 border-gradient bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl p-8 backdrop-blur-3xl overflow-hidden relative mb-12">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg" style={{
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg" style={{
                   animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                 }}>
-                  <Sparkles className="w-7 h-7 text-white" />
+                  <Zap className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-foreground">RitzYard Suggestions</h3>
-                  <p className="text-sm text-muted-foreground mt-1">AI-powered insights based on global market research</p>
+                  <h3 className="text-2xl font-bold text-foreground">Supplier Growth Toolkit</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Automate tasks & unlock business growth with AI-powered tools</p>
                 </div>
               </div>
             </div>
 
-            {loadingAI ? (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-muted-foreground">Analyzing your business...</p>
-              </div>
-            ) : aiSuggestions?.insights ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in">
-                {/* Demographics */}
-                {aiSuggestions.insights.demographics && (
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
-                        <Target className="w-5 h-5 text-cyan-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Business Profile</h4>
-                        <div className="space-y-1 text-xs text-muted-foreground">
-                          <p><strong>Type:</strong> {aiSuggestions.insights.demographics.supplierType}</p>
-                          <p><strong>Size:</strong> {aiSuggestions.insights.demographics.businessSize}</p>
-                          <p><strong>Maturity:</strong> {aiSuggestions.insights.demographics.maturityLevel}</p>
-                        </div>
-                      </div>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Tool 1: Auto Reply Manager */}
+              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-blue-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                    <MessageSquare className="w-5 h-5 text-blue-600" />
                   </div>
-                )}
-
-                {/* Predictions */}
-                {aiSuggestions.insights.predictions && (
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                        <TrendingUp className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Growth Forecast</h4>
-                        <div className="space-y-1 text-xs text-muted-foreground">
-                          <p><strong>Expected Growth:</strong> {aiSuggestions.insights.predictions.likelyGrowth}%</p>
-                          <p><strong>Trend:</strong> {aiSuggestions.insights.predictions.nextMonthTrend}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Market Position */}
-                {aiSuggestions.insights.businessImpact && (
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                        <Star className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Market Position</h4>
-                        <div className="space-y-1 text-xs text-muted-foreground">
-                          <p><strong>Position:</strong> {aiSuggestions.insights.businessImpact.marketPosition}</p>
-                          <p><strong>Revenue Potential:</strong> {aiSuggestions.insights.businessImpact.estimatedRevenuePotential}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Recommendations */}
-                {aiSuggestions.insights.recommendations?.improvements && aiSuggestions.insights.recommendations.improvements.length > 0 && (
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-orange-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group md:col-span-2 lg:col-span-1">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500/30 transition-colors flex-shrink-0">
-                        <Zap className="w-5 h-5 text-orange-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Improvements</h4>
-                        <ul className="space-y-1 text-xs text-muted-foreground">
-                          {aiSuggestions.insights.recommendations.improvements.slice(0, 2).map((item: string, idx: number) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-primary mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Opportunities */}
-                {aiSuggestions.insights.recommendations?.opportunities && aiSuggestions.insights.recommendations.opportunities.length > 0 && (
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-pink-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group md:col-span-2 lg:col-span-1">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/30 transition-colors flex-shrink-0">
-                        <Activity className="w-5 h-5 text-pink-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Opportunities</h4>
-                        <ul className="space-y-1 text-xs text-muted-foreground">
-                          {aiSuggestions.insights.recommendations.opportunities.slice(0, 2).map((item: string, idx: number) => (
-                            <li key={idx} className="flex items-start gap-2">
-                              <span className="text-primary mt-1">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div>
-                <div className="text-center py-8 px-6 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20 mb-6">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mx-auto mb-4">
-                    <Sparkles className="w-8 h-8 text-primary/50" />
-                  </div>
-                  <p className="text-muted-foreground font-medium">Add products to receive personalized AI suggestions</p>
-                  <p className="text-xs text-muted-foreground mt-2">AI will analyze your products and provide actionable insights to boost sales</p>
-                </div>
-
-                {/* Example/Demo Insights Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Example: Business Profile */}
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
-                        <Target className="w-5 h-5 text-cyan-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Business Profile</h4>
-                        <div className="space-y-1 text-xs text-muted-foreground">
-                          <p><strong>Type:</strong> B2B Supplier</p>
-                          <p><strong>Size:</strong> Small</p>
-                          <p><strong>Maturity:</strong> Startup</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Example: Growth Forecast */}
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                        <TrendingUp className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Growth Forecast</h4>
-                        <div className="space-y-1 text-xs text-muted-foreground">
-                          <p><strong>Expected Growth:</strong> 35%</p>
-                          <p><strong>Trend:</strong> Upward momentum</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Example: Market Position */}
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                        <Star className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Market Position</h4>
-                        <div className="space-y-1 text-xs text-muted-foreground">
-                          <p><strong>Position:</strong> Emerging Seller</p>
-                          <p><strong>Revenue Potential:</strong> ₹50-100L</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Example: Improvements */}
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-orange-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60 md:col-span-2 lg:col-span-1">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500/30 transition-colors flex-shrink-0">
-                        <Zap className="w-5 h-5 text-orange-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Improvements</h4>
-                        <ul className="space-y-1 text-xs text-muted-foreground">
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
-                            <span>Enhance product descriptions</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
-                            <span>Add high-quality images</span>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Example: Opportunities */}
-                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-pink-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60 md:col-span-2 lg:col-span-1">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/30 transition-colors flex-shrink-0">
-                        <Activity className="w-5 h-5 text-pink-600" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-bold text-foreground mb-2">Opportunities</h4>
-                        <ul className="space-y-1 text-xs text-muted-foreground">
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
-                            <span>Expand to new markets</span>
-                          </li>
-                          <li className="flex items-start gap-2">
-                            <span className="text-primary mt-1">•</span>
-                            <span>Bundle complementary products</span>
-                          </li>
-                        </ul>
-                      </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-foreground mb-1">Auto Reply Manager</h4>
+                    <p className="text-xs text-muted-foreground mb-3">Respond to inquiries instantly 24/7</p>
+                    <div className="flex items-center gap-1 text-xs text-blue-600 font-semibold">
+                      <span>↑ Response Rate +78%</span>
                     </div>
                   </div>
                 </div>
               </div>
-            )}
+
+              {/* Tool 2: Lead Scoring */}
+              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                    <Target className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-foreground mb-1">Lead Scoring</h4>
+                    <p className="text-xs text-muted-foreground mb-3">Identify high-value leads automatically</p>
+                    <div className="flex items-center gap-1 text-xs text-green-600 font-semibold">
+                      <span>↑ Conversion +45%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tool 3: Order Automation */}
+              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                    <ShoppingBag className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-foreground mb-1">Order Automation</h4>
+                    <p className="text-xs text-muted-foreground mb-3">Auto-process & fulfill orders seamlessly</p>
+                    <div className="flex items-center gap-1 text-xs text-purple-600 font-semibold">
+                      <span>↓ Time -60%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tool 4: Inventory Management */}
+              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-amber-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center group-hover:bg-amber-500/30 transition-colors">
+                    <BarChart3 className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-foreground mb-1">Smart Inventory</h4>
+                    <p className="text-xs text-muted-foreground mb-3">Real-time stock tracking & alerts</p>
+                    <div className="flex items-center gap-1 text-xs text-amber-600 font-semibold">
+                      <span>↑ Efficiency +55%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tool 5: Price Optimizer */}
+              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-rose-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center group-hover:bg-rose-500/30 transition-colors">
+                    <TrendingUp className="w-5 h-5 text-rose-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-foreground mb-1">Price Optimizer</h4>
+                    <p className="text-xs text-muted-foreground mb-3">Dynamic pricing based on demand</p>
+                    <div className="flex items-center gap-1 text-xs text-rose-600 font-semibold">
+                      <span>↑ Revenue +25%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tool 6: Analytics Dashboard */}
+              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
+                    <PieChart className="w-5 h-5 text-cyan-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-foreground mb-1">Analytics Hub</h4>
+                    <p className="text-xs text-muted-foreground mb-3">Real-time business insights & reports</p>
+                    <div className="flex items-center gap-1 text-xs text-cyan-600 font-semibold">
+                      <span>→ Data-Driven</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="mt-6 pt-6 border-t border-white/20">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">Ready to scale your business?</p>
+                  <p className="text-xs text-muted-foreground mt-1">Enable automation tools to save time and increase revenue</p>
+                </div>
+                <Button
+                  className="bg-gradient-to-r from-primary to-secondary text-white font-semibold px-6 py-3 rounded-xl hover:shadow-xl transition-all duration-300"
+                  onClick={() => toast({ title: 'Coming Soon', description: 'Automation tools will be available soon!' })}
+                >
+                  <Zap className="w-4 h-4 mr-2" />
+                  Unlock All Tools
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
