@@ -390,6 +390,45 @@ const SupplierProductDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
+        {/* Supplier Profile Card */}
+        <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 mb-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+          <div className="relative z-10">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+              {/* Profile Section */}
+              <div className="flex items-center gap-4 flex-1">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
+                  <span className="text-white font-bold text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground mb-1">{user?.companyName || 'Business Ventures'}</h2>
+                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                    <span>📊 {analytics.total} Products</span>
+                    <span>✅ {aiInsights.approvalRate}% Success</span>
+                    <span>📅 Member Since 2024</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-4 w-full md:w-auto">
+                <div className="text-center glass-card border border-white/20 p-3 rounded-lg">
+                  <p className="text-2xl font-bold text-primary">{analytics.total}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Products</p>
+                </div>
+                <div className="text-center glass-card border border-white/20 p-3 rounded-lg">
+                  <p className="text-2xl font-bold text-green-600">{aiInsights.approvalRate}%</p>
+                  <p className="text-xs text-muted-foreground mt-1">Approval</p>
+                </div>
+                <div className="text-center glass-card border border-white/20 p-3 rounded-lg">
+                  <p className="text-2xl font-bold text-yellow-600">{analytics.pending}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Pending</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Compact Analytics - Single Row - Enhanced Design */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
           {/* Total Products */}
@@ -705,6 +744,24 @@ const SupplierProductDashboard = () => {
                           
                           {/* Action Buttons */}
                           <div className="flex gap-2 mt-4 pt-4 border-t border-border/30">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 border-2 border-primary/50 text-primary hover:bg-primary/10 transition-all duration-300 rounded-xl font-medium"
+                              onClick={() => toast({title: 'View', description: `Viewing ${product.name}`, duration: 2000})}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 border-2 border-yellow-500/50 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 transition-all duration-300 rounded-xl font-medium"
+                              onClick={() => toast({title: 'Edit', description: `Editing ${product.name}`, duration: 2000})}
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
                             <Button
                               size="sm"
                               className="flex-1 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-2 border-red-200/50 dark:border-red-200/30 hover:border-red-500 hover:shadow-lg transition-all duration-300 rounded-xl font-medium"
