@@ -70,6 +70,8 @@ const SupplierProductDashboard = () => {
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [availableSubcategories, setAvailableSubcategories] = useState<Subcategory[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [aiSuggestions, setAiSuggestions] = useState<any>(null);
+  const [loadingAI, setLoadingAI] = useState(false);
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -106,15 +108,25 @@ const SupplierProductDashboard = () => {
   }, []);
 
   useEffect(() => {
-    if (productForm.category) {
-      const selectedCategory = categories.find(cat => cat.slug === productForm.category);
-      if (selectedCategory) {
-        setAvailableSubcategories(selectedCategory.subcategories || []);
-      } else {
-        setAvailableSubcategories([]);
+    fetchAISuggestions();
+  }, [products]);
+
+  const fetchAISuggestions = async () => {
+    try {
+      setLoadingAI(true);
+      const response = await fetch(`${API_URL}/ai/supplier-insights`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAiSuggestions(data);
       }
+    } catch (error) {
+      console.error('Failed to fetch AI suggestions:', error);
+    } finally {
+      setLoadingAI(false);
     }
-  }, [productForm.category, categories]);
+  };
 
   const fetchCategories = async () => {
     try {
@@ -637,7 +649,9 @@ const SupplierProductDashboard = () => {
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg animate-pulse">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg" style={{
+                  animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                }}>
                   <Sparkles className="w-7 h-7 text-white" />
                 </div>
                 <div>
@@ -647,85 +661,117 @@ const SupplierProductDashboard = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Suggestion 1 */}
-              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
-                    <Zap className="w-5 h-5 text-cyan-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">High Demand Categories</h4>
-                    <p className="text-xs text-muted-foreground">Focus on Steel & Construction materials - 67% market growth expected</p>
-                  </div>
-                </div>
+            {loadingAI ? (
+              <div className="text-center py-8">
+                <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="text-muted-foreground">Analyzing your business...</p>
               </div>
+            ) : aiSuggestions ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in">
+                {/* Demographics */}
+                {aiSuggestions.insights?.demographics && (
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
+                        <Target className="w-5 h-5 text-cyan-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Business Profile</h4>
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <p><strong>Type:</strong> {aiSuggestions.insights.demographics.supplierType}</p>
+                          <p><strong>Size:</strong> {aiSuggestions.insights.demographics.businessSize}</p>
+                          <p><strong>Maturity:</strong> {aiSuggestions.insights.demographics.maturityLevel}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
-              {/* Suggestion 2 */}
-              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                    <Target className="w-5 h-5 text-purple-600" />
+                {/* Predictions */}
+                {aiSuggestions.insights?.predictions && (
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                        <TrendingUp className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Growth Forecast</h4>
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <p><strong>Expected Growth:</strong> {aiSuggestions.insights.predictions.likelyGrowth}%</p>
+                          <p><strong>Trend:</strong> {aiSuggestions.insights.predictions.nextMonthTrend}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">Target Buyers</h4>
-                    <p className="text-xs text-muted-foreground">Contractors & Builders are your primary audience - 84% purchasing power</p>
-                  </div>
-                </div>
-              </div>
+                )}
 
-              {/* Suggestion 3 */}
-              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                    <TrendingUp className="w-5 h-5 text-green-600" />
+                {/* Market Position */}
+                {aiSuggestions.insights?.businessImpact && (
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                        <Award className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Market Position</h4>
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <p><strong>Position:</strong> {aiSuggestions.insights.businessImpact.marketPosition}</p>
+                          <p><strong>Revenue Potential:</strong> {aiSuggestions.insights.businessImpact.estimatedRevenuePotential}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">Pricing Insights</h4>
-                    <p className="text-xs text-muted-foreground">Premium products command 23% higher margins - Quality over quantity</p>
-                  </div>
-                </div>
-              </div>
+                )}
 
-              {/* Suggestion 4 */}
-              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-orange-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500/30 transition-colors">
-                    <ShoppingBag className="w-5 h-5 text-orange-600" />
+                {/* Recommendations */}
+                {aiSuggestions.insights?.recommendations?.improvements && aiSuggestions.insights.recommendations.improvements.length > 0 && (
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-orange-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group md:col-span-2 lg:col-span-1">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500/30 transition-colors flex-shrink-0">
+                        <Zap className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Improvements</h4>
+                        <ul className="space-y-1 text-xs text-muted-foreground">
+                          {aiSuggestions.insights.recommendations.improvements.slice(0, 2).map((item: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">Bundle Opportunities</h4>
-                    <p className="text-xs text-muted-foreground">Cross-sell complementary products - Increase AOV by 45%</p>
-                  </div>
-                </div>
-              </div>
+                )}
 
-              {/* Suggestion 5 */}
-              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-red-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center group-hover:bg-red-500/30 transition-colors">
-                    <AlertCircle className="w-5 h-5 text-red-600" />
+                {/* Opportunities */}
+                {aiSuggestions.insights?.recommendations?.opportunities && aiSuggestions.insights.recommendations.opportunities.length > 0 && (
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-pink-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group md:col-span-2 lg:col-span-1">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/30 transition-colors flex-shrink-0">
+                        <Activity className="w-5 h-5 text-pink-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Opportunities</h4>
+                        <ul className="space-y-1 text-xs text-muted-foreground">
+                          {aiSuggestions.insights.recommendations.opportunities.slice(0, 2).map((item: string, idx: number) => (
+                            <li key={idx} className="flex items-start gap-2">
+                              <span className="text-primary mt-1">•</span>
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">Quality Standards</h4>
-                    <p className="text-xs text-muted-foreground">IS/BS certifications boost trust by 56% - Highlight them prominently</p>
-                  </div>
-                </div>
+                )}
               </div>
-
-              {/* Suggestion 6 */}
-              <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-pink-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
-                <div className="flex items-start gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/30 transition-colors">
-                    <Activity className="w-5 h-5 text-pink-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">Market Trends</h4>
-                    <p className="text-xs text-muted-foreground">Eco-friendly materials trending - Gain competitive advantage</p>
-                  </div>
-                </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Add products to receive personalized AI suggestions</p>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
