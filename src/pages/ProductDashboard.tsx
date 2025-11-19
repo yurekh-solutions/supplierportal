@@ -1467,14 +1467,16 @@ Does this look good? Reply YES to save or NO to edit.`);
                   return (
                     <div
                       key={product._id}
-                      onClick={() => {
-                        setSelectedProduct(product as any);
-                        setShowProductDetail(true);
-                      }}
                       className="glass-card border-2 border-white/30 rounded-2xl overflow-hidden backdrop-blur-xl bg-white/20 dark:bg-white/5 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group flex flex-col h-full"
                     >
-                      {/* Product Image */}
-                      <div className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 overflow-hidden relative flex items-center justify-center group-hover:brightness-110 transition-all">
+                      {/* Product Image - Clickable */}
+                      <div 
+                        onClick={() => {
+                          setSelectedProduct(product as any);
+                          setShowProductDetail(true);
+                        }}
+                        className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 overflow-hidden relative flex items-center justify-center group-hover:brightness-110 transition-all"
+                      >
                         {productImage ? (
                           <img
                             src={productImage}
@@ -1510,28 +1512,20 @@ Does this look good? Reply YES to save or NO to edit.`);
 
                         {/* Description */}
                         <p className="text-xs text-muted-foreground mb-4 line-clamp-2 flex-1 leading-relaxed">{product.description}</p>
-
-                        {/* Price Info */}
-                        {product.price && product.price.amount && (
-                          <div className="mb-4 pb-4 border-b border-white/20">
-                            <p className="text-xs text-muted-foreground mb-1">Price</p>
-                            <p className="text-sm font-bold text-foreground">{product.price.currency} {product.price.amount} {product.price.unit && `/ ${product.price.unit}`}</p>
-                          </div>
-                        )}
                       </div>
 
-                      {/* View Details Button */}
+                      {/* Add Button - No View Details */}
                       <div className="p-4 pt-0">
                         <Button
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedProduct(product as any);
-                            setShowProductDetail(true);
+                            // Navigate to add product and prefill
+                            navigate('/products/add');
                           }}
                           className="w-full bg-gradient-to-r from-primary via-primary-glow to-secondary text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
                         >
-                          View Details
+                          Add Product
                         </Button>
                       </div>
                     </div>
