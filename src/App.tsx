@@ -18,6 +18,7 @@ import Dashboard from './pages/Dashboard';
 import ProductDashboard from './pages/ProductDashboard';
 import AddProduct from './pages/AddProduct';
 import Marketplace from './pages/Marketplace';
+import AIBusinessIntelligence from './pages/AIBusinessIntelligence';
 import TestPage from './pages/TestPage';
 import SupplierStatus from './pages/SupplierStatus';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -70,6 +71,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/products" element={<ProductDashboard />} /> 
             <Route path="/products/add" element={<AddProduct />} />
+            <Route path="/intelligence" element={<AIBusinessIntelligence />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
