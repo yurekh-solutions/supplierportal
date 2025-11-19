@@ -3,6 +3,8 @@ import { X, Sparkles, TrendingUp, Award } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/pages/components/ui/dialog';
 import { Button } from '@/pages/components/ui/button';
 import { Badge } from '@/pages/components/ui/badge';
+import AIRecommendationEngine from './AIRecommendationEngine';
+import SmartProductSearch from './SmartProductSearch';
 
 interface Product {
   _id: string;
@@ -189,6 +191,15 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
                   </ul>
                 </div>
               )}
+
+              {/* AI Recommendations */}
+              <div>
+                <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Intelligent Recommendations
+                </h3>
+                <AIRecommendationEngine product={product} />
+              </div>
             </div>
           ) : (
             <div className="glass-card border-2 border-primary/30 p-6 rounded-xl text-center">
