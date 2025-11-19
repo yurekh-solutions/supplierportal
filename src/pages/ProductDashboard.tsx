@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye, Package, TrendingUp, LogOut, MessageSquare, CheckCircle, Settings, CreditCard, X, Search, BarChart3, PieChart, DollarSign, AlertCircle, Clock, ShoppingBag, Sparkles, TrendingDown, Activity, Zap, Target } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Package, TrendingUp, LogOut, MessageSquare, CheckCircle, Settings, CreditCard, X, Search, BarChart3, PieChart, DollarSign, AlertCircle, Clock, ShoppingBag, Sparkles, TrendingDown, Activity, Zap, Target, Star } from 'lucide-react';
 import { products as predefinedProducts } from '../data';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
@@ -328,6 +328,16 @@ const SupplierProductDashboard = () => {
       rejected: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200/50',
     };
     return <Badge className={`${variants[status as keyof typeof variants]} capitalize font-medium px-3 py-1`}>{status}</Badge>;
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors: Record<string, { bg: string; text: string; border: string; icon: string }> = {
+      'mild-steel': { bg: 'from-slate-500 to-slate-600', text: 'text-slate-700', border: 'border-slate-300', icon: '⚙️' },
+      'stainless-steel': { bg: 'from-gray-400 to-gray-500', text: 'text-gray-700', border: 'border-gray-300', icon: '✨' },
+      'construction': { bg: 'from-orange-500 to-amber-600', text: 'text-orange-700', border: 'border-orange-300', icon: '🏗️' },
+      'electrical': { bg: 'from-yellow-500 to-amber-500', text: 'text-yellow-700', border: 'border-yellow-300', icon: '⚡' },
+    };
+    return colors[category] || { bg: 'from-primary to-secondary', text: 'text-primary', border: 'border-primary', icon: '📦' };
   };
 
   // Analytics calculations with AI insights
@@ -710,7 +720,7 @@ const SupplierProductDashboard = () => {
                   <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                        <Award className="w-5 h-5 text-green-600" />
+                        <Star className="w-5 h-5 text-green-600" />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-bold text-foreground mb-2">Market Position</h4>
@@ -895,8 +905,8 @@ const SupplierProductDashboard = () => {
                         key={product._id}
                         className="glass-card border-2 border-white/30 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 backdrop-blur-2xl group relative overflow-hidden"
                       >
-                        {/* Subtle background gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+                        {/* Subtle background gradient - Color-synced to category */}
+                        <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryColor(product.category).bg}/5 via-transparent to-secondary/5`}></div>
                         
                         <div className="relative z-10">
                           <div className="flex justify-between items-start mb-4">
