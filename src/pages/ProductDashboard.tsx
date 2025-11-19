@@ -654,7 +654,7 @@ const SupplierProductDashboard = () => {
         </div>
 
         {/* RitzYard AI Suggestions - Global Research */}
-        <div className="glass-card border-2 border-gradient bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl p-8 backdrop-blur-3xl overflow-hidden relative">
+        <div className="glass-card border-2 border-gradient bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl p-8 backdrop-blur-3xl overflow-hidden relative mb-12">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10"></div>
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
@@ -676,10 +676,10 @@ const SupplierProductDashboard = () => {
                 <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-3"></div>
                 <p className="text-muted-foreground">Analyzing your business...</p>
               </div>
-            ) : aiSuggestions ? (
+            ) : aiSuggestions?.insights ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in">
                 {/* Demographics */}
-                {aiSuggestions.insights?.demographics && (
+                {aiSuggestions.insights.demographics && (
                   <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
@@ -698,7 +698,7 @@ const SupplierProductDashboard = () => {
                 )}
 
                 {/* Predictions */}
-                {aiSuggestions.insights?.predictions && (
+                {aiSuggestions.insights.predictions && (
                   <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
@@ -716,7 +716,7 @@ const SupplierProductDashboard = () => {
                 )}
 
                 {/* Market Position */}
-                {aiSuggestions.insights?.businessImpact && (
+                {aiSuggestions.insights.businessImpact && (
                   <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
@@ -734,7 +734,7 @@ const SupplierProductDashboard = () => {
                 )}
 
                 {/* Recommendations */}
-                {aiSuggestions.insights?.recommendations?.improvements && aiSuggestions.insights.recommendations.improvements.length > 0 && (
+                {aiSuggestions.insights.recommendations?.improvements && aiSuggestions.insights.recommendations.improvements.length > 0 && (
                   <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-orange-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group md:col-span-2 lg:col-span-1">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500/30 transition-colors flex-shrink-0">
@@ -756,7 +756,7 @@ const SupplierProductDashboard = () => {
                 )}
 
                 {/* Opportunities */}
-                {aiSuggestions.insights?.recommendations?.opportunities && aiSuggestions.insights.recommendations.opportunities.length > 0 && (
+                {aiSuggestions.insights.recommendations?.opportunities && aiSuggestions.insights.recommendations.opportunities.length > 0 && (
                   <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-pink-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group md:col-span-2 lg:col-span-1">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/30 transition-colors flex-shrink-0">
@@ -778,8 +778,12 @@ const SupplierProductDashboard = () => {
                 )}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <p>Add products to receive personalized AI suggestions</p>
+              <div className="text-center py-12 px-6 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-8 h-8 text-primary/50" />
+                </div>
+                <p className="text-muted-foreground font-medium">Add products to receive personalized AI suggestions</p>
+                <p className="text-xs text-muted-foreground mt-2">AI will analyze your products and provide actionable insights to boost sales</p>
               </div>
             )}
           </div>
