@@ -793,12 +793,110 @@ const SupplierProductDashboard = () => {
                 )}
               </div>
             ) : (
-              <div className="text-center py-12 px-6 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mx-auto mb-4">
-                  <Sparkles className="w-8 h-8 text-primary/50" />
+              <div>
+                <div className="text-center py-8 px-6 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20 mb-6">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mx-auto mb-4">
+                    <Sparkles className="w-8 h-8 text-primary/50" />
+                  </div>
+                  <p className="text-muted-foreground font-medium">Add products to receive personalized AI suggestions</p>
+                  <p className="text-xs text-muted-foreground mt-2">AI will analyze your products and provide actionable insights to boost sales</p>
                 </div>
-                <p className="text-muted-foreground font-medium">Add products to receive personalized AI suggestions</p>
-                <p className="text-xs text-muted-foreground mt-2">AI will analyze your products and provide actionable insights to boost sales</p>
+
+                {/* Example/Demo Insights Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Example: Business Profile */}
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
+                        <Target className="w-5 h-5 text-cyan-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Business Profile</h4>
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <p><strong>Type:</strong> B2B Supplier</p>
+                          <p><strong>Size:</strong> Small</p>
+                          <p><strong>Maturity:</strong> Startup</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Example: Growth Forecast */}
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                        <TrendingUp className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Growth Forecast</h4>
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <p><strong>Expected Growth:</strong> 35%</p>
+                          <p><strong>Trend:</strong> Upward momentum</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Example: Market Position */}
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                        <Star className="w-5 h-5 text-green-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Market Position</h4>
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <p><strong>Position:</strong> Emerging Seller</p>
+                          <p><strong>Revenue Potential:</strong> ₹50-100L</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Example: Improvements */}
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-orange-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60 md:col-span-2 lg:col-span-1">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500/30 transition-colors flex-shrink-0">
+                        <Zap className="w-5 h-5 text-orange-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Improvements</h4>
+                        <ul className="space-y-1 text-xs text-muted-foreground">
+                          <li className="flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            <span>Enhance product descriptions</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            <span>Add high-quality images</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Example: Opportunities */}
+                  <div className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-pink-500/50 hover:shadow-xl transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group opacity-60 md:col-span-2 lg:col-span-1">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-pink-500/20 flex items-center justify-center group-hover:bg-pink-500/30 transition-colors flex-shrink-0">
+                        <Activity className="w-5 h-5 text-pink-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-foreground mb-2">Opportunities</h4>
+                        <ul className="space-y-1 text-xs text-muted-foreground">
+                          <li className="flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            <span>Expand to new markets</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-primary mt-1">•</span>
+                            <span>Bundle complementary products</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
