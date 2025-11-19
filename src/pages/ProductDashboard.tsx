@@ -306,12 +306,12 @@ const SupplierProductDashboard = () => {
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      pending: 'bg-yellow-100 text-yellow-800',
-      active: 'bg-green-100 text-green-800',
-      inactive: 'bg-gray-100 text-gray-800',
-      rejected: 'bg-red-100 text-red-800',
+      pending: 'bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200/50',
+      active: 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200/50',
+      inactive: 'bg-gray-50 dark:bg-gray-900/20 text-gray-700 dark:text-gray-400 border border-gray-200/50',
+      rejected: 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200/50',
     };
-    return <Badge className={variants[status as keyof typeof variants]}>{status}</Badge>;
+    return <Badge className={`${variants[status as keyof typeof variants]} capitalize font-medium px-3 py-1`}>{status}</Badge>;
   };
 
   // Analytics calculations
@@ -373,199 +373,188 @@ const SupplierProductDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
-        {/* Analytics Overview */}
+        {/* Analytics Overview - Clean Professional Design */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Statistics Cards - 2x2 Grid */}
+          {/* Statistics Cards - 2x2 Grid - Minimalist Design */}
           <div className="lg:col-span-2 grid grid-cols-2 gap-6">
             {/* Total Products */}
-            <div className="glass-card border-2 border-primary/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <Package className="w-7 h-7 text-white" />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Package className="w-6 h-6 text-primary" />
                   </div>
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground font-medium mb-1">Total Products</p>
-                    <p className="text-4xl font-bold text-foreground">{analytics.total}</p>
+                    <p className="text-3xl font-bold text-foreground">{analytics.total}</p>
                   </div>
                 </div>
-                <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
               </div>
             </div>
 
             {/* Active Products */}
-            <div className="glass-card border-2 border-green-300/50 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-green-50/30 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5"></div>
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <CheckCircle className="w-7 h-7 text-white" />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-green-700 font-medium mb-1">Active Products</p>
-                    <p className="text-4xl font-bold text-green-600">{analytics.active}</p>
+                    <p className="text-sm text-green-700 dark:text-green-400 font-medium mb-1">Active Products</p>
+                    <p className="text-3xl font-bold text-green-600">{analytics.active}</p>
                   </div>
                 </div>
-                <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full"></div>
               </div>
             </div>
 
             {/* Pending Products */}
-            <div className="glass-card border-2 border-yellow-300/50 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-yellow-50/30 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-transparent to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-orange-500/5"></div>
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <Clock className="w-7 h-7 text-white" />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Clock className="w-6 h-6 text-yellow-600" />
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-yellow-700 font-medium mb-1">Pending Review</p>
-                    <p className="text-4xl font-bold text-yellow-600">{analytics.pending}</p>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-400 font-medium mb-1">Pending Review</p>
+                    <p className="text-3xl font-bold text-yellow-600">{analytics.pending}</p>
                   </div>
                 </div>
-                <div className="h-1 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full"></div>
               </div>
             </div>
 
             {/* Rejected Products */}
-            <div className="glass-card border-2 border-red-300/50 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-red-50/30 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-pink-500/5"></div>
               <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                    <AlertCircle className="w-7 h-7 text-white" />
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <AlertCircle className="w-6 h-6 text-red-600" />
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-red-700 font-medium mb-1">Rejected Items</p>
-                    <p className="text-4xl font-bold text-red-600">{analytics.rejected}</p>
+                    <p className="text-sm text-red-700 dark:text-red-400 font-medium mb-1">Rejected Items</p>
+                    <p className="text-3xl font-bold text-red-600">{analytics.rejected}</p>
                   </div>
                 </div>
-                <div className="h-1 bg-gradient-to-r from-red-500 to-pink-600 rounded-full"></div>
               </div>
             </div>
           </div>
 
-          {/* Pie Chart - Status Distribution */}
-          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple/5 via-transparent to-blue-500/5 opacity-50"></div>
+          {/* Status Distribution - Simplified Elegant Design */}
+          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
-                  <PieChart className="w-5 h-5 text-white" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-bold text-lg">Status Overview</h3>
+                <h3 className="font-bold text-lg text-foreground">Status Overview</h3>
               </div>
               
-              {/* Simple Pie Chart Visualization */}
-              <div className="flex items-center justify-center my-6">
-                <div className="relative w-40 h-40">
-                  {/* SVG Pie Chart */}
-                  <svg viewBox="0 0 100 100" className="transform -rotate-90">
-                    {(() => {
-                      let currentAngle = 0;
-                      const total = analytics.total || 1;
-                      const segments = [
-                        { value: analytics.active, color: '#10b981', label: 'Active' },
-                        { value: analytics.pending, color: '#f59e0b', label: 'Pending' },
-                        { value: analytics.rejected, color: '#ef4444', label: 'Rejected' },
-                        { value: analytics.inactive, color: '#6b7280', label: 'Inactive' },
-                      ];
-                      
-                      return segments.map((segment, index) => {
-                        const percentage = (segment.value / total) * 100;
-                        const angle = (percentage / 100) * 360;
-                        const radius = 15.9155; // circumference / 2π
-                        const circumference = 2 * Math.PI * radius;
-                        const offset = circumference - (percentage / 100) * circumference;
-                        
-                        const startAngle = currentAngle;
-                        currentAngle += angle;
-                        
-                        return segment.value > 0 ? (
-                          <circle
-                            key={index}
-                            r={radius}
-                            cx="50"
-                            cy="50"
-                            fill="transparent"
-                            stroke={segment.color}
-                            strokeWidth="32"
-                            strokeDasharray={`${circumference}`}
-                            strokeDashoffset={offset}
-                            style={{
-                              transform: `rotate(${startAngle}deg)`,
-                              transformOrigin: '50% 50%',
-                            }}
-                          />
-                        ) : null;
-                      });
-                    })()}
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-foreground">{analytics.total}</p>
-                      <p className="text-xs text-muted-foreground">Total</p>
+              {/* Elegant List View Instead of Pie Chart */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="text-muted-foreground font-medium">Active</span>
                     </div>
+                    <span className="font-bold text-foreground">{analytics.active}</span>
+                  </div>
+                  <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
+                      style={{width: `${analytics.total > 0 ? (analytics.active / analytics.total) * 100 : 0}%`}}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
+                      <span className="text-muted-foreground font-medium">Pending</span>
+                    </div>
+                    <span className="font-bold text-foreground">{analytics.pending}</span>
+                  </div>
+                  <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full transition-all duration-500"
+                      style={{width: `${analytics.total > 0 ? (analytics.pending / analytics.total) * 100 : 0}%`}}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                      <span className="text-muted-foreground font-medium">Rejected</span>
+                    </div>
+                    <span className="font-bold text-foreground">{analytics.rejected}</span>
+                  </div>
+                  <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-red-500 to-pink-500 rounded-full transition-all duration-500"
+                      style={{width: `${analytics.total > 0 ? (analytics.rejected / analytics.total) * 100 : 0}%`}}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                      <span className="text-muted-foreground font-medium">Inactive</span>
+                    </div>
+                    <span className="font-bold text-foreground">{analytics.inactive}</span>
+                  </div>
+                  <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-gray-400 to-gray-500 rounded-full transition-all duration-500"
+                      style={{width: `${analytics.total > 0 ? (analytics.inactive / analytics.total) * 100 : 0}%`}}
+                    ></div>
                   </div>
                 </div>
               </div>
 
-              {/* Legend */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span className="text-muted-foreground">Active</span>
-                  </div>
-                  <span className="font-semibold">{analytics.active}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <span className="text-muted-foreground">Pending</span>
-                  </div>
-                  <span className="font-semibold">{analytics.pending}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                    <span className="text-muted-foreground">Rejected</span>
-                  </div>
-                  <span className="font-semibold">{analytics.rejected}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-gray-500"></div>
-                    <span className="text-muted-foreground">Inactive</span>
-                  </div>
-                  <span className="font-semibold">{analytics.inactive}</span>
+              {/* Total Summary */}
+              <div className="mt-6 pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-muted-foreground">Total Products</span>
+                  <span className="text-2xl font-bold text-primary">{analytics.total}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Category Breakdown */}
+        {/* Category Breakdown - Minimalist Cards */}
         {Object.keys(categoryBreakdown).length > 0 && (
-          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 mb-8 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-50"></div>
+          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 mb-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-white" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <ShoppingBag className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="font-bold text-xl">Category Distribution</h3>
+                <h3 className="font-bold text-xl text-foreground">Category Distribution</h3>
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {Object.entries(categoryBreakdown).map(([category, count]) => (
-                  <div key={category} className="bg-gradient-to-br from-primary/5 to-secondary/5 p-4 rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 group">
-                    <div className="flex items-center justify-between mb-2">
-                      <ShoppingBag className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-                      <span className="text-2xl font-bold text-primary">{count}</span>
+                  <div key={category} className="glass-card border border-white/20 p-4 rounded-xl hover:border-primary/30 transition-all duration-300 group">
+                    <div className="flex flex-col items-center text-center space-y-2">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Package className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-foreground">{count}</p>
+                        <p className="text-xs text-muted-foreground font-medium capitalize truncate">{category.replace('-', ' ')}</p>
+                      </div>
                     </div>
-                    <p className="text-sm text-foreground font-medium capitalize truncate">{category.replace('-', ' ')}</p>
                   </div>
                 ))}
               </div>
@@ -632,33 +621,36 @@ const SupplierProductDashboard = () => {
                     {filteredProducts.map((product) => (
                       <div
                         key={product._id}
-                        className="glass-card border-2 border-white/30 rounded-3xl p-6 hover:shadow-3xl transition-all duration-500 backdrop-blur-2xl group hover:-translate-y-2 relative overflow-hidden"
+                        className="glass-card border-2 border-white/30 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 backdrop-blur-2xl group relative overflow-hidden"
                       >
-                        {/* Animated background gradient */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        {/* Subtle background gradient */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
                         
                         <div className="relative z-10">
                           <div className="flex justify-between items-start mb-4">
-                            <h3 className="font-bold text-foreground text-xl group-hover:text-primary transition-colors duration-300">{product.name}</h3>
+                            <div className="flex-1">
+                              <h3 className="font-bold text-foreground text-lg mb-1 group-hover:text-primary transition-colors">{product.name}</h3>
+                              <div className="flex items-center gap-2 mt-2">
+                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                                  <Package className="w-4 h-4 text-primary" />
+                                </div>
+                                <p className="text-sm text-muted-foreground font-medium capitalize">{product.category.replace('-', ' ')}</p>
+                              </div>
+                            </div>
                             {getStatusBadge(product.status)}
                           </div>
                           
-                          <div className="flex items-center gap-2 mb-3">
-                            <Package className="w-4 h-4 text-primary" />
-                            <p className="text-sm text-muted-foreground font-medium capitalize">{product.category.replace('-', ' ')}</p>
-                          </div>
+                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
                           
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{product.description}</p>
-                          
-                          <div className="flex gap-2 mt-4">
+                          {/* Action Buttons */}
+                          <div className="flex gap-2 mt-4 pt-4 border-t border-border/30">
                             <Button
                               size="sm"
-                              variant="outline"
-                              className="flex-1 border-2 border-red-500/50 text-red-600 hover:bg-red-50 hover:border-red-500 transition-all duration-300 rounded-xl"
+                              className="flex-1 bg-gradient-to-r from-rgba(193, 72, 43, 0.2) to-rgba(193, 72, 43, 0.15) text-[#c1482b] border-2 border-[#c1482b]/30 hover:border-[#c1482b]/50 hover:shadow-lg transition-all duration-300 rounded-xl font-medium"
                               onClick={() => handleDeleteProduct(product._id)}
                             >
                               <Trash2 className="w-4 h-4 mr-1" />
-                              Delete
+                              Remove
                             </Button>
                           </div>
                         </div>
