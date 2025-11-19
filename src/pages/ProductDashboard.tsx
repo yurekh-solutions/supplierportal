@@ -98,6 +98,41 @@ const SupplierProductDashboard = () => {
   const token = localStorage.getItem('supplierToken');
   const user = JSON.parse(localStorage.getItem('supplierUser') || '{}');
 
+  // Handle tool click and send to API
+  const handleToolClick = async (toolName: string, toolType: string, description: string) => {
+    try {
+      // Send to backend
+      const response = await fetch(`${API_URL}/tools/record-click`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          toolName,
+          toolType,
+          description
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        toast({
+          title: toolName,
+          description: description,
+          duration: 3000
+        });
+      }
+    } catch (error) {
+      console.error('Error recording tool click:', error);
+      toast({
+        title: toolName,
+        description: description,
+        duration: 3000
+      });
+    }
+  };
+
   useEffect(() => {
     if (!token) {
       navigate('/login');
@@ -689,7 +724,7 @@ const SupplierProductDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Tool 1: Auto Reply Manager */}
               <button
-                onClick={() => toast({ title: 'Auto Reply Manager', description: 'This feature will be available soon. Set up automatic responses to customer inquiries.' })}
+                onClick={() => handleToolClick('Auto Reply Manager', 'auto-reply', 'This feature will be available soon. Set up automatic responses to customer inquiries.')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-blue-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -708,7 +743,7 @@ const SupplierProductDashboard = () => {
 
               {/* Tool 2: Lead Scoring */}
               <button
-                onClick={() => toast({ title: 'Lead Scoring', description: 'Automatically identify and prioritize high-value leads from your inquiries.' })}
+                onClick={() => handleToolClick('Lead Scoring', 'lead-scoring', 'Automatically identify and prioritize high-value leads from your inquiries.')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -727,7 +762,7 @@ const SupplierProductDashboard = () => {
 
               {/* Tool 3: Order Automation */}
               <button
-                onClick={() => toast({ title: 'Order Automation', description: 'Streamline order processing and fulfillment with automated workflows.' })}
+                onClick={() => handleToolClick('Order Automation', 'order-automation', 'Streamline order processing and fulfillment with automated workflows.')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -746,7 +781,7 @@ const SupplierProductDashboard = () => {
 
               {/* Tool 4: Inventory Management */}
               <button
-                onClick={() => toast({ title: 'Smart Inventory', description: 'Get real-time stock tracking, low stock alerts, and inventory forecasting.' })}
+                onClick={() => handleToolClick('Smart Inventory', 'smart-inventory', 'Get real-time stock tracking, low stock alerts, and inventory forecasting.')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-amber-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -765,7 +800,7 @@ const SupplierProductDashboard = () => {
 
               {/* Tool 5: Price Optimizer */}
               <button
-                onClick={() => toast({ title: 'Price Optimizer', description: 'Adjust prices dynamically based on demand, competition, and market trends.' })}
+                onClick={() => handleToolClick('Price Optimizer', 'price-optimizer', 'Adjust prices dynamically based on demand, competition, and market trends.')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-rose-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -784,7 +819,7 @@ const SupplierProductDashboard = () => {
 
               {/* Tool 6: Analytics Dashboard */}
               <button
-                onClick={() => toast({ title: 'Analytics Hub', description: 'View detailed business analytics, sales trends, and performance metrics.' })}
+                onClick={() => handleToolClick('Analytics Hub', 'analytics-hub', 'View detailed business analytics, sales trends, and performance metrics.')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
