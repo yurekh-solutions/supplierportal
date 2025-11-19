@@ -70,46 +70,102 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl glass-card border-2 border-white/30 rounded-2xl bg-white/70 dark:bg-black/40 backdrop-blur-3xl shadow-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl glass-card border-2 border-white/30 rounded-2xl bg-white/70 dark:bg-black/40 backdrop-blur-3xl shadow-4xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-foreground">{product.name}</DialogTitle>
+          <DialogTitle className="text-3xl font-bold text-foreground">{product.name}</DialogTitle>
           <DialogDescription className="flex gap-2 mt-2">
-            <Badge className="bg-primary/20 text-primary border-0">{product.category}</Badge>
-            <Badge className={product.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+            <Badge className="bg-primary/20 text-primary border-0 text-sm px-3 py-1">{product.category}</Badge>
+            <Badge className={product.status === 'active' ? 'bg-green-100 text-green-800 text-sm px-3 py-1' : product.status === 'inactive' ? 'bg-gray-100 text-gray-800 text-sm px-3 py-1' : 'bg-yellow-100 text-yellow-800 text-sm px-3 py-1'}>
               {product.status}
             </Badge>
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Product Image */}
-          {product.image && (
-            <div className="w-full h-64 rounded-xl overflow-hidden bg-muted">
+          {/* Product Image - Always Show */}
+          <div className="w-full h-80 rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
+            {(product as any)?.image || (product as any)?.imagePreview ? (
               <img 
-                src={product.image} 
+                src={(product as any)?.image || (product as any)?.imagePreview}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
               />
-            </div>
-          )}
+            ) : (
+              <div className="text-center">
+                <Package className="w-24 h-24 text-muted-foreground/30 mx-auto mb-2" />
+                <p className="text-muted-foreground">No image available</p>
+              </div>
+            )}
+          </div>
 
           {/* Description */}
           <div>
-            <h3 className="font-semibold text-foreground mb-2">Description</h3>
-            <p className="text-muted-foreground leading-relaxed">{product.description}</p>
+            <h3 className="font-bold text-lg text-foreground mb-2">Description</h3>
+            <p className="text-muted-foreground leading-relaxed text-base">{product.description}</p>
           </div>
 
-          {/* Specifications */}
+          {/* Price & Stock Info */}
+          {(product.price || product.stock) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {product.price && (
+                <div className="glass-card border-2 border-primary/30 p-4 rounded-xl bg-gradient-to-br from-primary/5 to-secondary/5">
+                  <h4 className="font-semibold text-foreground mb-2 flex items-center gap-2">
+                    <DollarSign className="w-4 h-4 text-primary" />
+                    Price
+                  </h4>
+                  <p className="text-xl font-bold text-primary">{product.price.currency} {product.price.amount}</p>
+                  {product.price.unit && <p className="text-xs text-muted-foreground mt-1">per {product.price.unit}</p>}
+                </div>
+              )}
+              {product.stock && (
+                <div className="glass-card border-2 border-green-300/30 p-4 rounded-xl bg-gradient-to-br from-green-5 to-emerald-5">
+                  <h4 className="font-semibold text-foreground mb-2">Stock Status</h4>
+                  <p className={`font-bold ${product.stock.available ? 'text-green-600' : 'text-red-600'}`}>
+                    {product.stock.available ? '✓ In Stock' : '✗ Out of Stock'}
+                  </p>
+                  {product.stock.quantity && <p className="text-sm text-muted-foreground mt-1">Available: {product.stock.quantity}</p>}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* All Specifications - Display Everything */}
           {product.specifications && Object.keys(product.specifications).length > 0 && (
             <div>
-              <h3 className="font-semibold text-foreground mb-3">Specifications</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {Object.entries(product.specifications).map(([key, value]) => (
-                  <div key={key} className="glass-card border border-white/20 p-3 rounded-lg">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{key}</p>
-                    <p className="font-medium text-foreground">{JSON.stringify(value)}</p>
-                  </div>
-                ))}
+              <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary" />
+                All Specifications & Details
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {Object.entries(product.specifications).map(([key, value]) => {
+                  // Format the key nicely
+                  const formattedKey = key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase())
+                    .trim();
+                  
+                  // Format the value
+                  let formattedValue = value;
+                  if (typeof value === 'object') {
+                    if (Array.isArray(value)) {
+                      formattedValue = value.join(', ');
+                    } else {
+                      formattedValue = JSON.stringify(value, null, 2);
+                    }
+                  }
+                  
+                  return (
+                    <div key={key} className="glass-card border-2 border-white/20 p-4 rounded-lg hover:border-primary/50 transition-colors">
+                      <p className="text-xs font-bold text-primary uppercase tracking-wider mb-2">{formattedKey}</p>
+                      <p className="text-sm font-medium text-foreground leading-relaxed line-clamp-3">
+                        {String(formattedValue)}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
