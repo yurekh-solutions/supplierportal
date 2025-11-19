@@ -96,6 +96,8 @@ const SupplierProductDashboard = () => {
   const [showAutoReplyChatbox, setShowAutoReplyChatbox] = useState(false);
   const [autoReplyMessages, setAutoReplyMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
   const [autoReplyInput, setAutoReplyInput] = useState('');
+  const [autoReplyStep, setAutoReplyStep] = useState<'menu' | 'select-type' | 'write-response' | 'confirm'>('menu');
+  const [autoReplyConfig, setAutoReplyConfig] = useState({messageType: '', response: '', triggerKeywords: ''});
   const chatInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLDivElement>(null);
 
@@ -137,24 +139,79 @@ const SupplierProductDashboard = () => {
     }
   };
 
-  // Handle Auto Reply Manager chatbox
+  // Handle Auto Reply Manager chatbox with configuration steps
   const handleAutoReplyOpen = () => {
     setShowAutoReplyChatbox(true);
-    if (autoReplyMessages.length === 0) {
-      setAutoReplyMessages([{
-        id: 1,
-        text: 'Hello! I\'m your Auto Reply Manager. I help you set up automatic responses to customer inquiries. What would you like to do?',
-        sender: 'bot',
-        timestamp: new Date()
-      }]);
-    }
+    setAutoReplyStep('menu');
+    setAutoReplyMessages([{
+      id: 1,
+      text: 'Hello! 👋 I\'m your Auto Reply Manager. I can help you set up automatic responses to customer inquiries. What would you like to do?',
+      sender: 'bot',
+      timestamp: new Date()
+    }]);
   };
 
   const handleAutoReplyClose = () => {
     setShowAutoReplyChatbox(false);
   };
 
-  const handleAutoReplySubmit = (e: React.FormEvent) => {
+  const addBotMessage = (text: string) => {
+    setAutoReplyMessages(prev => [...prev, {
+      id: prev.length + 1,
+      text,
+      sender: 'bot',
+      timestamp: new Date()
+    }]);
+  };
+
+  const handleAutoReplyAction = (action: string) => {
+    const userMessage = {
+      id: autoReplyMessages.length + 1,
+      text: action,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setAutoReplyMessages(prev => [...prev, userMessage]);
+
+    setTimeout(() => {
+      if (action === 'Create New Response') {
+        setAutoReplyStep('select-type');
+        addBotMessage('Great! What type of inquiry would you like to respond to? Choose one:\n\n1️⃣ General Inquiry\n2️⃣ Price Quote Request\n3️⃣ Product Availability\n4️⃣ Custom Message');
+      } else if (action === 'View Existing Responses') {
+        addBotMessage('You currently have no saved auto-replies. Let\'s create your first one! 🚀');
+        setTimeout(() => {
+          setAutoReplyStep('select-type');
+          addBotMessage('What type of inquiry would you like to respond to?\n\n1️⃣ General Inquiry\n2️⃣ Price Quote Request\n3️⃣ Product Availability\n4️⃣ Custom Message');
+        }, 600);
+      }
+    }, 300);
+  };
+
+  const handleMessageTypeSelect = (type: string) => {
+    const typeMap: Record<string, string> = {
+      '1': 'General Inquiry',
+      '2': 'Price Quote Request',
+      '3': 'Product Availability',
+      '4': 'Custom Message'
+    };
+    const selectedType = typeMap[type] || type;
+
+    const userMessage = {
+      id: autoReplyMessages.length + 1,
+      text: `I want to set up: ${selectedType}`,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setAutoReplyMessages(prev => [...prev, userMessage]);
+    setAutoReplyConfig({...autoReplyConfig, messageType: selectedType});
+
+    setTimeout(() => {
+      setAutoReplyStep('write-response');
+      addBotMessage(`Perfect! Now, what should the automatic response be for ${selectedType}? Please type your message.`);
+    }, 300);
+  };
+
+  const handleResponseText = (e: React.FormEvent) => {
     e.preventDefault();
     if (!autoReplyInput.trim()) return;
 
@@ -164,20 +221,56 @@ const SupplierProductDashboard = () => {
       sender: 'user' as const,
       timestamp: new Date()
     };
-
-    setAutoReplyMessages([...autoReplyMessages, userMessage]);
+    setAutoReplyMessages(prev => [...prev, userMessage]);
+    setAutoReplyConfig({...autoReplyConfig, response: autoReplyInput});
     setAutoReplyInput('');
 
-    // Simulate bot response
     setTimeout(() => {
-      const botMessage = {
-        id: autoReplyMessages.length + 2,
-        text: 'Got it! I can help you set up automatic replies for customer inquiries. You can configure responses for different types of messages.',
-        sender: 'bot' as const,
-        timestamp: new Date()
-      };
-      setAutoReplyMessages(prev => [...prev, botMessage]);
-    }, 500);
+      setAutoReplyStep('confirm');
+      addBotMessage(`Great! Here's your auto-reply:\n\n"${autoReplyInput}"\n\nDoes this look good? Reply YES to save or NO to edit.`);
+    }, 300);
+  };
+
+  const handleConfirmReply = (action: string) => {
+    const userMessage = {
+      id: autoReplyMessages.length + 1,
+      text: action,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+    setAutoReplyMessages(prev => [...prev, userMessage]);
+
+    if (action.toUpperCase() === 'YES') {
+      setTimeout(() => {
+        addBotMessage('✅ Auto-reply saved successfully! Your response will now be sent automatically when customers inquire about ' + autoReplyConfig.messageType + '.');
+        setTimeout(() => {
+          addBotMessage('Would you like to set up another auto-reply? Reply YES or NO.');
+          setAutoReplyStep('menu');
+        }, 600);
+      }, 300);
+    } else {
+      setTimeout(() => {
+        addBotMessage('No problem! Let\'s try again. What should the response be?');
+        setAutoReplyStep('write-response');
+      }, 300);
+    }
+  };
+
+  const handleAutoReplySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (autoReplyStep === 'menu') {
+      handleAutoReplyAction(autoReplyInput);
+    } else if (autoReplyStep === 'select-type') {
+      handleMessageTypeSelect(autoReplyInput);
+    } else if (autoReplyStep === 'write-response') {
+      handleResponseText(e);
+      return;
+    } else if (autoReplyStep === 'confirm') {
+      handleConfirmReply(autoReplyInput);
+    }
+
+    setAutoReplyInput('');
   };
 
   useEffect(() => {
@@ -1561,7 +1654,7 @@ const SupplierProductDashboard = () => {
             {autoReplyMessages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-xs px-4 py-3 rounded-2xl ${
+                  className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap ${
                     msg.sender === 'user'
                       ? 'bg-primary text-white rounded-br-none'
                       : 'bg-white/20 text-foreground rounded-bl-none'
@@ -1572,6 +1665,24 @@ const SupplierProductDashboard = () => {
                 </div>
               </div>
             ))}
+            
+            {/* Quick Action Buttons for Menu */}
+            {autoReplyStep === 'menu' && autoReplyMessages.length > 0 && (
+              <div className="flex flex-col gap-2 mt-4">
+                <Button
+                  onClick={() => handleAutoReplyAction('Create New Response')}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm py-2 transition-all"
+                >
+                  ✨ Create New Response
+                </Button>
+                <Button
+                  onClick={() => handleAutoReplyAction('View Existing Responses')}
+                  className="w-full bg-secondary/80 hover:bg-secondary text-white rounded-xl text-sm py-2 transition-all"
+                >
+                  📋 View Existing Responses
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Input Area */}
