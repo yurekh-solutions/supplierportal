@@ -707,6 +707,7 @@ const SupplierProductDashboard = () => {
         <div className="glass-card border-2 border-gradient bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl p-8 backdrop-blur-3xl overflow-hidden relative mb-8">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-secondary/10"></div>
           <div className="relative z-10">
+            {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg" style={{
@@ -715,11 +716,30 @@ const SupplierProductDashboard = () => {
                   <Zap className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-foreground">Supplier Growth Toolkit</h3>
-                  <p className="text-sm text-muted-foreground mt-1">Automate tasks & unlock business growth with AI-powered tools</p>
+                  <h3 className="text-2xl font-bold text-foreground">Business Automation Suite</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Smart tools to save time, boost sales, and scale your business</p>
                 </div>
               </div>
             </div>
+
+            {/* Purpose & Usage Guide */}
+            <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-foreground">📌 What is This?</p>
+                <p className="text-xs text-muted-foreground">A collection of AI-powered automation tools designed to streamline your business operations. Each tool addresses a specific business need and shows measurable impact on your growth.</p>
+                
+                <p className="text-sm font-semibold text-foreground mt-3">🎯 How to Use?</p>
+                <p className="text-xs text-muted-foreground">Simply click on any tool below to explore what it does. Each tool will help you:</p>
+                <ul className="text-xs text-muted-foreground space-y-1 ml-3 mt-2">
+                  <li>✓ Save time on repetitive tasks</li>
+                  <li>✓ Make better business decisions</li>
+                  <li>✓ Increase revenue and efficiency</li>
+                  <li>✓ Scale your operations faster</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Tools Grid */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Tool 1: Auto Reply Manager */}
