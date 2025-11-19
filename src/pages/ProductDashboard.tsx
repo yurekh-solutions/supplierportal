@@ -101,6 +101,26 @@ const SupplierProductDashboard = () => {
   const [autoReplyLoading, setAutoReplyLoading] = useState(false);
   const [savedAutoReplies, setSavedAutoReplies] = useState<any[]>([]);
   const chatInputRef = useRef<HTMLInputElement>(null);
+
+  // Lead Scoring Chatbox
+  const [showLeadScoringChatbox, setShowLeadScoringChatbox] = useState(false);
+  const [leadScoringMessages, setLeadScoringMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  
+  // Order Automation Chatbox
+  const [showOrderAutomationChatbox, setShowOrderAutomationChatbox] = useState(false);
+  const [orderAutomationMessages, setOrderAutomationMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  
+  // Smart Inventory Chatbox
+  const [showSmartInventoryChatbox, setShowSmartInventoryChatbox] = useState(false);
+  const [smartInventoryMessages, setSmartInventoryMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  
+  // Price Optimizer Chatbox
+  const [showPriceOptimizerChatbox, setShowPriceOptimizerChatbox] = useState(false);
+  const [priceOptimizerMessages, setPriceOptimizerMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  
+  // Analytics Hub Chatbox
+  const [showAnalyticsHubChatbox, setShowAnalyticsHubChatbox] = useState(false);
+  const [analyticsHubMessages, setAnalyticsHubMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
   const productInputRef = useRef<HTMLDivElement>(null);
 
   const token = localStorage.getItem('supplierToken');
@@ -428,6 +448,81 @@ Does this look good? Reply YES to save or NO to edit.`);
     }
 
     setAutoReplyInput('');
+  };
+
+  // Lead Scoring Handlers
+  const handleLeadScoringOpen = () => {
+    setShowLeadScoringChatbox(true);
+    setLeadScoringMessages([{
+      id: 1,
+      text: '🎯 Lead Scoring Assistant ready! This tool analyzes your inquiries and scores them by value potential.\n\nFeatures:\n• AI-powered lead evaluation\n• Priority ranking (Hot → Warm → Cold)\n• Custom scoring criteria\n• Auto-tagging high-value leads',
+      sender: 'bot',
+      timestamp: new Date()
+    }]);
+  };
+
+  const handleLeadScoringClose = () => {
+    setShowLeadScoringChatbox(false);
+  };
+
+  // Order Automation Handlers
+  const handleOrderAutomationOpen = () => {
+    setShowOrderAutomationChatbox(true);
+    setOrderAutomationMessages([{
+      id: 1,
+      text: '📦 Order Automation System initialized!\n\nCapabilities:\n• Instant order confirmation emails\n• Automatic invoice generation\n• Shipment tracking updates\n• Payment reminders\n• Reduces processing time by 60%',
+      sender: 'bot',
+      timestamp: new Date()
+    }]);
+  };
+
+  const handleOrderAutomationClose = () => {
+    setShowOrderAutomationChatbox(false);
+  };
+
+  // Smart Inventory Handlers
+  const handleSmartInventoryOpen = () => {
+    setShowSmartInventoryChatbox(true);
+    setSmartInventoryMessages([{
+      id: 1,
+      text: '📊 Smart Inventory Tracker activated!\n\nRealtime Features:\n• Stock level monitoring\n• Low-stock alerts (customizable)\n• Predictive demand forecasting\n• Automatic reorder suggestions\n• Prevents stockouts & overstock',
+      sender: 'bot',
+      timestamp: new Date()
+    }]);
+  };
+
+  const handleSmartInventoryClose = () => {
+    setShowSmartInventoryChatbox(false);
+  };
+
+  // Price Optimizer Handlers
+  const handlePriceOptimizerOpen = () => {
+    setShowPriceOptimizerChatbox(true);
+    setPriceOptimizerMessages([{
+      id: 1,
+      text: '💰 Price Optimizer activated!\n\nDynamic Pricing Engine:\n• Real-time competitor analysis\n• Demand-based adjustments\n• Seasonal pricing strategies\n• Margin optimization\n• Revenue increase up to 25%',
+      sender: 'bot',
+      timestamp: new Date()
+    }]);
+  };
+
+  const handlePriceOptimizerClose = () => {
+    setShowPriceOptimizerChatbox(false);
+  };
+
+  // Analytics Hub Handlers
+  const handleAnalyticsHubOpen = () => {
+    setShowAnalyticsHubChatbox(true);
+    setAnalyticsHubMessages([{
+      id: 1,
+      text: '📈 Analytics Hub Dashboard loaded!\n\nAnalytics Available:\n• Sales trends & patterns\n• Customer insights\n• Performance metrics\n• Revenue forecasting\n• ROI analysis by tool\n• Export reports (PDF/CSV)',
+      sender: 'bot',
+      timestamp: new Date()
+    }]);
+  };
+
+  const handleAnalyticsHubClose = () => {
+    setShowAnalyticsHubChatbox(false);
   };
 
   useEffect(() => {
@@ -1044,7 +1139,10 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 2: Lead Scoring */}
               <button
-                onClick={() => handleToolClick('Lead Scoring', 'lead-scoring', 'Automatically identify and prioritize high-value leads from your inquiries.')}
+                onClick={() => {
+                  handleToolClick('Lead Scoring', 'lead-scoring', 'Automatically identify and prioritize high-value leads from your inquiries.');
+                  handleLeadScoringOpen();
+                }}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1063,7 +1161,10 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 3: Order Automation */}
               <button
-                onClick={() => handleToolClick('Order Automation', 'order-automation', 'Streamline order processing and fulfillment with automated workflows.')}
+                onClick={() => {
+                  handleToolClick('Order Automation', 'order-automation', 'Streamline order processing and fulfillment with automated workflows.');
+                  handleOrderAutomationOpen();
+                }}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1082,7 +1183,10 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 4: Inventory Management */}
               <button
-                onClick={() => handleToolClick('Smart Inventory', 'smart-inventory', 'Get real-time stock tracking, low stock alerts, and inventory forecasting.')}
+                onClick={() => {
+                  handleToolClick('Smart Inventory', 'smart-inventory', 'Get real-time stock tracking, low stock alerts, and inventory forecasting.');
+                  handleSmartInventoryOpen();
+                }}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-amber-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1101,7 +1205,10 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 5: Price Optimizer */}
               <button
-                onClick={() => handleToolClick('Price Optimizer', 'price-optimizer', 'Adjust prices dynamically based on demand, competition, and market trends.')}
+                onClick={() => {
+                  handleToolClick('Price Optimizer', 'price-optimizer', 'Adjust prices dynamically based on demand, competition, and market trends.');
+                  handlePriceOptimizerOpen();
+                }}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-rose-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1120,7 +1227,10 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 6: Analytics Dashboard */}
               <button
-                onClick={() => handleToolClick('Analytics Hub', 'analytics-hub', 'View detailed business analytics, sales trends, and performance metrics.')}
+                onClick={() => {
+                  handleToolClick('Analytics Hub', 'analytics-hub', 'View detailed business analytics, sales trends, and performance metrics.');
+                  handleAnalyticsHubOpen();
+                }}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1857,6 +1967,286 @@ Does this look good? Reply YES to save or NO to edit.`);
               <Button
                 type="submit"
                 className="bg-gradient-to-r from-primary to-secondary text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
+              >
+                <span className="text-lg">↑</span>
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Lead Scoring Chatbox */}
+      {showLeadScoringChatbox && (
+        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+          <div className="bg-gradient-to-r from-green-500/20 to-green-400/20 border-b border-white/20 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                <Target className="w-5 h-5 text-green-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">Lead Scoring</h3>
+                <p className="text-xs text-muted-foreground">Identify high-value leads</p>
+              </div>
+            </div>
+            <button
+              onClick={handleLeadScoringClose}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {leadScoringMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-white rounded-br-none shadow-md'
+                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                  }`}
+                >
+                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-xs mt-1 opacity-70">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-white/20 p-4 bg-white/5">
+            <form className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Ask about lead scoring..."
+                disabled
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+              />
+              <Button
+                type="submit"
+                disabled
+                className="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+              >
+                <span className="text-lg">↑</span>
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Order Automation Chatbox */}
+      {showOrderAutomationChatbox && (
+        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+          <div className="bg-gradient-to-r from-purple-500/20 to-purple-400/20 border-b border-white/20 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">Order Automation</h3>
+                <p className="text-xs text-muted-foreground">Auto-process & fulfill orders</p>
+              </div>
+            </div>
+            <button
+              onClick={handleOrderAutomationClose}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {orderAutomationMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-white rounded-br-none shadow-md'
+                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                  }`}
+                >
+                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-xs mt-1 opacity-70">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-white/20 p-4 bg-white/5">
+            <form className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Ask about order automation..."
+                disabled
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+              />
+              <Button
+                type="submit"
+                disabled
+                className="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+              >
+                <span className="text-lg">↑</span>
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Smart Inventory Chatbox */}
+      {showSmartInventoryChatbox && (
+        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+          <div className="bg-gradient-to-r from-amber-500/20 to-amber-400/20 border-b border-white/20 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">Smart Inventory</h3>
+                <p className="text-xs text-muted-foreground">Real-time stock tracking</p>
+              </div>
+            </div>
+            <button
+              onClick={handleSmartInventoryClose}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {smartInventoryMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-white rounded-br-none shadow-md'
+                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                  }`}
+                >
+                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-xs mt-1 opacity-70">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-white/20 p-4 bg-white/5">
+            <form className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Ask about inventory..."
+                disabled
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+              />
+              <Button
+                type="submit"
+                disabled
+                className="bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+              >
+                <span className="text-lg">↑</span>
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Price Optimizer Chatbox */}
+      {showPriceOptimizerChatbox && (
+        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+          <div className="bg-gradient-to-r from-rose-500/20 to-rose-400/20 border-b border-white/20 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">Price Optimizer</h3>
+                <p className="text-xs text-muted-foreground">Dynamic pricing engine</p>
+              </div>
+            </div>
+            <button
+              onClick={handlePriceOptimizerClose}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {priceOptimizerMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-white rounded-br-none shadow-md'
+                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                  }`}
+                >
+                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-xs mt-1 opacity-70">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-white/20 p-4 bg-white/5">
+            <form className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Ask about pricing..."
+                disabled
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+              />
+              <Button
+                type="submit"
+                disabled
+                className="bg-gradient-to-r from-rose-500 to-rose-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
+              >
+                <span className="text-lg">↑</span>
+              </Button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Analytics Hub Chatbox */}
+      {showAnalyticsHubChatbox && (
+        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+          <div className="bg-gradient-to-r from-cyan-500/20 to-cyan-400/20 border-b border-white/20 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <PieChart className="w-5 h-5 text-cyan-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">Analytics Hub</h3>
+                <p className="text-xs text-muted-foreground">Business insights & reports</p>
+              </div>
+            </div>
+            <button
+              onClick={handleAnalyticsHubClose}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {analyticsHubMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-xs px-4 py-3 rounded-2xl whitespace-pre-wrap transition-all ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-white rounded-br-none shadow-md'
+                      : 'bg-white/5 text-foreground rounded-bl-none shadow-sm'
+                  }`}
+                >
+                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-xs mt-1 opacity-70">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="border-t border-white/20 p-4 bg-white/5">
+            <form className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="Ask about analytics..."
+                disabled
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground opacity-50"
+              />
+              <Button
+                type="submit"
+                disabled
+                className="bg-gradient-to-r from-cyan-500 to-cyan-600 text-white rounded-full w-10 h-10 p-0 flex items-center justify-center opacity-50"
               >
                 <span className="text-lg">↑</span>
               </Button>
