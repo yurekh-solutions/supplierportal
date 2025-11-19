@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye, Package, TrendingUp, LogOut, MessageSquare, CheckCircle, Settings, CreditCard, X, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Package, TrendingUp, LogOut, MessageSquare, CheckCircle, Settings, CreditCard, X, Search, BarChart3, PieChart, DollarSign, AlertCircle, Clock, ShoppingBag } from 'lucide-react';
 import { products as predefinedProducts } from '../data';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
@@ -67,6 +67,7 @@ const SupplierProductDashboard = () => {
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [availableSubcategories, setAvailableSubcategories] = useState<Subcategory[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -85,7 +86,7 @@ const SupplierProductDashboard = () => {
   const [showCustomCategory, setShowCustomCategory] = useState(false);
   const [showCustomSubcategory, setShowCustomSubcategory] = useState(false);
   const [showProductSuggestions, setShowProductSuggestions] = useState(false);
-  const [filteredProducts, setFilteredProducts] = useState<typeof predefinedProducts>([]);
+  const [productSuggestions, setProductSuggestions] = useState<typeof predefinedProducts>([]);
   const productInputRef = useRef<HTMLDivElement>(null);
 
   const token = localStorage.getItem('supplierToken');
@@ -130,7 +131,7 @@ const SupplierProductDashboard = () => {
       const filtered = predefinedProducts.filter(product => 
         product.name.toLowerCase().includes(value.toLowerCase())
       );
-      setFilteredProducts(filtered);
+      setProductSuggestions(filtered);
       setShowProductSuggestions(true);
     } else {
       setShowProductSuggestions(false);
@@ -313,6 +314,26 @@ const SupplierProductDashboard = () => {
     return <Badge className={variants[status as keyof typeof variants]}>{status}</Badge>;
   };
 
+  // Analytics calculations
+  const analytics = {
+    total: products.length,
+    active: products.filter(p => p.status === 'active').length,
+    pending: products.filter(p => p.status === 'pending').length,
+    rejected: products.filter(p => p.status === 'rejected').length,
+    inactive: products.filter(p => p.status === 'inactive').length,
+  };
+
+  const categoryBreakdown = products.reduce((acc, product) => {
+    const category = product.category || 'Uncategorized';
+    acc[category] = (acc[category] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-[#f3f0ec] relative overflow-hidden">
       {/* Animated Background - Match Login Page */}
@@ -352,42 +373,191 @@ const SupplierProductDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
-        {/* Statistics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="glass-card border-2 border-primary/30 p-6 rounded-3xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative z-10 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Package className="w-8 h-8 text-white" />
+        {/* Analytics Overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Statistics Cards */}
+          <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {/* Total Products */}
+            <div className="glass-card border-2 border-primary/30 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <Package className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-sm text-muted-foreground font-medium mb-1">Total</p>
+                <p className="text-3xl font-bold text-foreground">{analytics.total}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">Total Products</p>
-                <p className="text-4xl font-bold text-foreground">{products.length}</p>
+            </div>
+
+            {/* Active Products */}
+            <div className="glass-card border-2 border-green-300/50 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-green-50/30 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <CheckCircle className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-sm text-green-700 font-medium mb-1">Active</p>
+                <p className="text-3xl font-bold text-green-600">{analytics.active}</p>
+              </div>
+            </div>
+
+            {/* Pending Products */}
+            <div className="glass-card border-2 border-yellow-300/50 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-yellow-50/30 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-transparent to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-sm text-yellow-700 font-medium mb-1">Pending</p>
+                <p className="text-3xl font-bold text-yellow-600">{analytics.pending}</p>
+              </div>
+            </div>
+
+            {/* Rejected Products */}
+            <div className="glass-card border-2 border-red-300/50 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-red-50/30 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+                  <AlertCircle className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-sm text-red-700 font-medium mb-1">Rejected</p>
+                <p className="text-3xl font-bold text-red-600">{analytics.rejected}</p>
               </div>
             </div>
           </div>
 
-          <div className="glass-card border-2 border-green-300/50 p-6 rounded-3xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-green-50/30 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            <div className="relative z-10 flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <TrendingUp className="w-8 h-8 text-white" />
+          {/* Pie Chart - Status Distribution */}
+          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple/5 via-transparent to-blue-500/5 opacity-50"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center">
+                  <PieChart className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-lg">Status Overview</h3>
               </div>
-              <div>
-                <p className="text-sm text-green-700 font-medium">Active Products</p>
-                <p className="text-4xl font-bold text-green-600">
-                  {products.filter((p) => p.status === 'active').length}
-                </p>
+              
+              {/* Simple Pie Chart Visualization */}
+              <div className="flex items-center justify-center my-6">
+                <div className="relative w-40 h-40">
+                  {/* SVG Pie Chart */}
+                  <svg viewBox="0 0 100 100" className="transform -rotate-90">
+                    {(() => {
+                      let currentAngle = 0;
+                      const total = analytics.total || 1;
+                      const segments = [
+                        { value: analytics.active, color: '#10b981', label: 'Active' },
+                        { value: analytics.pending, color: '#f59e0b', label: 'Pending' },
+                        { value: analytics.rejected, color: '#ef4444', label: 'Rejected' },
+                        { value: analytics.inactive, color: '#6b7280', label: 'Inactive' },
+                      ];
+                      
+                      return segments.map((segment, index) => {
+                        const percentage = (segment.value / total) * 100;
+                        const angle = (percentage / 100) * 360;
+                        const radius = 15.9155; // circumference / 2π
+                        const circumference = 2 * Math.PI * radius;
+                        const offset = circumference - (percentage / 100) * circumference;
+                        
+                        const startAngle = currentAngle;
+                        currentAngle += angle;
+                        
+                        return segment.value > 0 ? (
+                          <circle
+                            key={index}
+                            r={radius}
+                            cx="50"
+                            cy="50"
+                            fill="transparent"
+                            stroke={segment.color}
+                            strokeWidth="32"
+                            strokeDasharray={`${circumference}`}
+                            strokeDashoffset={offset}
+                            style={{
+                              transform: `rotate(${startAngle}deg)`,
+                              transformOrigin: '50% 50%',
+                            }}
+                          />
+                        ) : null;
+                      });
+                    })()}
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-foreground">{analytics.total}</p>
+                      <p className="text-xs text-muted-foreground">Total</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Legend */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span className="text-muted-foreground">Active</span>
+                  </div>
+                  <span className="font-semibold">{analytics.active}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <span className="text-muted-foreground">Pending</span>
+                  </div>
+                  <span className="font-semibold">{analytics.pending}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span className="text-muted-foreground">Rejected</span>
+                  </div>
+                  <span className="font-semibold">{analytics.rejected}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-gray-500"></div>
+                    <span className="text-muted-foreground">Inactive</span>
+                  </div>
+                  <span className="font-semibold">{analytics.inactive}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Category Breakdown */}
+        {Object.keys(categoryBreakdown).length > 0 && (
+          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 mb-8 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-50"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="font-bold text-xl">Category Distribution</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {Object.entries(categoryBreakdown).map(([category, count]) => (
+                  <div key={category} className="bg-gradient-to-br from-primary/5 to-secondary/5 p-4 rounded-xl border border-border/50 hover:border-primary/50 transition-all duration-300 group">
+                    <div className="flex items-center justify-between mb-2">
+                      <ShoppingBag className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
+                      <span className="text-2xl font-bold text-primary">{count}</span>
+                    </div>
+                    <p className="text-sm text-foreground font-medium capitalize truncate">{category.replace('-', ' ')}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
         <div className="space-y-6">
             <div className="glass-card border-2 border-white/30 shadow-2xl rounded-3xl overflow-hidden backdrop-blur-2xl">
               <div className="bg-gradient-to-r from-primary/10 via-primary-glow/10 to-secondary/10 border-b border-white/20 p-6 rounded-t-3xl">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
                   <div>
                 <h2 className="text-gradient text-3xl font-bold mb-2 bg-clip-text text-transparent">
                   Product Management
@@ -403,6 +573,17 @@ const SupplierProductDashboard = () => {
                     <Plus className="w-5 h-5 mr-2" />
                     Add Product
                   </Button>
+                </div>
+                
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search products by name or category..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-12 h-12 border-2 border-white/30 bg-white/50 dark:bg-black/30 backdrop-blur-xl rounded-xl"
+                  />
                 </div>
               </div>
               <div className="p-6">
@@ -428,7 +609,7 @@ const SupplierProductDashboard = () => {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                       <div
                         key={product._id}
                         className="glass-card border-2 border-white/30 rounded-3xl p-6 hover:shadow-3xl transition-all duration-500 backdrop-blur-2xl group hover:-translate-y-2 relative overflow-hidden"
@@ -510,16 +691,16 @@ const SupplierProductDashboard = () => {
                 </p>
                 
                 {/* Autocomplete Suggestions Dropdown */}
-                {showProductSuggestions && filteredProducts.length > 0 && (
+                {showProductSuggestions && productSuggestions.length > 0 && (
                   <div className="absolute z-50 w-full mt-2 max-h-80 overflow-y-auto bg-white dark:bg-gray-900 border-2 border-primary/30 rounded-xl shadow-2xl animate-in fade-in slide-in-from-top-2">
                     <div className="p-2 border-b border-border/50 bg-primary/5">
                       <p className="text-xs font-semibold text-primary flex items-center gap-2">
                         <Package className="w-4 h-4" />
-                        {filteredProducts.length} Products Found - Click to auto-fill
+                        {productSuggestions.length} Products Found - Click to auto-fill
                       </p>
                     </div>
                     <div className="max-h-72 overflow-y-auto">
-                      {filteredProducts.slice(0, 10).map((product) => (
+                      {productSuggestions.slice(0, 10).map((product) => (
                         <button
                           key={product.id}
                           type="button"
@@ -553,10 +734,10 @@ const SupplierProductDashboard = () => {
                         </button>
                       ))}
                     </div>
-                    {filteredProducts.length > 10 && (
+                    {productSuggestions.length > 10 && (
                       <div className="p-2 border-t border-border/50 bg-muted/50">
                         <p className="text-xs text-center text-muted-foreground">
-                          Showing 10 of {filteredProducts.length} results. Type more to refine search.
+                          Showing 10 of {productSuggestions.length} results. Type more to refine search.
                         </p>
                       </div>
                     )}
