@@ -785,64 +785,6 @@ const SupplierProductDashboard = () => {
           </div>
         </div>
 
-        {/* Category Breakdown - Attractive Premium Grid */}
-        {Object.keys(categoryBreakdown).length > 0 && (
-          <div className="glass-card border-2 border-gradient rounded-3xl p-8 backdrop-blur-3xl hover:shadow-2xl transition-all duration-300 relative overflow-hidden bg-gradient-to-br from-white/40 via-white/20 to-white/30 dark:from-white/5 dark:via-transparent dark:to-white/5">
-            {/* Enhanced Background Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-secondary/8"></div>
-            
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center border-2 border-white/50 shadow-lg hover:scale-110 transition-transform">
-                    <BarChart3 className="w-7 h-7 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-2xl text-foreground">Category Distribution</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Your product catalog breakdown</p>
-                  </div>
-                </div>
-                <Badge className="bg-gradient-to-r from-primary to-secondary text-white border-0 font-bold text-base px-4 py-2 shadow-lg rounded-xl">{Object.keys(categoryBreakdown).length} Categories</Badge>
-              </div>
-              
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {Object.entries(categoryBreakdown).map(([category, count], index) => {
-                  const totalProducts = products.length;
-                  const percentage = totalProducts > 0 ? ((count / totalProducts) * 100).toFixed(1) : 0;
-                  
-                  return (
-                    <div 
-                      key={category} 
-                      className="glass-card border-2 border-white/40 rounded-2xl p-5 hover:border-primary/80 hover:shadow-2xl transition-all duration-300 group relative overflow-hidden backdrop-blur-xl bg-white/15 dark:bg-white/5 hover:bg-white/25 dark:hover:bg-white/10 animate-in fade-in slide-in-from-bottom-4"
-                      style={{
-                        animationDelay: `${index * 100}ms`,
-                        animationDuration: '500ms'
-                      }}
-                    >
-                      {/* Gradient overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-secondary/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
-                      <div className="relative z-10 flex flex-col items-center text-center space-y-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center border-2 border-white/50 group-hover:scale-125 group-hover:shadow-lg transition-all duration-300 shadow-md animate-bounce" style={{
-                          animationDelay: `${index * 150}ms`
-                        }}>
-                          <Package className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-1 animate-pulse" style={{
-                            animationDelay: `${index * 200}ms`
-                          }}>{count}</p>
-                          <p className="text-xs text-muted-foreground font-semibold capitalize mb-2">{category.replace('-', ' ')}</p>
-                          <div className="text-xs font-bold px-2 py-1 rounded-lg bg-primary/15 text-primary transition-all group-hover:bg-primary/30">{percentage}%</div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Tabs */}
         <div className="space-y-6">
