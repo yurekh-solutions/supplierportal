@@ -375,53 +375,73 @@ const SupplierProductDashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
         {/* Analytics Overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Statistics Cards */}
-          <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {/* Statistics Cards - 2x2 Grid */}
+          <div className="lg:col-span-2 grid grid-cols-2 gap-6">
             {/* Total Products */}
-            <div className="glass-card border-2 border-primary/30 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 relative overflow-hidden">
+            <div className="glass-card border-2 border-primary/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <Package className="w-6 h-6 text-white" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <Package className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground font-medium mb-1">Total Products</p>
+                    <p className="text-4xl font-bold text-foreground">{analytics.total}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-muted-foreground font-medium mb-1">Total</p>
-                <p className="text-3xl font-bold text-foreground">{analytics.total}</p>
+                <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
               </div>
             </div>
 
             {/* Active Products */}
-            <div className="glass-card border-2 border-green-300/50 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-green-50/30 relative overflow-hidden">
+            <div className="glass-card border-2 border-green-300/50 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-green-50/30 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <CheckCircle className="w-6 h-6 text-white" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <CheckCircle className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-green-700 font-medium mb-1">Active Products</p>
+                    <p className="text-4xl font-bold text-green-600">{analytics.active}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-green-700 font-medium mb-1">Active</p>
-                <p className="text-3xl font-bold text-green-600">{analytics.active}</p>
+                <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full"></div>
               </div>
             </div>
 
             {/* Pending Products */}
-            <div className="glass-card border-2 border-yellow-300/50 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-yellow-50/30 relative overflow-hidden">
+            <div className="glass-card border-2 border-yellow-300/50 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-yellow-50/30 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 via-transparent to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <Clock className="w-6 h-6 text-white" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <Clock className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-yellow-700 font-medium mb-1">Pending Review</p>
+                    <p className="text-4xl font-bold text-yellow-600">{analytics.pending}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-yellow-700 font-medium mb-1">Pending</p>
-                <p className="text-3xl font-bold text-yellow-600">{analytics.pending}</p>
+                <div className="h-1 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full"></div>
               </div>
             </div>
 
             {/* Rejected Products */}
-            <div className="glass-card border-2 border-red-300/50 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-red-50/30 relative overflow-hidden">
+            <div className="glass-card border-2 border-red-300/50 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-2xl transition-all duration-500 group hover:-translate-y-1 bg-red-50/30 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 via-transparent to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <AlertCircle className="w-6 h-6 text-white" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                    <AlertCircle className="w-7 h-7 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-red-700 font-medium mb-1">Rejected Items</p>
+                    <p className="text-4xl font-bold text-red-600">{analytics.rejected}</p>
+                  </div>
                 </div>
-                <p className="text-sm text-red-700 font-medium mb-1">Rejected</p>
-                <p className="text-3xl font-bold text-red-600">{analytics.rejected}</p>
+                <div className="h-1 bg-gradient-to-r from-red-500 to-pink-600 rounded-full"></div>
               </div>
             </div>
           </div>
