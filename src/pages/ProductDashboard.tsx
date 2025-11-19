@@ -96,9 +96,10 @@ const SupplierProductDashboard = () => {
   const [showAutoReplyChatbox, setShowAutoReplyChatbox] = useState(false);
   const [autoReplyMessages, setAutoReplyMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
   const [autoReplyInput, setAutoReplyInput] = useState('');
-  const [autoReplyStep, setAutoReplyStep] = useState<'menu' | 'select-type' | 'write-response' | 'confirm' | 'ai-suggestion'>('menu');
+  const [autoReplyStep, setAutoReplyStep] = useState<'menu' | 'select-type' | 'write-response' | 'confirm' | 'ai-suggestion' | 'view-saved'>('menu');
   const [autoReplyConfig, setAutoReplyConfig] = useState({messageType: '', response: '', triggerKeywords: '', useAI: false});
   const [autoReplyLoading, setAutoReplyLoading] = useState(false);
+  const [savedAutoReplies, setSavedAutoReplies] = useState<any[]>([]);
   const chatInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLDivElement>(null);
 
@@ -175,17 +176,45 @@ const SupplierProductDashboard = () => {
     setAutoReplyMessages(prev => [...prev, userMessage]);
 
     setTimeout(() => {
-      if (action === 'Create New Response') {
+      if (action === 'Create Auto-Reply') {
         setAutoReplyStep('select-type');
         addBotMessage('Great! What type of inquiry would you like to respond to? Choose one:\n\n1️⃣ General Inquiry\n2️⃣ Price Quote Request\n3️⃣ Product Availability\n4️⃣ Custom Message');
-      } else if (action === 'View Existing Responses') {
-        addBotMessage('You currently have no saved auto-replies. Let\'s create your first one! 🚀');
+      } else if (action === 'View Saved Replies') {
+        fetchAndShowSavedReplies();
+      }
+    }, 300);
+  };
+
+  const fetchAndShowSavedReplies = async () => {
+    try {
+      const response = await fetch(`${API_URL}/auto-replies`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await response.json();
+      
+      if (data.success && data.data && data.data.length > 0) {
+        setSavedAutoReplies(data.data);
+        setAutoReplyStep('view-saved');
+        
+        let message = '📋 Your Saved Auto-Replies:\n\n';
+        data.data.forEach((reply: any, idx: number) => {
+          const emoji = reply.isActive ? '✅' : '❌';
+          const typeDisplay = reply.messageType.replace('-', ' ').toUpperCase();
+          message += `${idx + 1}. ${emoji} ${typeDisplay}\n   "${reply.responseText.substring(0, 50)}..."\n\n`;
+        });
+        message += 'Reply "Create New" to add another, or "Back" to go to menu.';
+        addBotMessage(message);
+      } else {
+        addBotMessage('📭 You don\'t have any saved auto-replies yet. Let\'s create your first one! 🚀');
         setTimeout(() => {
           setAutoReplyStep('select-type');
           addBotMessage('What type of inquiry would you like to respond to?\n\n1️⃣ General Inquiry\n2️⃣ Price Quote Request\n3️⃣ Product Availability\n4️⃣ Custom Message');
         }, 600);
       }
-    }, 300);
+    } catch (error) {
+      console.error('Error fetching saved replies:', error);
+      addBotMessage('❌ Error loading saved replies. Please try again.');
+    }
   };
 
   const handleMessageTypeSelect = (type: string) => {
@@ -388,6 +417,14 @@ Does this look good? Reply YES to save or NO to edit.`);
       return;
     } else if (autoReplyStep === 'confirm') {
       handleConfirmReply(autoReplyInput);
+    } else if (autoReplyStep === 'view-saved') {
+      if (autoReplyInput.toLowerCase() === 'create new') {
+        setAutoReplyStep('select-type');
+        addBotMessage('What type would you like to create?\n\n1️⃣ General Inquiry\n2️⃣ Price Quote Request\n3️⃣ Product Availability\n4️⃣ Custom Message');
+      } else if (autoReplyInput.toLowerCase() === 'back') {
+        setAutoReplyStep('menu');
+        addBotMessage('Hello! 👋 What would you like to do?');
+      }
     }
 
     setAutoReplyInput('');
@@ -1790,15 +1827,15 @@ Does this look good? Reply YES to save or NO to edit.`);
             {autoReplyStep === 'menu' && autoReplyMessages.length > 0 && (
               <div className="flex flex-col gap-2 mt-4">
                 <Button
-                  onClick={() => handleAutoReplyAction('Create New Response')}
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl text-sm py-3 font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  onClick={() => handleAutoReplyAction('Create Auto-Reply')}
+                  className="w-full bg-gradient-to-r from-primary via-primary/90 to-secondary hover:from-primary/90 hover:via-primary/80 hover:to-secondary/90 text-white rounded-2xl text-sm py-3 font-semibold transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 border border-white/20"
                 >
                   <span className="text-lg">✨</span>
                   <span>Create Auto-Reply</span>
                 </Button>
                 <Button
-                  onClick={() => handleAutoReplyAction('View Existing Responses')}
-                  className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary text-white rounded-xl text-sm py-3 font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                  onClick={() => handleAutoReplyAction('View Saved Replies')}
+                  className="w-full bg-gradient-to-r from-primary/20 via-primary/10 to-secondary/20 hover:from-primary/30 hover:via-primary/20 hover:to-secondary/30 text-foreground rounded-2xl text-sm py-3 font-semibold transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 border-2 border-primary/30"
                 >
                   <span className="text-lg">📋</span>
                   <span>View Saved Replies</span>
