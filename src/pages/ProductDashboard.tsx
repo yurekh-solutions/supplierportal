@@ -409,7 +409,7 @@ const SupplierProductDashboard = () => {
                   <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                     <span>📊 {analytics.total} Products</span>
                     <span>✅ {aiInsights.approvalRate}% Success</span>
-                    <span>📅 Member Since 2024</span>
+                    <span>📅 Member Since {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}</span>
                   </div>
                 </div>
               </div>
@@ -750,23 +750,34 @@ const SupplierProductDashboard = () => {
               </div>
               
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                {Object.entries(categoryBreakdown).map(([category, count]) => {
+                {Object.entries(categoryBreakdown).map(([category, count], index) => {
                   const totalProducts = products.length;
                   const percentage = totalProducts > 0 ? ((count / totalProducts) * 100).toFixed(1) : 0;
                   
                   return (
-                    <div key={category} className="glass-card border-2 border-white/40 rounded-2xl p-5 hover:border-primary/80 hover:shadow-2xl transition-all duration-300 group relative overflow-hidden backdrop-blur-xl bg-white/15 dark:bg-white/5 hover:bg-white/25 dark:hover:bg-white/10">
+                    <div 
+                      key={category} 
+                      className="glass-card border-2 border-white/40 rounded-2xl p-5 hover:border-primary/80 hover:shadow-2xl transition-all duration-300 group relative overflow-hidden backdrop-blur-xl bg-white/15 dark:bg-white/5 hover:bg-white/25 dark:hover:bg-white/10 animate-in fade-in slide-in-from-bottom-4"
+                      style={{
+                        animationDelay: `${index * 100}ms`,
+                        animationDuration: '500ms'
+                      }}
+                    >
                       {/* Gradient overlay */}
                       <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-secondary/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                       
                       <div className="relative z-10 flex flex-col items-center text-center space-y-3">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center border-2 border-white/50 group-hover:scale-125 group-hover:shadow-lg transition-all duration-300 shadow-md">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center border-2 border-white/50 group-hover:scale-125 group-hover:shadow-lg transition-all duration-300 shadow-md animate-bounce" style={{
+                          animationDelay: `${index * 150}ms`
+                        }}>
                           <Package className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <p className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-1">{count}</p>
+                          <p className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-1 animate-pulse" style={{
+                            animationDelay: `${index * 200}ms`
+                          }}>{count}</p>
                           <p className="text-xs text-muted-foreground font-semibold capitalize mb-2">{category.replace('-', ' ')}</p>
-                          <div className="text-xs font-bold px-2 py-1 rounded-lg bg-primary/15 text-primary">{percentage}%</div>
+                          <div className="text-xs font-bold px-2 py-1 rounded-lg bg-primary/15 text-primary transition-all group-hover:bg-primary/30">{percentage}%</div>
                         </div>
                       </div>
                     </div>
@@ -872,6 +883,17 @@ const SupplierProductDashboard = () => {
                               <p className="text-sm font-bold text-foreground mt-1">Recently</p>
                             </div>
                           </div>
+
+                          {/* Delete Button - Remove Product */}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full mt-4 border-2 border-red-300/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-500 transition-all duration-300 rounded-xl font-medium"
+                            onClick={() => handleDeleteProduct(product._id)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Remove Product
+                          </Button>
 
         {/* Product Detail Modal */}
         <ProductDetailModal 
