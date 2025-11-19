@@ -93,6 +93,10 @@ const SupplierProductDashboard = () => {
   const [productSuggestions, setProductSuggestions] = useState<typeof predefinedProducts>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showProductDetail, setShowProductDetail] = useState(false);
+  const [showAutoReplyChatbox, setShowAutoReplyChatbox] = useState(false);
+  const [autoReplyMessages, setAutoReplyMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
+  const [autoReplyInput, setAutoReplyInput] = useState('');
+  const chatInputRef = useRef<HTMLInputElement>(null);
   const productInputRef = useRef<HTMLDivElement>(null);
 
   const token = localStorage.getItem('supplierToken');
@@ -131,6 +135,49 @@ const SupplierProductDashboard = () => {
         duration: 3000
       });
     }
+  };
+
+  // Handle Auto Reply Manager chatbox
+  const handleAutoReplyOpen = () => {
+    setShowAutoReplyChatbox(true);
+    if (autoReplyMessages.length === 0) {
+      setAutoReplyMessages([{
+        id: 1,
+        text: 'Hello! I\'m your Auto Reply Manager. I help you set up automatic responses to customer inquiries. What would you like to do?',
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    }
+  };
+
+  const handleAutoReplyClose = () => {
+    setShowAutoReplyChatbox(false);
+  };
+
+  const handleAutoReplySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!autoReplyInput.trim()) return;
+
+    const userMessage = {
+      id: autoReplyMessages.length + 1,
+      text: autoReplyInput,
+      sender: 'user' as const,
+      timestamp: new Date()
+    };
+
+    setAutoReplyMessages([...autoReplyMessages, userMessage]);
+    setAutoReplyInput('');
+
+    // Simulate bot response
+    setTimeout(() => {
+      const botMessage = {
+        id: autoReplyMessages.length + 2,
+        text: 'Got it! I can help you set up automatic replies for customer inquiries. You can configure responses for different types of messages.',
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setAutoReplyMessages(prev => [...prev, botMessage]);
+    }, 500);
   };
 
   useEffect(() => {
@@ -710,9 +757,7 @@ const SupplierProductDashboard = () => {
             {/* Header - Synced with RitzYard */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg" style={{
-                  animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                }}>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
                   <Zap className="w-7 h-7 text-white" />
                 </div>
                 <div>
@@ -727,7 +772,10 @@ const SupplierProductDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Tool 1: Auto Reply Manager */}
               <button
-                onClick={() => handleToolClick('Auto Reply Manager', 'auto-reply', 'This feature will be available soon. Set up automatic responses to customer inquiries.')}
+                onClick={() => {
+                  handleToolClick('Auto Reply Manager', 'auto-reply', 'Set up automatic responses to customer inquiries.');
+                  handleAutoReplyOpen();
+                }}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-blue-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -848,9 +896,7 @@ const SupplierProductDashboard = () => {
           <div className="relative z-10">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg" style={{
-                  animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                }}>
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
                   <Sparkles className="w-7 h-7 text-white" />
                 </div>
                 <div>
@@ -1484,6 +1530,68 @@ const SupplierProductDashboard = () => {
                 Continue
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Auto Reply Manager Chatbox */}
+      {showAutoReplyChatbox && (
+        <div className="fixed bottom-0 right-0 w-96 h-screen md:h-[600px] md:rounded-t-3xl md:rounded-br-none rounded-tl-3xl glass-card border-2 border-white/30 bg-gradient-to-br from-primary/10 to-secondary/10 backdrop-blur-3xl overflow-hidden flex flex-col shadow-2xl z-50">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-primary/20 to-secondary/20 border-b border-white/20 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-blue-600" />
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground">Auto Reply Manager</h3>
+                <p className="text-xs text-muted-foreground">Set up auto-responses</p>
+              </div>
+            </div>
+            <button
+              onClick={handleAutoReplyClose}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5 text-foreground" />
+            </button>
+          </div>
+
+          {/* Messages Container */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {autoReplyMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-xs px-4 py-3 rounded-2xl ${
+                    msg.sender === 'user'
+                      ? 'bg-primary text-white rounded-br-none'
+                      : 'bg-white/20 text-foreground rounded-bl-none'
+                  }`}
+                >
+                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-xs mt-1 opacity-70">{msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Input Area */}
+          <div className="border-t border-white/20 p-4 bg-white/5">
+            <form onSubmit={handleAutoReplySubmit} className="flex gap-2">
+              <Input
+                ref={chatInputRef}
+                type="text"
+                placeholder="Type your message..."
+                value={autoReplyInput}
+                onChange={(e) => setAutoReplyInput(e.target.value)}
+                className="flex-1 bg-white/20 border-white/30 rounded-full text-foreground placeholder:text-muted-foreground"
+              />
+              <Button
+                type="submit"
+                className="bg-gradient-to-r from-primary to-secondary text-white rounded-full w-10 h-10 p-0 flex items-center justify-center hover:shadow-lg transition-all"
+              >
+                <span className="text-lg">↑</span>
+              </Button>
+            </form>
           </div>
         </div>
       )}
