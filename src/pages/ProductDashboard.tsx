@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Edit, Trash2, Eye, Package, TrendingUp, LogOut, MessageSquare, CheckCircle, Settings, CreditCard, X, Search, BarChart3, PieChart, DollarSign, AlertCircle, Clock, ShoppingBag } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, Package, TrendingUp, LogOut, MessageSquare, CheckCircle, Settings, CreditCard, X, Search, BarChart3, PieChart, DollarSign, AlertCircle, Clock, ShoppingBag, Sparkles, TrendingDown, Activity, Zap, Target } from 'lucide-react';
 import { products as predefinedProducts } from '../data';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
@@ -314,13 +314,30 @@ const SupplierProductDashboard = () => {
     return <Badge className={`${variants[status as keyof typeof variants]} capitalize font-medium px-3 py-1`}>{status}</Badge>;
   };
 
-  // Analytics calculations
+  // Analytics calculations with AI insights
   const analytics = {
     total: products.length,
     active: products.filter(p => p.status === 'active').length,
     pending: products.filter(p => p.status === 'pending').length,
     rejected: products.filter(p => p.status === 'rejected').length,
     inactive: products.filter(p => p.status === 'inactive').length,
+  };
+
+  // AI-powered insights
+  const aiInsights = {
+    approvalRate: analytics.total > 0 ? Math.round((analytics.active / analytics.total) * 100) : 0,
+    pendingTrend: analytics.pending > analytics.total * 0.5 ? 'high' : analytics.pending > analytics.total * 0.2 ? 'medium' : 'low',
+    topCategory: Object.entries(products.reduce((acc, product) => {
+      const category = product.category || 'Uncategorized';
+      acc[category] = (acc[category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>)).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A',
+    recommendations: [
+      analytics.pending > 5 ? '⚡ High pending items - Consider reviewing product details' : null,
+      analytics.active === 0 && analytics.total > 0 ? '🎯 No active products - Follow up with admin team' : null,
+      analytics.total < 5 ? '📦 Add more products to increase visibility' : null,
+      analytics.rejected > 0 ? '🔍 Review rejected items and resubmit with corrections' : null,
+    ].filter(Boolean),
   };
 
   const categoryBreakdown = products.reduce((acc, product) => {
@@ -373,188 +390,242 @@ const SupplierProductDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
-        {/* Analytics Overview - Clean Professional Design */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Statistics Cards - 2x2 Grid - Minimalist Design */}
-          <div className="lg:col-span-2 grid grid-cols-2 gap-6">
-            {/* Total Products */}
-            <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Package className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground font-medium mb-1">Total Products</p>
-                    <p className="text-3xl font-bold text-foreground">{analytics.total}</p>
-                  </div>
-                </div>
+        {/* AI Insights Banner */}
+        {aiInsights.recommendations.length > 0 && (
+          <div className="glass-card border-2 border-primary/30 p-4 rounded-2xl backdrop-blur-2xl mb-6 relative overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-purple-500/10 to-secondary/10"></div>
+            <div className="relative z-10 flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 animate-pulse">
+                <Sparkles className="w-5 h-5 text-white" />
               </div>
-            </div>
-
-            {/* Active Products */}
-            <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-green-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <CheckCircle className="w-6 h-6 text-green-600" />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-green-700 dark:text-green-400 font-medium mb-1">Active Products</p>
-                    <p className="text-3xl font-bold text-green-600">{analytics.active}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Pending Products */}
-            <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-orange-500/5"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-yellow-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Clock className="w-6 h-6 text-yellow-600" />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-yellow-700 dark:text-yellow-400 font-medium mb-1">Pending Review</p>
-                    <p className="text-3xl font-bold text-yellow-600">{analytics.pending}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Rejected Products */}
-            <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 group relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-pink-500/5"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <AlertCircle className="w-6 h-6 text-red-600" />
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-red-700 dark:text-red-400 font-medium mb-1">Rejected Items</p>
-                    <p className="text-3xl font-bold text-red-600">{analytics.rejected}</p>
-                  </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-foreground mb-2 flex items-center gap-2">
+                  AI-Powered Insights
+                  <Badge className="bg-gradient-to-r from-primary to-secondary text-white text-xs">SMART</Badge>
+                </h3>
+                <div className="space-y-1.5">
+                  {aiInsights.recommendations.slice(0, 2).map((rec, idx) => (
+                    <p key={idx} className="text-sm text-muted-foreground leading-relaxed">{rec}</p>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
+        )}
 
-          {/* Status Distribution - Simplified Elegant Design */}
-          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+        {/* Compact Analytics - Single Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+          {/* Total Products */}
+          <div className="glass-card border-2 border-white/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-primary" />
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Package className="w-4 h-4 text-primary" />
                 </div>
-                <h3 className="font-bold text-lg text-foreground">Status Overview</h3>
+                <p className="text-xs text-muted-foreground font-medium">Total</p>
+              </div>
+              <p className="text-2xl font-bold text-foreground">{analytics.total}</p>
+            </div>
+          </div>
+
+          {/* Active */}
+          <div className="glass-card border-2 border-white/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 via-transparent to-emerald-500/5"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                </div>
+                <p className="text-xs text-green-700 dark:text-green-400 font-medium">Active</p>
+              </div>
+              <p className="text-2xl font-bold text-green-600">{analytics.active}</p>
+            </div>
+          </div>
+
+          {/* Pending */}
+          <div className="glass-card border-2 border-white/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-orange-500/5"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-yellow-600" />
+                </div>
+                <p className="text-xs text-yellow-700 dark:text-yellow-400 font-medium">Pending</p>
+              </div>
+              <p className="text-2xl font-bold text-yellow-600">{analytics.pending}</p>
+            </div>
+          </div>
+
+          {/* Rejected */}
+          <div className="glass-card border-2 border-white/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-pink-500/5"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                </div>
+                <p className="text-xs text-red-700 dark:text-red-400 font-medium">Rejected</p>
+              </div>
+              <p className="text-2xl font-bold text-red-600">{analytics.rejected}</p>
+            </div>
+          </div>
+
+          {/* Approval Rate - AI Metric */}
+          <div className="glass-card border-2 border-primary/30 p-4 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-secondary/10"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                  <Target className="w-4 h-4 text-primary" />
+                </div>
+                <p className="text-xs text-primary font-medium">Success</p>
+              </div>
+              <p className="text-2xl font-bold text-primary">{aiInsights.approvalRate}%</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Animated Progress Overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Status Progress Bars */}
+          <div className="glass-card border-2 border-white/30 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="font-bold text-lg text-foreground">Status Distribution</h3>
               </div>
               
-              {/* Elegant List View Instead of Pie Chart */}
               <div className="space-y-4">
+                {/* Active Progress */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
                       <span className="text-muted-foreground font-medium">Active</span>
                     </div>
-                    <span className="font-bold text-foreground">{analytics.active}</span>
+                    <span className="font-bold text-foreground">{analytics.active} / {analytics.total}</span>
                   </div>
-                  <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
+                      className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-1000 ease-out animate-in slide-in-from-left"
                       style={{width: `${analytics.total > 0 ? (analytics.active / analytics.total) * 100 : 0}%`}}
                     ></div>
                   </div>
                 </div>
 
+                {/* Pending Progress */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-yellow-500"></div>
-                      <span className="text-muted-foreground font-medium">Pending</span>
+                      <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" style={{animationDelay: '0.2s'}}></div>
+                      <span className="text-muted-foreground font-medium">Pending Review</span>
                     </div>
-                    <span className="font-bold text-foreground">{analytics.pending}</span>
+                    <span className="font-bold text-foreground">{analytics.pending} / {analytics.total}</span>
                   </div>
-                  <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full transition-all duration-500"
-                      style={{width: `${analytics.total > 0 ? (analytics.pending / analytics.total) * 100 : 0}%`}}
+                      className="h-full bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full transition-all duration-1000 ease-out animate-in slide-in-from-left"
+                      style={{width: `${analytics.total > 0 ? (analytics.pending / analytics.total) * 100 : 0}%`, animationDelay: '0.2s'}}
                     ></div>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                      <span className="text-muted-foreground font-medium">Rejected</span>
+                {/* Rejected Progress */}
+                {analytics.rejected > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                        <span className="text-muted-foreground font-medium">Rejected</span>
+                      </div>
+                      <span className="font-bold text-foreground">{analytics.rejected} / {analytics.total}</span>
                     </div>
-                    <span className="font-bold text-foreground">{analytics.rejected}</span>
+                    <div className="w-full bg-muted/30 rounded-full h-2.5 overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-red-500 to-pink-500 rounded-full transition-all duration-1000 ease-out animate-in slide-in-from-left"
+                        style={{width: `${analytics.total > 0 ? (analytics.rejected / analytics.total) * 100 : 0}%`, animationDelay: '0.4s'}}
+                      ></div>
+                    </div>
                   </div>
-                  <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-red-500 to-pink-500 rounded-full transition-all duration-500"
-                      style={{width: `${analytics.total > 0 ? (analytics.rejected / analytics.total) * 100 : 0}%`}}
-                    ></div>
-                  </div>
-                </div>
+                )}
+              </div>
+            </div>
+          </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                      <span className="text-muted-foreground font-medium">Inactive</span>
-                    </div>
-                    <span className="font-bold text-foreground">{analytics.inactive}</span>
-                  </div>
-                  <div className="w-full bg-muted/30 rounded-full h-2 overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-gray-400 to-gray-500 rounded-full transition-all duration-500"
-                      style={{width: `${analytics.total > 0 ? (analytics.inactive / analytics.total) * 100 : 0}%`}}
-                    ></div>
-                  </div>
+          {/* Quick Actions & Top Category */}
+          <div className="glass-card border-2 border-white/30 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
+                <h3 className="font-bold text-lg text-foreground">Quick Insights</h3>
               </div>
 
-              {/* Total Summary */}
-              <div className="mt-6 pt-4 border-t border-border/50">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted-foreground">Total Products</span>
-                  <span className="text-2xl font-bold text-primary">{analytics.total}</span>
+              <div className="space-y-4">
+                {/* Top Category */}
+                <div className="glass-card border border-white/20 p-4 rounded-xl hover:border-primary/30 transition-all">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs text-muted-foreground font-medium">Top Category</p>
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                  </div>
+                  <p className="text-lg font-bold text-foreground capitalize">{aiInsights.topCategory.replace('-', ' ')}</p>
                 </div>
+
+                {/* Pending Alert */}
+                {analytics.pending > 0 && (
+                  <div className="glass-card border border-yellow-200/50 bg-yellow-50/30 p-4 rounded-xl">
+                    <div className="flex items-start gap-3">
+                      <Clock className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-semibold text-yellow-800 mb-1">Pending Approval</p>
+                        <p className="text-xs text-yellow-700">{analytics.pending} product{analytics.pending > 1 ? 's' : ''} awaiting admin review</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Quick Action Button */}
+                <Button
+                  onClick={() => navigate('/products/add')}
+                  className="w-full bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl hover:scale-105 text-white font-semibold transition-all duration-300 rounded-xl"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add New Product
+                </Button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Category Breakdown - Minimalist Cards */}
+        {/* Category Breakdown - Compact Grid */}
         {Object.keys(categoryBreakdown).length > 0 && (
-          <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 mb-8 relative overflow-hidden">
+          <div className="glass-card border-2 border-white/30 p-5 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 mb-6 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <ShoppingBag className="w-5 h-5 text-primary" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <ShoppingBag className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="font-bold text-lg text-foreground">Category Distribution</h3>
                 </div>
-                <h3 className="font-bold text-xl text-foreground">Category Distribution</h3>
+                <Badge className="bg-primary/10 text-primary border-0">{Object.keys(categoryBreakdown).length} Categories</Badge>
               </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                 {Object.entries(categoryBreakdown).map(([category, count]) => (
-                  <div key={category} className="glass-card border border-white/20 p-4 rounded-xl hover:border-primary/30 transition-all duration-300 group">
-                    <div className="flex flex-col items-center text-center space-y-2">
-                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Package className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-foreground">{count}</p>
-                        <p className="text-xs text-muted-foreground font-medium capitalize truncate">{category.replace('-', ' ')}</p>
-                      </div>
+                  <div key={category} className="glass-card border border-white/20 p-3 rounded-xl hover:border-primary/30 transition-all duration-300 group text-center">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform">
+                      <Package className="w-4 h-4 text-primary" />
                     </div>
+                    <p className="text-xl font-bold text-foreground mb-0.5">{count}</p>
+                    <p className="text-xs text-muted-foreground font-medium capitalize truncate" title={category.replace('-', ' ')}>{category.replace('-', ' ')}</p>
                   </div>
                 ))}
               </div>
