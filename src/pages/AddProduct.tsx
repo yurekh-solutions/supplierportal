@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, X, Upload, Send, Package, Home, Zap, Award, TrendingUp, CheckCircle, MapPin, Clock, Lightbulb, Star, Globe } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
@@ -26,6 +26,7 @@ interface Supplier {
 
 const AddProduct = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
@@ -34,6 +35,10 @@ const AddProduct = () => {
   const [suggestions, setSuggestions] = useState<typeof predefinedProducts>([]);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [userProducts, setUserProducts] = useState<any[]>([]);
+  const [showOtherCategoryModal, setShowOtherCategoryModal] = useState(false);
+  const [otherCategoryInput, setOtherCategoryInput] = useState('');
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [submissionType, setSubmissionType] = useState<'product' | 'category'>('product');
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -65,6 +70,12 @@ const AddProduct = () => {
     fetchCategories();
     fetchSuppliers();
     fetchUserProducts();
+  
+    // Handle auto-fill from ProductDashboard navigation
+    const state = location.state as any;
+    if (state?.selectedProduct) {
+      handleSelectProduct(state.selectedProduct);
+    }
   }, []);
 
   const fetchCategories = async () => {
@@ -86,7 +97,7 @@ const AddProduct = () => {
 
   const fetchUserProducts = async () => {
     try {
-      const response = await fetch(`${API_URL}/products`, {
+      const response = await fetch(`${API_URL}/products/my-products`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -121,14 +132,26 @@ const AddProduct = () => {
     const selectedProduct = predefinedProducts.find(p => p.name === productForm.name);
     
     if (!selectedProduct) {
-      return [];
+      // Return default featured products if no product is selected
+      const defaultProducts = predefinedProducts.slice(0, 4);
+      return shuffleArray(defaultProducts);
     }
     
     // Get all products in the same category, excluding the current product
     const recommendedProducts = predefinedProducts
       .filter(p => p.category === selectedProduct.category && p.name !== selectedProduct.name);
     
-    return recommendedProducts; // Return ALL products, not just 4
+    // Shuffle and return up to 4 products
+    return shuffleArray(recommendedProducts).slice(0, 4);
+  };
+
+  const shuffleArray = (array: typeof predefinedProducts) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   };
 
   const getRecommendedProductsForDropdown = () => {
@@ -193,6 +216,44 @@ const AddProduct = () => {
     setSuggestions([]);
   };
 
+  const handleOtherCategorySubmit = async () => {
+    if (!otherCategoryInput.trim()) {
+      toast({ title: 'Error', description: 'Please enter a category name', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/categories/request`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: otherCategoryInput.trim(),
+          slug: otherCategoryInput.trim().toLowerCase().replace(/\s+/g, '-')
+        })
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setSubmissionType('category');
+        setSubmissionSuccess(true);
+        setProductForm({ ...productForm, category: 'pending-approval' });
+        setShowOtherCategoryModal(false);
+        setOtherCategoryInput('');
+        
+        // Auto-hide success message after 3 seconds
+        setTimeout(() => setSubmissionSuccess(false), 3000);
+      } else {
+        toast({ title: 'Error', description: data.message || 'Failed to submit category', variant: 'destructive' });
+      }
+    } catch (error) {
+      console.error('Error submitting category:', error);
+      toast({ title: 'Error', description: 'Failed to submit category for approval', variant: 'destructive' });
+    }
+  };
+
   const handleSubmit = async () => {
     if (!productForm.name || !productForm.category) {
       toast({ title: 'Error', description: 'Product name and category are required', variant: 'destructive' });
@@ -214,6 +275,14 @@ const AddProduct = () => {
       formDataToSend.append('pricing', productForm.pricing);
       formDataToSend.append('moq', productForm.moq);
       formDataToSend.append('leadTime', productForm.leadTime);
+      formDataToSend.append('materialStandard', productForm.materialStandard);
+      formDataToSend.append('packaging', productForm.packaging);
+      formDataToSend.append('testingCertificate', productForm.testingCertificate);
+      formDataToSend.append('brands', JSON.stringify(productForm.brands));
+      formDataToSend.append('grades', JSON.stringify(productForm.grades));
+      formDataToSend.append('delivery', productForm.delivery);
+      formDataToSend.append('quality', productForm.quality);
+      formDataToSend.append('availability', productForm.availability);
 
       if (productForm.imageFile) {
         const imageBlob = await fetch(productForm.imagePreview).then(r => r.blob());
@@ -230,8 +299,13 @@ const AddProduct = () => {
 
       const data = await response.json();
       if (data.success) {
-        toast({ title: 'Success', description: 'Product added to your account!' });
-        navigate('/products');
+        setSubmissionType('product');
+        setSubmissionSuccess(true);
+        // Auto-hide and navigate after 3 seconds
+        setTimeout(() => {
+          setSubmissionSuccess(false);
+          navigate('/products');
+        }, 3000);
       } else {
         throw new Error(data.message || 'Failed to add product');
       }
@@ -246,14 +320,14 @@ const AddProduct = () => {
     <div className="min-h-screen bg-[#f3f0ec] overflow-x-hidden" style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ background: 'white', borderBottom: '1px solid #e8dcd0' }}>
-        <div className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold" style={{ color: '#c1482b' }}>Add Product</h1>
-            <p className="text-sm mt-1" style={{ color: '#6b5d54' }}>Expand your product catalog and reach B2B buyers across India</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gradient">Add Product</h1>
+            <p className="text-xs sm:text-sm mt-1" style={{ color: '#6b5d54' }}>Expand your product catalog and reach B2B buyers across India</p>
           </div>
           <Button
             onClick={() => navigate('/products')}
-            className="rounded-lg font-medium border-2"
+            className="rounded-lg font-medium border-2 whitespace-nowrap w-full sm:w-auto"
             style={{ borderColor: '#c1482b', color: '#c1482b', background: 'white' }}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -264,20 +338,20 @@ const AddProduct = () => {
 
       {/* Main Content */}
       <div style={{ flex: 1, overflow: 'auto' }}>
-        <div className="w-full px-6 py-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="max-w-7xl mx-auto">
-            {/* Grid Layout - Form Left (2/3), Products Right (1/3) */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+            {/* Grid Layout - Responsive: 1 col mobile, 1 col tablet, 2 col desktop */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
               
-              {/* Form Column - 2/3 width */}
-              <div className="lg:col-span-2 bg-white rounded-2xl p-8" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <h3 className="text-2xl font-bold mb-2" style={{ color: '#c1482b' }}>Product Details</h3>
-                <p className="text-sm mb-6" style={{ color: '#6b5d54' }}>Fill in all required information for your industrial product listing</p>
+              {/* Form Column - Full on mobile, 2/3 on desktop */}
+              <div className="lg:col-span-2 bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gradient" style={{ color: '#c1482b' }}>Product Details</h3>
+                <p className="text-xs sm:text-sm mb-6" style={{ color: '#6b5d54' }}>Fill in all required information for your industrial product listing</p>
 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Product Name with Suggestions */}
                   <div className="relative">
-                    <Label className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>Product Name *</Label>
+                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Product Name *</Label>
                     <Input
                       type="text"
                       value={productForm.name}
@@ -286,7 +360,7 @@ const AddProduct = () => {
                         handleSearch(e.target.value);
                       }}
                       placeholder="Enter product name (e.g., TMT Bars, Steel Pipes, Cement)"
-                      className="mt-2 h-12 border rounded-lg text-sm px-4"
+                      className="mt-2 h-10 sm:h-12 border rounded-lg text-xs sm:text-sm px-3 sm:px-4"
                       style={{ borderColor: '#ddd', background: '#faf9f8', color: '#6b5d54' }}
                     />
                   </div>
@@ -378,15 +452,15 @@ const AddProduct = () => {
 )}
 
 
-                  {/* Category - 2 Column Grid */}
+                  {/* Category - Responsive Grid */}
                   <div>
-                    <Label className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>Category *</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
+                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Category *</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2 mt-2">
                       {categories.map((cat) => (
                         <button
                           key={cat.slug}
                           onClick={() => setProductForm({ ...productForm, category: cat.slug })}
-                          className="p-2 border rounded-lg text-sm font-medium transition-all"
+                          className="p-2 border rounded-lg text-xs sm:text-sm font-medium transition-all"
                           style={{
                             borderColor: productForm.category === cat.slug ? '#c1482b' : '#ddd',
                             backgroundColor: productForm.category === cat.slug ? '#c1482b' : '#faf9f8',
@@ -396,24 +470,37 @@ const AddProduct = () => {
                           {cat.name}
                         </button>
                       ))}
+                      {/* Other Category Button */}
+                      <button
+                        onClick={() => setShowOtherCategoryModal(true)}
+                        className="p-2 border rounded-lg text-xs sm:text-sm font-medium transition-all hover:scale-105"
+                        style={{
+                          borderColor: '#ddd',
+                          backgroundColor: '#faf9f8',
+                          color: '#c1482b',
+                          borderStyle: 'dashed'
+                        }}
+                      >
+                        + Other
+                      </button>
                     </div>
                   </div>
 
                   {/* Description */}
                   <div>
-                    <Label className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>Description *</Label>
+                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Description *</Label>
                     <Textarea
                       value={productForm.description}
                       onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                       placeholder="Describe your product specifications, applications, and benefits..."
                       rows={3}
-                      className="mt-2 border rounded-lg text-sm px-4 py-3"
+                      className="mt-2 border rounded-lg text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-3"
                       style={{ borderColor: '#ddd', background: '#faf9f8', color: '#6b5d54' }}
                     />
                   </div>
 
-                  {/* Grid Fields - 2 Columns */}
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Grid Fields - Responsive: 1 col mobile, 2 col tablet+ */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                       <Label className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>Price (₹)</Label>
                       <Input
@@ -510,7 +597,7 @@ const AddProduct = () => {
 
                   {/* Brands */}
                   <div>
-                    <Label className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>Brands</Label>
+                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Brands</Label>
                     <div className="mt-2 space-y-2">
                       {productForm.brands.map((brand, idx) => (
                         <div key={idx} className="flex gap-2">
@@ -550,7 +637,7 @@ const AddProduct = () => {
 
                   {/* Grades */}
                   <div>
-                    <Label className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>Grades/Specifications</Label>
+                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Grades/Specifications</Label>
                     <div className="mt-2 space-y-2">
                       {productForm.grades.map((grade, idx) => (
                         <div key={idx} className="flex gap-2">
@@ -590,7 +677,7 @@ const AddProduct = () => {
 
                   {/* Features */}
                   <div>
-                    <Label className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>Key Features</Label>
+                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Key Features</Label>
                     <div className="mt-2 space-y-2">
                       {productForm.features.map((feature, idx) => (
                         <div key={idx} className="flex gap-2">
@@ -630,7 +717,7 @@ const AddProduct = () => {
 
                   {/* Image Upload */}
                   <div>
-                    <Label className="font-semibold text-sm" style={{ color: '#1a1a1a' }}>Product Image</Label>
+                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Product Image</Label>
                     {productForm.imagePreview ? (
                       <div className="mt-2 relative w-full h-40 rounded-lg overflow-hidden border" style={{ borderColor: '#ddd' }}>
                         <img src={productForm.imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -666,16 +753,16 @@ const AddProduct = () => {
                   </div>
 
                   {/* Checkbox Agreement - MANDATORY */}
-                  <div className="flex items-start gap-3 p-4 rounded-lg" style={{ backgroundColor: '#faf9f8', borderLeft: '4px solid #c1482b' }}>
+                  <div className="flex items-start gap-3 p-3 sm:p-4 rounded-lg" style={{ backgroundColor: '#faf9f8', borderLeft: '4px solid #c1482b' }}>
                     <input
                       type="checkbox"
                       id="agree"
                       checked={agreeToTerms}
                       onChange={(e) => setAgreeToTerms(e.target.checked)}
-                      className="mt-1 w-4 h-4 cursor-pointer"
+                      className="mt-1 w-4 h-4 cursor-pointer flex-shrink-0"
                       style={{ accentColor: '#c1482b' }}
                     />
-                    <label htmlFor="agree" className="text-sm font-medium cursor-pointer" style={{ color: '#1a1a1a' }}>
+                    <label htmlFor="agree" className="text-xs sm:text-sm font-medium cursor-pointer" style={{ color: '#1a1a1a' }}>
                       I confirm that the product information is accurate and complete. *
                     </label>
                   </div>
@@ -695,22 +782,22 @@ const AddProduct = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={loading}
-                  className="w-full mt-8 py-3 rounded-lg text-white bg-gradient-to-br from-primary to-secondary  font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-lg"
+                  className=" bg-gradient-to-r from-primary via-primary-glow to-secondary  w-full mt-6 sm:mt-8 py-2.5 sm:py-3 rounded-lg text-white font-semibold flex items-center justify-center gap-2 transition-all hover:shadow-lg text-sm sm:text-base"
                   style={{
-                    
+                    backgroundColor: '#c1482b',
                     cursor: loading ? 'not-allowed' : 'pointer',
-                    opacity: 1
+                    opacity: loading ? 0.6 : 1
                   }}
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 h-4" />
                   <span>{loading ? 'Adding Product...' : 'Add to Account'}</span>
                 </button>
               </div>
 
-              {/* Products Column - 1/3 width */}
-              <div className="bg-white rounded-2xl p-8" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
-                <h4 className="text-2xl font-bold mb-6" style={{ color: '#c1482b' }}>Popular Products</h4>
-                <div className="space-y-4">
+              {/* Products Column - 1/3 width, Hidden on mobile */}
+              <div className="hidden lg:block bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 h-fit sticky top-8" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+                <h4 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#c1482b' }}>Popular Products</h4>
+                <div className="space-y-3 sm:space-y-4">
                   {predefinedProducts.slice(0, 6).map((product, idx) => {
                     const icons = [Package, Home, Zap, Award, TrendingUp, CheckCircle];
                     const gradients = [
@@ -727,15 +814,15 @@ const AddProduct = () => {
                       <div
                         key={product.id}
                         onClick={() => handleSelectProduct(product)}
-                        className="p-4 rounded-xl border transition-all cursor-pointer hover:shadow-lg group"
+                        className="p-3 sm:p-4 rounded-xl border transition-all cursor-pointer hover:shadow-lg group"
                         style={{ borderColor: '#e8dcd0', backgroundColor: '#faf9f8' }}
                       >
                         <div className="flex items-start gap-3">
-                          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                            <IconComponent className="w-5 h-5" />
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br ${gradient} flex items-center justify-center text-white flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                            <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm text-foreground truncate group-hover:text-primary transition-colors">{product.name}</p>
+                            <p className="font-bold text-xs sm:text-sm text-foreground truncate group-hover:text-primary transition-colors">{product.name}</p>
                             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{product.description}</p>
                             <button className="mt-2 text-xs font-semibold" style={{ color: '#c1482b' }}>
                               Select →
@@ -784,74 +871,7 @@ const AddProduct = () => {
                     </div>
                   )}
 
-                  {/* Recommended Products by AI - Enhanced Design */}
-                  {userProducts.length > 0 && (
-                    <div className="pt-6 border-t" style={{ borderColor: '#e8dcd0' }}>
-                      <div className="flex items-center gap-2 mb-4 px-2">
-                        <p className="text-lg font-bold" style={{ color: '#c1482b' }}>✨ Recommended by AI</p>
-                        <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#ffe4d4', color: '#c1482b' }}>Smart Match</span>
-                      </div>
-                      <p className="text-xs mb-4 px-2" style={{ color: '#6b5d54' }}>AI-powered product recommendations based on your latest additions</p>
-                      <div className="grid grid-cols-1 gap-4">
-                        {userProducts.map((product) => (
-                          <div
-                            key={product._id}
-                            onClick={() => handleSelectProduct({
-                              id: product._id,
-                              name: product.name,
-                              category: product.category,
-                              description: product.description,
-                              image: product.image || '',
-                              features: [],
-                              specifications: {}
-                            } as any)}
-                            className="group cursor-pointer rounded-xl overflow-hidden transition-all duration-300 hover:shadow-lg"
-                            style={{ borderColor: '#e8dcd0', backgroundColor: 'white', border: '2px solid #e8dcd0' }}
-                          >
-                            {/* Image Container - Large */}
-                            <div className="relative w-full h-40 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
-                              {(product as any)?.image ? (
-                                <img
-                                  src={(product as any)?.image}
-                                  alt={product.name}
-                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                  onError={(e) => {
-                                    e.currentTarget.src = `https://placehold.co/300x200?text=${encodeURIComponent(product.name.substring(0, 15))}`;
-                                  }}
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#f3f0ec' }}>
-                                  <Package className="w-12 h-12" style={{ color: '#c1482b' }} />
-                                </div>
-                              )}
-                            </div>
-                            {/* Content Section */}
-                            <div className="p-4">
-                              <p className="font-bold text-sm text-foreground mb-1 line-clamp-2">
-                                {product.name}
-                              </p>
-                              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                                {product.description}
-                              </p>
-                              {product.category && (
-                                <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: '#e8dcd0', color: '#6b5d54' }}>
-                                  {product.category}
-                                </span>
-                              )}
-                              <button
-                                className="mt-3 text-xs font-semibold py-2 px-3 rounded-lg transition-all w-full text-white"
-                                style={{ backgroundColor: '#c1482b' }}
-                                onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#a53019'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#c1482b'; }}
-                              >
-                                Add Product
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                
                 </div>
                 
                 {/* Why List Your Products - Info Card Style */}
@@ -954,6 +974,136 @@ const AddProduct = () => {
           </div>
         </div>
       </div>
+
+      {/* Other Category Modal */}
+      {showOtherCategoryModal && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl animate-in zoom-in scale-95">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowOtherCategoryModal(false);
+                setOtherCategoryInput('');
+              }}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <X className="w-5 h-5" style={{ color: '#c1482b' }} />
+            </button>
+
+            {/* Title */}
+            <h3 className="text-2xl font-bold mb-2" style={{ color: '#c1482b' }}>Request New Category</h3>
+            <p className="text-sm mb-6" style={{ color: '#6b5d54' }}>Didn't find your category? Let us know and we'll add it after admin approval.</p>
+
+            {/* Input Field */}
+            <div className="mb-6">
+              <Label className="font-semibold text-sm mb-2 block" style={{ color: '#1a1a1a' }}>Category Name *</Label>
+              <Input
+                type="text"
+                value={otherCategoryInput}
+                onChange={(e) => setOtherCategoryInput(e.target.value)}
+                placeholder="e.g., Recycled Materials, Specialty Metals"
+                className="h-12 border rounded-lg text-sm px-4 w-full"
+                style={{ borderColor: '#ddd', background: '#faf9f8', color: '#6b5d54' }}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') handleOtherCategorySubmit();
+                }}
+              />
+            </div>
+
+            {/* Info Message */}
+            <div className="mb-6 p-3 rounded-lg" style={{ backgroundColor: '#ffe4d4', borderLeft: '4px solid #c1482b' }}>
+              <p className="text-xs" style={{ color: '#6b5d54' }}>
+                ✓ Your category request will be reviewed by our admin team within 24 hours
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowOtherCategoryModal(false);
+                  setOtherCategoryInput('');
+                }}
+                className="flex-1 py-2.5 px-4 border rounded-lg font-medium transition-all"
+                style={{
+                  borderColor: '#ddd',
+                  color: '#6b5d54',
+                  backgroundColor: '#faf9f8'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleOtherCategorySubmit}
+                className="flex-1 py-2.5 px-4 rounded-lg font-medium text-white transition-all hover:shadow-lg"
+                style={{ backgroundColor: '#c1482b' }}
+              >
+                Submit Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Popup */}
+      {submissionSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl animate-in zoom-in scale-95 pointer-events-auto" style={{
+            animation: 'slideDown 0.5s ease-out forwards'
+          }}>
+            {/* Success Icon */}
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#d4f7e8' }}>
+              <CheckCircle className="w-8 h-8" style={{ color: '#10B981' }} />
+            </div>
+
+            {/* Title */}
+            <h3 className="text-2xl font-bold text-center mb-2" style={{ color: '#10B981' }}>
+              {submissionType === 'product' ? '✅ Product Added Successfully!' : 'Submitted Successfully!'}
+            </h3>
+
+            {/* Description */}
+            <p className="text-center text-sm mb-6" style={{ color: '#6b5d54' }}>
+              {submissionType === 'product'
+                ? 'Your product has been submitted and is under admin review. You will be notified once it is approved.'
+                : 'Your category request has been submitted for admin approval. We\'ll review it within 24 hours and notify you of the outcome.'}
+            </p>
+
+            {/* Status Badge */}
+            <div className="mb-6 p-3 rounded-lg text-center" style={{ backgroundColor: '#d4f7e8' }}>
+              <p className="text-xs font-semibold" style={{ color: '#10B981' }}>
+                ⏳ Status: {submissionType === 'product' ? 'Under Admin Review' : 'Pending Admin Approval'}
+              </p>
+            </div>
+
+            {/* Action Button */}
+            <button
+              onClick={() => {
+                setSubmissionSuccess(false);
+                if (submissionType === 'product') {
+                  navigate('/products');
+                }
+              }}
+              className="w-full py-2.5 px-4 rounded-lg font-medium text-white transition-all hover:shadow-lg"
+              style={{ backgroundColor: '#c1482b' }}
+            >
+              {submissionType === 'product' ? 'Go to Products' : 'Got It!'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };
