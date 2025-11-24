@@ -16,6 +16,7 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import ProductDashboard from './pages/ProductDashboard';
+import ProductInquiries from './pages/ProductInquiries';
 import AddProduct from './pages/AddProduct';
 import Marketplace from './pages/Marketplace';
 import AIBusinessIntelligence from './pages/AIBusinessIntelligence';
@@ -69,7 +70,8 @@ function App() {
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/status" element={<SupplierStatus />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/products" element={<ProductDashboard />} /> 
+            <Route path="/products" element={<ProductDashboard />} />
+            <Route path="/products/inquiries" element={<ProductInquiries />} />
             <Route path="/products/add" element={<AddProduct />} />
             <Route path="/intelligence" element={<AIBusinessIntelligence />} />
             <Route path="/test" element={<TestPage />} />

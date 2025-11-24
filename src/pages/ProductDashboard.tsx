@@ -58,6 +58,7 @@ interface Product {
   };
   status: string;
   createdAt?: string;
+  image?: string;
 }
 
 const SupplierProductDashboard = () => {
@@ -126,16 +127,81 @@ const SupplierProductDashboard = () => {
   const [showAnalyticsHubChatbox, setShowAnalyticsHubChatbox] = useState(false);
   const [analyticsHubMessages, setAnalyticsHubMessages] = useState<Array<{id: number, text: string, sender: 'user' | 'bot', timestamp: Date}>>([]);
   const [analyticsHubInput, setAnalyticsHubInput] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const productInputRef = useRef<HTMLDivElement>(null);
 
   const token = localStorage.getItem('supplierToken');
   const user = JSON.parse(localStorage.getItem('supplierUser') || '{}');
+  
+  // Check for 401 Unauthorized and clear invalid tokens
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
+    // Clear mock tokens that start with 'test-supplier-token-'
+    if (token.startsWith('test-supplier-token-')) {
+      console.warn('Invalid mock token detected, clearing...');
+      localStorage.removeItem('supplierToken');
+      localStorage.removeItem('supplierUser');
+      toast({
+        title: 'Session Expired',
+        description: 'Please login again with valid credentials',
+        variant: 'destructive',
+      });
+      navigate('/login');
+    }
+  }, [token, navigate]);
+
+const getRecommendedProducts = () => {
+    // Get the selected product
+    const selectedProduct = predefinedProducts.find(p => p.name === productForm.name);
+    
+    if (!selectedProduct) {
+      // Return random featured products from all categories for dynamic feel
+      const shuffled = [...predefinedProducts].sort(() => Math.random() - 0.5);
+      return shuffled.slice(0, 4);
+    }
+    
+    // Get products from different categories (not just same category) for variety
+    const otherCategories = predefinedProducts.filter(p => p.category !== selectedProduct.category);
+    const sameCategory = predefinedProducts.filter(p => p.category === selectedProduct.category && p.name !== selectedProduct.name);
+    
+    // Mix products from same category and other categories for dynamic recommendations
+    const mixed = [
+      ...sameCategory.slice(0, 2),
+      ...otherCategories.sort(() => Math.random() - 0.5).slice(0, 2)
+    ];
+    
+    // Shuffle and return up to 4 products
+    return mixed.sort(() => Math.random() - 0.5).slice(0, 4);
+  };
+
+  // Handle redirecting to add product with auto-filled data including features
+  const handleAddProductWithAutofill = (product: typeof predefinedProducts[0]) => {
+    navigate('/products/add', {
+      state: {
+        selectedProduct: {
+          id: product.id,
+          name: product.name,
+          category: product.category,
+          description: product.description,
+          image: product.image,
+          features: product.features || [],
+          applications: product.applications || [],
+          specifications: product.specifications || {}
+        }
+      }
+    });
+  };
 
   // Handle tool click and send to API
   const handleToolClick = async (toolName: string, toolType: string, description: string) => {
     try {
       // Send to backend
-      const response = await fetch(`${API_URL}/tools/record-click`, {
+      const response = await fetch(`${API_URL}/automation/tools/record-click`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -210,12 +276,35 @@ const SupplierProductDashboard = () => {
     }, 300);
   };
 
+  // Handle 401 Unauthorized responses
+  const handleApiError = (error: any, context: string) => {
+    const errorMessage = error?.message || '';
+    if (errorMessage.includes('401') || errorMessage.includes('Unauthorized')) {
+      console.warn(`❌ 401 Unauthorized in ${context} - Session expired`);
+      localStorage.removeItem('supplierToken');
+      localStorage.removeItem('supplierUser');
+      toast({
+        title: 'Session Expired',
+        description: 'Your session has expired. Please login again.',
+        variant: 'destructive',
+      });
+      navigate('/login');
+      return true;
+    }
+    return false;
+  };
+
   const fetchAndShowSavedReplies = async () => {
     try {
-      const response = await fetch(`${API_URL}/auto-replies`, {
+      const response = await fetch(`${API_URL}/automation/auto-replies`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const data = await response.json();
+      
+      if (response.status === 401) {
+        handleApiError({ message: 'Unauthorized' }, 'fetchAndShowSavedReplies');
+        return;
+      }
       
       if (data.success && data.data && data.data.length > 0) {
         setSavedAutoReplies(data.data);
@@ -236,8 +325,9 @@ const SupplierProductDashboard = () => {
           addBotMessage('What type of inquiry would you like to respond to?\n\n1️⃣ General Inquiry\n2️⃣ Price Quote Request\n3️⃣ Product Availability\n4️⃣ Custom Message');
         }, 600);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching saved replies:', error);
+      if (handleApiError(error, 'fetchAndShowSavedReplies')) return;
       addBotMessage('❌ Error loading saved replies. Please try again.');
     }
   };
@@ -386,7 +476,7 @@ Does this look good? Reply YES to save or NO to edit.`);
 
       const saveAutoReply = async () => {
         try {
-          const response = await fetch(`${API_URL}/auto-replies`, {
+          const response = await fetch(`${API_URL}/automation/auto-replies`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -531,7 +621,7 @@ Does this look good? Reply YES to save or NO to edit.`);
   };
 
   // Lead Scoring Submit Handler
-  const handleLeadScoringSubmit = (e: React.FormEvent) => {
+  const handleLeadScoringSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!leadScoringInput.trim()) return;
 
@@ -544,17 +634,68 @@ Does this look good? Reply YES to save or NO to edit.`);
     setLeadScoringMessages(prev => [...prev, userMessage]);
     setLeadScoringInput('');
 
-    // Simulate bot response based on input
-    setTimeout(() => {
-      let response = '';
+    try {
       const input = leadScoringInput.toLowerCase();
-      
+      let response = '';
+
       if (input.includes('score') || input.includes('analyze')) {
-        response = '🎯 Analyzing your leads...\n\n📊 Lead Score Analysis:\n• Hot Leads: 5 (45% conversion potential)\n• Warm Leads: 8 (25% conversion potential)\n• Cold Leads: 12 (5% conversion potential)\n\nTop Priority: Enterprise inquiry from manufacturing sector';
-      } else if (input.includes('criteria')) {
-        response = '⚙️ Current Scoring Criteria:\n• Budget Size: 30%\n• Company Size: 25%\n• Industry Match: 20%\n• Response Time: 15%\n• Product Interest: 10%\n\nYou can customize these weights based on your business needs!';
+        // Fetch real leads from backend
+        const leadsResponse = await fetch(`${API_URL}/automation/leads`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const leadsData = await leadsResponse.json();
+        
+        if (leadsData.success && leadsData.leads) {
+          const hotLeads = leadsData.leads.filter((l: any) => l.score >= 80).length;
+          const warmLeads = leadsData.leads.filter((l: any) => l.score >= 60 && l.score < 80).length;
+          const coldLeads = leadsData.leads.filter((l: any) => l.score < 60).length;
+          const avgScore = Math.round(leadsData.leads.reduce((sum: number, l: any) => sum + (l.score || 0), 0) / leadsData.leads.length);
+          const topLead = leadsData.leads.sort((a: any, b: any) => (b.score || 0) - (a.score || 0))[0];
+          
+          response = `🎯 Analyzing your leads...
+
+📊 Lead Score Analysis:
+• Hot Leads: ${hotLeads} (80+ score)
+• Warm Leads: ${warmLeads} (60-79 score)
+• Cold Leads: ${coldLeads} (<60 score)
+• Average Score: ${avgScore}
+
+🏆 Top Priority: ${topLead?.company || 'Unknown'} (Score: ${topLead?.score || 0})
+📧 Contact: ${topLead?.email || 'N/A'}
+💼 Potential: ₹${topLead?.potential || 0}`;
+        } else {
+          response = '📊 No leads found yet. Start collecting inquiries to see scoring analysis!';
+        }
+      } else if (input.includes('criteria') || input.includes('weight')) {
+        response = '⚙️ Your Scoring Criteria:\n• Budget Size: 30%\n• Company Size: 25%\n• Industry Match: 20%\n• Engagement Level: 15%\n• Product Interest: 10%\n\n💡 Tip: Leads are automatically scored. Higher scores = Better conversion potential!';
+      } else if (input.includes('hot') || input.includes('best')) {
+        const leadsResponse = await fetch(`${API_URL}/automation/leads`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const leadsData = await leadsResponse.json();
+        
+        if (leadsData.success && leadsData.leads) {
+          const hotLeads = leadsData.leads
+            .filter((l: any) => l.score >= 80)
+            .sort((a: any, b: any) => (b.score || 0) - (a.score || 0))
+            .slice(0, 3);
+          
+          if (hotLeads.length > 0) {
+            response = '🔥 Your Hottest Leads:\n\n';
+            hotLeads.forEach((lead: any, idx: number) => {
+              response += `${idx + 1}. ${lead.company} - Score: ${lead.score}
+   📧 ${lead.email}
+   💰 ${lead.potential}
+
+`;
+            });
+            response += '👉 These are your priority contacts!';
+          } else {
+            response = '❄️ No hot leads yet. Keep nurturing your inquiries!';
+          }
+        }
       } else {
-        response = '✅ Got it! You can ask me to:\n• Score and analyze your leads\n• Show scoring criteria\n• Identify high-value prospects\n• Set up auto-tagging rules';
+        response = '✅ I can help you with:\n• Score and analyze your leads\n• Show your hottest prospects\n• Explain scoring criteria\n• Identify high-value leads\n\n📝 Try asking: "Score my leads" or "Show hot leads"';
       }
 
       const botMessage = {
@@ -564,7 +705,16 @@ Does this look good? Reply YES to save or NO to edit.`);
         timestamp: new Date()
       };
       setLeadScoringMessages(prev => [...prev, botMessage]);
-    }, 300);
+    } catch (error) {
+      console.error('Error fetching leads:', error);
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: '❌ Error analyzing leads. Please try again.',
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setLeadScoringMessages(prev => [...prev, botMessage]);
+    }
   };
 
   // Order Automation Submit Handler
@@ -985,10 +1135,13 @@ Does this look good? Reply YES to save or NO to edit.`);
     return acc;
   }, {} as Record<string, number>);
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = products.filter(product => {
+    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = filterStatus === 'all' || product.status === filterStatus;
+    const matchesCategory = filterCategory === 'all' || product.category === filterCategory;
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
 
   return (
     <div className="min-h-screen bg-[#f3f0ec] relative overflow-hidden">
@@ -1030,37 +1183,37 @@ Does this look good? Reply YES to save or NO to edit.`);
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 relative z-10">
         {/* Supplier Profile Card */}
-        <div className="glass-card border-2 border-white/30 p-6 rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 mb-6 relative overflow-hidden">
+        <div className="glass-card border-2 border-white/30 p-4 sm:p-6 rounded-xl sm:rounded-2xl backdrop-blur-2xl hover:shadow-xl transition-all duration-300 mb-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
           <div className="relative z-10">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6">
               {/* Profile Section */}
-              <div className="flex items-center gap-4 flex-1">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
-                  <span className="text-white font-bold text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
+              <div className="flex items-center gap-3 sm:gap-4 flex-1 w-full">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
+                  <span className="text-white font-bold text-lg sm:text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground mb-1">{user?.companyName || 'Business Ventures'}</h2>
-                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
-                    <span>📊 {analytics.total} Products</span>
-                    <span>✅ {aiInsights.approvalRate}% Success</span>
-                    <span>📅 Member Since {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}</span>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg sm:text-2xl font-bold text-foreground mb-1 truncate">{user?.companyName || 'Business Ventures'}</h2>
+                  <div className="flex flex-wrap gap-2 sm:gap-3 text-xs text-muted-foreground">
+                    <span className="truncate">📊 {analytics.total} Products</span>
+                    <span className="truncate">✅ {aiInsights.approvalRate}% Success</span>
+                    <span className="truncate">📅 {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}</span>
                   </div>
                 </div>
               </div>
               
               {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-4 w-full md:w-auto">
-                <div className="text-center glass-card border border-white/20 p-3 rounded-lg">
-                  <p className="text-2xl font-bold text-primary">{analytics.total}</p>
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full md:w-auto">
+                <div className="text-center glass-card border border-white/20 p-2 sm:p-3 rounded-lg">
+                  <p className="text-xl sm:text-2xl font-bold text-primary">{analytics.total}</p>
                   <p className="text-xs text-muted-foreground mt-1">Products</p>
                 </div>
-                <div className="text-center glass-card border border-white/20 p-3 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{aiInsights.approvalRate}%</p>
+                <div className="text-center glass-card border border-white/20 p-2 sm:p-3 rounded-lg">
+                  <p className="text-xl sm:text-2xl font-bold text-green-600">{aiInsights.approvalRate}%</p>
                   <p className="text-xs text-muted-foreground mt-1">Approval</p>
                 </div>
-                <div className="text-center glass-card border border-white/20 p-3 rounded-lg">
-                  <p className="text-2xl font-bold text-yellow-600">{analytics.pending}</p>
+                <div className="text-center glass-card border border-white/20 p-2 sm:p-3 rounded-lg">
+                  <p className="text-xl sm:text-2xl font-bold text-yellow-600">{analytics.pending}</p>
                   <p className="text-xs text-muted-foreground mt-1">Pending</p>
                 </div>
               </div>
@@ -1072,19 +1225,19 @@ Does this look good? Reply YES to save or NO to edit.`);
         <AIInsightsPanel />
 
         {/* Compact Analytics - Single Row - Enhanced Design */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
           {/* Total Products */}
-          <div className="glass-card border-2 border-white/30 p-5 rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden bg-gradient-to-br from-slate-50/50 to-slate-100/30 dark:from-slate-900/30 dark:to-slate-800/20">
+          <div className="glass-card border-2 border-white/30 p-3 sm:p-5 rounded-lg sm:rounded-xl backdrop-blur-2xl hover:shadow-lg transition-all duration-300 group relative overflow-hidden bg-gradient-to-br from-slate-50/50 to-slate-100/30 dark:from-slate-900/30 dark:to-slate-800/20">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-secondary/8 group-hover:from-primary/12 group-hover:to-secondary/12 transition-colors duration-300"></div>
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+              <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
                   <Package className="w-4 h-4 text-white" />
                 </div>
-                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide">Total</p>
+                <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wide hidden sm:block">Total</p>
               </div>
-              <p className="text-4xl font-bold text-gradient bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{analytics.total}</p>
-              <p className="text-xs text-muted-foreground mt-2">Products</p>
+              <p className="text-2xl sm:text-4xl font-bold text-gradient bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">{analytics.total}</p>
+              <p className="text-xs text-muted-foreground mt-1 sm:mt-2">Products</p>
             </div>
           </div>
 
@@ -1292,7 +1445,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                   <Zap className="w-7 h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-foreground">Business Automation Suite</h3>
+                  <h3 className=" text-gradient text-2xl font-bold text-foreground">Business Automation Suite</h3>
                   <p className="text-sm text-muted-foreground mt-1">Smart tools to save time, boost sales, and scale your business</p>
                 </div>
               </div>
@@ -1300,7 +1453,7 @@ Does this look good? Reply YES to save or NO to edit.`);
 
             {/* Tools Grid */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Tool 1: Auto Reply Manager */}
               <button
                 onClick={() => {
@@ -1437,107 +1590,85 @@ Does this look good? Reply YES to save or NO to edit.`);
         </div>
 
         {/* RitzYard AI Recommendations - Recommended by AI Products */}
-        <div className="glass-card border-2 border-white/30 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl p-8 backdrop-blur-3xl overflow-hidden relative mb-12">
+        <div className="glass-card border-2 border-white/30 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl p-6 md:p-8 backdrop-blur-3xl overflow-hidden relative mb-12">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-                  <Sparkles className="w-7 h-7 text-white" />
+            {/* Header Section */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
+                  <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-foreground flex items-center gap-2">Recommended by AI <span className="text-xl">✨</span></h3>
-                  <p className="text-sm text-muted-foreground mt-1">AI-powered product recommendations based on your latest additions</p>
+                  <h3 className=" text-gradient text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2">Recommended by AI <span className="text-lg sm:text-xl text-yellow">✨</span></h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">AI-powered recommendations based on your product additions</p>
                 </div>
               </div>
             </div>
 
+            {/* Content Section */}
             {loadingAI ? (
               <div className="text-center py-12">
                 <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-3"></div>
-                <p className="text-muted-foreground">Analyzing your products for AI recommendations...</p>
+                <p className="text-muted-foreground text-sm sm:text-base">Analyzing your products for AI recommendations...</p>
               </div>
             ) : products.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in">
-                {/* Display top 4 products with real data including images */}
-                {products.slice(0, 4).map((product) => {
-                  // Try to get image from various possible sources
-                  const productImage = (product as any)?.image || (product as any)?.imagePreview || (product as any)?.images?.[0];
-                  
-                  return (
-                    <div
-                      key={product._id}
-                      className="glass-card border-2 border-white/30 rounded-2xl overflow-hidden backdrop-blur-xl bg-white/20 dark:bg-white/5 hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer group flex flex-col h-full"
-                    >
-                      {/* Product Image - Clickable */}
-                      <div 
-                        onClick={() => {
-                          setSelectedProduct(product as any);
-                          setShowProductDetail(true);
-                        }}
-                        className="h-40 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 overflow-hidden relative flex items-center justify-center group-hover:brightness-110 transition-all"
-                      >
-                        {productImage ? (
-                          <img
-                            src={productImage}
-                            alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : (
-                          <Package className="w-12 h-12 text-muted-foreground/50" />
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-4 flex-1 flex flex-col">
-                        {/* Product Name */}
-                        <h4 className="font-bold text-foreground text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">{product.name}</h4>
-                        
-                        {/* Category & Status */}
-                        <div className="flex items-center justify-between mb-3 text-xs">
-                          <span className="font-medium text-muted-foreground capitalize">{product.category.replace('-', ' ')}</span>
-                          <span className={`px-2 py-1 rounded-lg font-semibold ${
-                            product.status === 'active'
-                              ? 'bg-green-100/50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : product.status === 'inactive'
-                              ? 'bg-gray-100/50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-                              : 'bg-yellow-100/50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                          }`}>
-                            {product.status}
-                          </span>
-                        </div>
-
-                        {/* Description */}
-                        <p className="text-xs text-muted-foreground mb-4 line-clamp-2 flex-1 leading-relaxed">{product.description}</p>
-                      </div>
-
-                      {/* Add Button - No View Details */}
-                      <div className="p-4 pt-0">
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Navigate to add product and prefill
-                            navigate('/products/add');
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 animate-in fade-in">
+                {getRecommendedProducts().map((product) => (
+                  <div
+                    key={product.id}
+                    onClick={() => handleAddProductWithAutofill(product)}
+                    className="group cursor-pointer rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 flex flex-col h-full bg-white"
+                    style={{ border: '2px solid #e8dcd0' }}
+                  >
+                    {/* Image Container */}
+                    <div className="relative w-full overflow-hidden flex-shrink-0" style={{ height: '200px' }}>
+                      {product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.src = `https://placehold.co/400x200?text=${encodeURIComponent(product.name.substring(0, 20))}`;
                           }}
-                          className="w-full bg-gradient-to-r from-primary via-primary-glow to-secondary text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
-                        >
-                          Add Product
-                        </Button>
-                      </div>
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: '#f3f0ec' }}>
+                          <Package className="w-12 h-12 sm:w-14 sm:h-14" style={{ color: '#c1482b' }} />
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
+                    {/* Content Section */}
+                    <div className="p-4 sm:p-5 flex flex-col flex-grow">
+                      <h4 className="font-bold text-sm sm:text-base text-foreground mb-2 line-clamp-2 group-hover:text-red-600 transition-colors">
+                        {product.name}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-muted-foreground mb-3 line-clamp-2 flex-grow">
+                        {product.description}
+                      </p>
+                      {product.category && (
+                        <span className="text-xs px-3 py-1 rounded-lg mb-3 inline-block font-medium" style={{ backgroundColor: '#e8dcd0', color: '#6b5d54' }}>
+                          {product.category.replace('-', ' ')}
+                        </span>
+                      )}
+                      <button
+                        className=" bg-gradient-to-r from-primary via-primary-glow to-secondary  mt-auto text-xs sm:text-sm font-bold py-2 sm:py-3 px-3 sm:px-4 rounded-lg sm:rounded-xl transition-all w-full text-white hover:shadow-lg"
+                       
+                        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#a53019'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = '#c1482b'; }}
+                      >
+                        + Add Product
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
-              <div className="text-center py-12 px-6 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20">
+              <div className="text-center py-12 px-4 sm:px-6 rounded-2xl bg-white/10 dark:bg-white/5 border border-white/20">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mx-auto mb-4">
                   <Sparkles className="w-8 h-8 text-primary/50" />
                 </div>
-                <p className="text-muted-foreground font-medium">No products yet to get recommendations</p>
+                <p className="text-muted-foreground font-medium text-sm sm:text-base">No products yet to get recommendations</p>
                 <p className="text-xs text-muted-foreground mt-2">Add your first product to receive AI-powered recommendations and insights</p>
               </div>
             )}
@@ -1551,7 +1682,7 @@ Does this look good? Reply YES to save or NO to edit.`);
               <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border-b border-white/20 p-6 rounded-t-3xl">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                   <div>
-                    <h2 className="text-3xl font-bold text-foreground mb-2">
+                    <h2 className=" text-gradient text-3xl font-bold text-foreground mb-2">
                       Product Management
                     </h2>
                     <p className="text-muted-foreground text-base">Manage your product listings and track performance</p>
@@ -1574,6 +1705,42 @@ Does this look good? Reply YES to save or NO to edit.`);
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-12 h-12 border-2 border-white/30 bg-white/50 dark:bg-black/30 backdrop-blur-xl rounded-xl"
                   />
+                </div>
+
+                {/* Filter Options */}
+                <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Status Filter */}
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground mb-2 block">Filter by Status</Label>
+                    <Select value={filterStatus} onValueChange={setFilterStatus}>
+                      <SelectTrigger className="h-10 border-2 border-white/30 bg-white/50 dark:bg-black/30 backdrop-blur-xl rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-900 border-2 border-white/30 rounded-lg">
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Category Filter */}
+                  <div>
+                    <Label className="text-sm font-semibold text-foreground mb-2 block">Filter by Category</Label>
+                    <Select value={filterCategory} onValueChange={setFilterCategory}>
+                      <SelectTrigger className="h-10 border-2 border-white/30 bg-white/50 dark:bg-black/30 backdrop-blur-xl rounded-lg">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white dark:bg-gray-900 border-2 border-white/30 rounded-lg">
+                        <SelectItem value="all">All Categories</SelectItem>
+                        <SelectItem value="mild-steel">Mild Steel</SelectItem>
+                        <SelectItem value="stainless-steel">Stainless Steel</SelectItem>
+                        <SelectItem value="construction">Construction Materials</SelectItem>
+                        <SelectItem value="electrical">Electrical Materials</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
               <div className="p-6">
@@ -1599,72 +1766,99 @@ Does this look good? Reply YES to save or NO to edit.`);
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredProducts.map((product) => (
-                      <div
-                        key={product._id}
-                        className="glass-card border-2 border-white/30 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 backdrop-blur-2xl group relative overflow-hidden"
-                      >
-                        {/* Subtle uniform background - no colorful gradient */}
-                        <div className="absolute inset-0 bg-white/5 dark:bg-white/3"></div>
-                        
-                        <div className="relative z-10">
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex-1">
-                              <h3 className="font-bold text-foreground text-lg mb-1 group-hover:text-primary transition-colors">{product.name}</h3>
-                              <div className="flex items-center gap-2 mt-2">
-                                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                                  <Package className="w-4 h-4 text-primary" />
+                    {filteredProducts.map((product) => {
+                      // Use only user-uploaded image
+                      const userImage = product.image || '';
+
+                      return (
+                        <div
+                          key={product._id}
+                          className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 group relative"
+                        >
+                          {/* Product Image - User Upload Only */}
+                          <div className="w-full h-56 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 overflow-hidden relative">
+                            {userImage ? (
+                              <img
+                                src={userImage}
+                                alt={product.name}
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
+                                <div className="text-center">
+                                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">No image uploaded</p>
                                 </div>
-                                <p className="text-sm text-muted-foreground font-medium capitalize">{product.category.replace('-', ' ')}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Card Content */}
+                          <div className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex-1">
+                                <h3 className="font-bold text-foreground text-lg mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                                  {product.name}
+                                </h3>
+                                <div className="inline-block mb-4">
+                                  <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full capitalize">
+                                    {product.category.replace('-', ' ')}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex-shrink-0">
+                                {getStatusBadge(product.status)}
                               </div>
                             </div>
-                            {getStatusBadge(product.status)}
-                          </div>
-                          
-                          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">{product.description}</p>
-                          
-                          {/* Status Grid - Always Visible */}
-                          <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-white/40 dark:bg-black/20 rounded-xl border border-white/20">
-                            <div className="text-center">
-                              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide">Status</p>
-                              <p className="text-sm font-bold text-foreground mt-1 capitalize">{product.status}</p>
-                            </div>
-                            <div className="text-center border-l border-r border-border/30">
-                              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide">Category</p>
-                              <p className="text-sm font-bold text-foreground mt-1">{product.category.replace('-', ' ')}</p>
-                            </div>
-                            <div className="text-center">
-                              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide">Added</p>
-                              <p className="text-sm font-bold text-foreground mt-1">Recently</p>
-                            </div>
-                          </div>
 
-                          {/* Delete Button - Remove Product */}
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="w-full mt-4 border-2 border-red-300/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-500 transition-all duration-300 rounded-xl font-medium"
-                            onClick={() => handleDeleteProduct(product._id)}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Remove Product
-                          </Button>
+                            {/* Description */}
+                            <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
+                              {product.description}
+                            </p>
 
-        {/* Product Detail Modal */}
-        <ProductDetailModal 
-          product={selectedProduct}
-          open={showProductDetail}
-          onOpenChange={setShowProductDetail}
-          onEdit={(product) => {
-            setSelectedProduct(product);
-            toast({ title: 'Edit', description: `Now editing: ${product.name}` });
-          }}
-        />
+                            {/* Info Grid */}
+                            <div className="grid grid-cols-2 gap-3 mb-6 py-4 border-t border-b border-gray-200 dark:border-gray-700">
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide mb-1">Status</p>
+                                <p className="text-sm font-bold text-foreground capitalize">{product.status}</p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wide mb-1">Added</p>
+                                <p className="text-sm font-bold text-foreground">Recently</p>
+                              </div>
+                            </div>
+
+                            {/* Action Button */}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="w-full border-2 border-red-300/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-500 transition-all duration-300 rounded-lg font-medium"
+                              onClick={() => handleDeleteProduct(product._id)}
+                            >
+                              Remove Product
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
+
+        {/* Product Detail Modal */}
+        {selectedProduct && (
+          <ProductDetailModal 
+            product={selectedProduct as any}
+            open={showProductDetail}
+            onOpenChange={setShowProductDetail}
+            onEdit={(product) => {
+              setSelectedProduct(product);
+              toast({ title: 'Edit', description: `Now editing: ${product.name}` });
+            }}
+          />
+        )}
               </div>
             </div>
         </div>
