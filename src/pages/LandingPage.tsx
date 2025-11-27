@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Menu, X, Package, FileCheck, Zap, Users, Phone, ShieldCheck, Mail, MapPin, Star, Sparkles, TrendingUp, Award, Globe, ChevronRight, Clock, BarChart3, Headphones, Truck, ShoppingCart, Target, Lock, MessageCircle, BadgeCheck, CheckCircle2, Percent, DollarSign, Boxes, TrendingDown, Lightbulb, Rocket, Network, Megaphone, LineChart, Building2, Handshake, Search, UserPlus, ShieldAlert, CircleDollarSign } from 'lucide-react';
+import { ArrowRight, Menu, X, Package, FileCheck, Zap, Users, Phone, ShieldCheck, Mail, MapPin, Star, Sparkles, TrendingUp, Award, Globe, ChevronRight, Clock, BarChart3, Headphones, Truck, ShoppingCart, Target, Lock, MessageCircle, BadgeCheck, CheckCircle2, Percent, DollarSign, Boxes, TrendingDown, Lightbulb, Rocket, Network, Megaphone, LineChart, Building2, Handshake, Search, UserPlus, ShieldAlert, CircleDollarSign, Mic } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Card } from '@/pages/components/ui/card';
 import LanguageSwitcher from './components/LanguageSwitcher';
@@ -421,11 +421,13 @@ const LandingPage = () => {
                 Login
               </Button>
               <Button
-                onClick={() => navigate('/onboarding')}
-                className="px-6 py-2.5 font-semibold bg-gradient-to-r from-primary via-primary-glow to-secondary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 relative overflow-hidden group"
+                onClick={() => navigate('/milo')}
+                className="px-4 py-2 font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 relative overflow-hidden group"
               >
-                <span className="relative z-10">Get Started</span>
-                <div className="absolute inset-0 bg-gradient-to-r from-secondary to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative z-10 flex items-center gap-2">
+                  <Mic className="w-4 h-4" />
+                  Voice AI
+                </span>
               </Button>
             </div>
 
@@ -450,7 +452,12 @@ const LandingPage = () => {
               <div className="space-y-2 pt-2 border-t border-border">
                 <div className="py-2"><LanguageSwitcher /></div>
                 <Button variant="outline" onClick={() => { setMobileMenuOpen(false); navigate('/login'); }} className="w-full border-2 border-primary text-primary hover:bg-primary/10">Login</Button>
-                <Button onClick={() => { setMobileMenuOpen(false); navigate('/onboarding'); }} className="w-full bg-gradient-to-r from-primary to-secondary text-white shadow-lg">Get Started</Button>
+                <Button onClick={() => { setMobileMenuOpen(false); navigate('/milo'); }} className="w-full bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:shadow-xl">
+                  <span className="flex items-center justify-center gap-2">
+                    <Mic className="w-4 h-4" />
+                    Voice AI Assistant
+                  </span>
+                </Button>
               </div>
             </nav>
           </div>
@@ -513,12 +520,13 @@ const LandingPage = () => {
           <div className="hero-buttons flex flex-col sm:flex-row items-center justify-center gap-4 mb-8 sm:mb-12">
             <Button
               size="lg"
-              onClick={() => navigate('/onboarding')}
-              className="px-10 py-6 text-lg font-semibold bg-gradient-to-r from-primary via-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
+              onClick={() => navigate('/milo')}
+              className="px-10 py-6 text-lg font-semibold bg-gradient-to-r from-primary via-primary-glow to-secondary hover:from-primary/90 hover:to-secondary/90 text-white shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
             >
-              <span className="flex items-center gap-2">
-                Get started
-                <ArrowRight className="w-5 h-5" />
+              <span className="flex items-center gap-3">
+                <Mic className="w-6 h-6 animate-pulse" />
+                Voice AI Assistant
+                <Sparkles className="w-5 h-5" />
               </span>
             </Button>
             <Button

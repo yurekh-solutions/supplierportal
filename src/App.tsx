@@ -20,6 +20,7 @@ import ProductInquiries from './pages/ProductInquiries';
 import AddProduct from './pages/AddProduct';
 import Marketplace from './pages/Marketplace';
 import AIBusinessIntelligence from './pages/AIBusinessIntelligence';
+import MiloAI from './pages/MiloAI';
 import TestPage from './pages/TestPage';
 import SupplierStatus from './pages/SupplierStatus';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -74,6 +75,7 @@ function App() {
             <Route path="/products/inquiries" element={<ProductInquiries />} />
             <Route path="/products/add" element={<AddProduct />} />
             <Route path="/intelligence" element={<AIBusinessIntelligence />} />
+            <Route path="/milo" element={<MiloAI />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
