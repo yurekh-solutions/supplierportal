@@ -127,8 +127,33 @@ export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) 
  */
 export const handleImageErrorWithFallback = (event: React.SyntheticEvent<HTMLImageElement>, fallbackUrl?: string) => {
   const img = event.currentTarget;
+  const originalSrc = img.getAttribute('data-original-src') || img.src;
   
-  // If fallback provided, try it first
+  // Store original source if not already stored
+  if (!img.getAttribute('data-original-src')) {
+    img.setAttribute('data-original-src', img.src);
+  }
+  
+  // Check retry count
+  const retryCount = parseInt(img.getAttribute('data-retry-count') || '0');
+  
+  // If Cloudinary image failed, try via backend proxy on localhost
+  if (originalSrc.includes('cloudinary.com') && retryCount === 0) {
+    const isProduction = window.location.hostname.includes('vercel.app') || 
+                        window.location.hostname.includes('vercel.com');
+    
+    // On localhost, try to fetch via backend if Cloudinary fails
+    if (!isProduction) {
+      img.setAttribute('data-retry-count', '1');
+      // Give it another chance - sometimes it's just a timing issue
+      setTimeout(() => {
+        img.src = originalSrc + '?t=' + Date.now();
+      }, 500);
+      return;
+    }
+  }
+  
+  // If fallback provided, try it
   if (fallbackUrl && !img.getAttribute('data-fallback-tried')) {
     img.setAttribute('data-fallback-tried', 'true');
     img.src = fallbackUrl;

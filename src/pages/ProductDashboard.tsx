@@ -1782,6 +1782,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                                 src={userImage}
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                crossOrigin="anonymous"
                                 onError={(e) => {
                                   handleImageErrorWithFallback(e);
                                 }}
