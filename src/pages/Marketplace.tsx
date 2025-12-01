@@ -238,11 +238,16 @@ const Marketplace = () => {
               const supplierSuggestions = getSupplierSuggestions(product.category);
               // Fix image URLs to work in both dev and production
               let imageUrl = product.image || '';
-              if (imageUrl.includes('localhost:5000')) {
+              if (imageUrl && (imageUrl.includes('localhost:5000') || imageUrl.startsWith('/uploads'))) {
                 const backendBaseUrl = import.meta.env.PROD 
                   ? 'https://backendmatrix.onrender.com'
                   : 'http://localhost:5000';
-                imageUrl = imageUrl.replace('http://localhost:5000', backendBaseUrl);
+                
+                if (imageUrl.startsWith('/uploads')) {
+                  imageUrl = backendBaseUrl + imageUrl;
+                } else {
+                  imageUrl = imageUrl.replace('http://localhost:5000', backendBaseUrl);
+                }
               }
               return (
                 <div

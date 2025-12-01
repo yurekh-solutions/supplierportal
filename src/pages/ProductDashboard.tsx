@@ -1769,13 +1769,18 @@ Does this look good? Reply YES to save or NO to edit.`);
                     {filteredProducts.map((product) => {
                       // Fix image URLs to work in both dev and production
                       let userImage = product.image || '';
-                      // If URL contains localhost:5000, replace with appropriate backend URL
-                      if (userImage.includes('localhost:5000')) {
-                        // In production, use production backend; in dev, keep localhost if backend is running
+                      // Always replace localhost URLs with appropriate backend
+                      if (userImage && (userImage.includes('localhost:5000') || userImage.startsWith('/uploads'))) {
+                        // In production, always use production backend
                         const backendBaseUrl = import.meta.env.PROD 
                           ? 'https://backendmatrix.onrender.com'
                           : 'http://localhost:5000';
-                        userImage = userImage.replace('http://localhost:5000', backendBaseUrl);
+                        
+                        if (userImage.startsWith('/uploads')) {
+                          userImage = backendBaseUrl + userImage;
+                        } else {
+                          userImage = userImage.replace('http://localhost:5000', backendBaseUrl);
+                        }
                       }
 
                       return (
