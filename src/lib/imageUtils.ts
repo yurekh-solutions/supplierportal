@@ -18,6 +18,25 @@ export const getBackendBaseUrl = (): string => {
 };
 
 /**
+ * Use backend proxy for Cloudinary images on localhost
+ * This bypasses CORS issues by routing through the backend
+ */
+export const getCloudinaryProxyUrl = (cloudinaryUrl: string): string => {
+  const isProduction = window.location.hostname.includes('vercel.app') || 
+                      window.location.hostname.includes('vercel.com');
+  
+  // On Vercel, use direct Cloudinary URLs (CDN works fine)
+  if (isProduction) {
+    return cloudinaryUrl;
+  }
+  
+  // On localhost, proxy through backend to avoid CORS issues
+  const backendUrl = getBackendBaseUrl();
+  const encodedUrl = encodeURIComponent(cloudinaryUrl);
+  return `${backendUrl}/api/image-proxy?url=${encodedUrl}`;
+};
+
+/**
  * Fix image URLs to work correctly in both development and production
  * Handles multiple URL formats:
  * 1. Cloudinary URLs - kept as-is
@@ -34,9 +53,9 @@ export const getFixedImageUrl = (imageUrl?: string | null): string => {
   const backendBaseUrl = getBackendBaseUrl();
   let processedUrl = imageUrl;
   
-  // Case 1: Cloudinary URLs (already https) - keep as-is
+  // Case 1: Cloudinary URLs (already https) - use proxy on localhost
   if (processedUrl.includes('cloudinary.com') || processedUrl.includes('res.cloudinary.com')) {
-    return processedUrl;
+    return getCloudinaryProxyUrl(processedUrl);
   }
   
   // Case 2: Relative path starting with /uploads
@@ -58,9 +77,9 @@ export const getFixedImageUrl = (imageUrl?: string | null): string => {
   
   // Case 4: Full URL but need to validate/fix protocol and domain
   if (processedUrl.startsWith('http://') || processedUrl.startsWith('https://')) {
-    // If it's a Cloudinary URL, return as-is
+    // If it's a Cloudinary URL, use proxy on localhost
     if (processedUrl.includes('cloudinary.com') || processedUrl.includes('res.cloudinary.com')) {
-      return processedUrl;
+      return getCloudinaryProxyUrl(processedUrl);
     }
     
     // If in production and not using correct backend domain
