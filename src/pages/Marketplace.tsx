@@ -6,7 +6,7 @@ import { Input } from '@/pages/components/ui/input';
 import { Card } from '@/pages/components/ui/card';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
-import { getFixedImageUrl, handleImageErrorWithFallback } from '@/lib/imageUtils';
+import { getFixedImageUrl } from '@/lib/imageUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -251,9 +251,6 @@ const Marketplace = () => {
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         crossOrigin="anonymous"
-                        onError={(e) => {
-                          handleImageErrorWithFallback(e);
-                        }}
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
