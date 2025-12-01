@@ -24,6 +24,7 @@ export const getBackendBaseUrl = (): string => {
  * 2. Relative paths (/uploads/...) - prepended with backend base URL
  * 3. Localhost URLs - converted to production backend URL
  * 4. Incorrect backend URLs - fixed to correct production URL
+ * 5. Filesystem paths - extracted and cleaned
  */
 export const getFixedImageUrl = (imageUrl?: string | null): string => {
   if (!imageUrl) {
@@ -44,6 +45,15 @@ export const getFixedImageUrl = (imageUrl?: string | null): string => {
   if (imageUrl.startsWith('/uploads')) {
     const fixed = backendBaseUrl + imageUrl;
     console.log(`✅ Relative path - fixed to: ${fixed.substring(0, 50)}...`);
+    return fixed;
+  }
+  
+  // Case 2b: Filesystem path with /uploads (e.g., /opt/render/project/src/uploads/...)
+  if (imageUrl.includes('/uploads/')) {
+    const uploadsIndex = imageUrl.indexOf('/uploads/');
+    const cleanPath = imageUrl.substring(uploadsIndex);
+    const fixed = backendBaseUrl + cleanPath;
+    console.log(`✅ Filesystem path - extracted and fixed to: ${fixed.substring(0, 50)}...`);
     return fixed;
   }
   
