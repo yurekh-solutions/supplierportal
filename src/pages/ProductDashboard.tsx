@@ -1777,6 +1777,14 @@ Does this look good? Reply YES to save or NO to edit.`);
                         ? 'https://backendmatrix.onrender.com'
                         : 'http://localhost:5000';
                       
+                      // Debug logging
+                      console.log('🖼️ Image Debug:', {
+                        productName: product.name,
+                        originalImage: product.image,
+                        isProduction,
+                        backendBaseUrl
+                      });
+                      
                       // Fix all possible image URL formats
                       if (userImage) {
                         // Case 1: Relative path starting with /uploads
@@ -1795,6 +1803,8 @@ Does this look good? Reply YES to save or NO to edit.`);
                           }
                         }
                       }
+                      
+                      console.log('🎯 Fixed Image URL:', userImage);
 
                       return (
                         <div
