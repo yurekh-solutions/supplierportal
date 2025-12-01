@@ -26,29 +26,39 @@ export const getBackendBaseUrl = (): string => {
  * 4. Incorrect backend URLs - fixed to correct production URL
  */
 export const getFixedImageUrl = (imageUrl?: string | null): string => {
-  if (!imageUrl) return '';
+  if (!imageUrl) {
+    console.log('📸 No image URL provided');
+    return '';
+  }
   
   const backendBaseUrl = getBackendBaseUrl();
+  console.log(`📸 Processing image URL: ${imageUrl.substring(0, 50)}...`);
   
   // Case 1: Cloudinary URLs (already https) - keep as-is
   if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
+    console.log('✅ Cloudinary URL - keeping as-is');
     return imageUrl;
   }
   
   // Case 2: Relative path starting with /uploads
   if (imageUrl.startsWith('/uploads')) {
-    return backendBaseUrl + imageUrl;
+    const fixed = backendBaseUrl + imageUrl;
+    console.log(`✅ Relative path - fixed to: ${fixed.substring(0, 50)}...`);
+    return fixed;
   }
   
   // Case 3: Contains localhost in the URL - replace with backend base URL
   if (imageUrl.includes('localhost')) {
-    return imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
+    const fixed = imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
+    console.log(`✅ Localhost URL - fixed to: ${fixed.substring(0, 50)}...`);
+    return fixed;
   }
   
   // Case 4: Full URL but need to validate/fix protocol and domain
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
     // If it's a Cloudinary URL, return as-is
     if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
+      console.log('✅ Cloudinary HTTPS URL - keeping as-is');
       return imageUrl;
     }
     
@@ -58,15 +68,20 @@ export const getFixedImageUrl = (imageUrl?: string | null): string => {
     
     if (isProduction && !imageUrl.includes('backendmatrix.onrender.com')) {
       // Replace any backend domain with the correct one
-      return imageUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
+      const fixed = imageUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
+      console.log(`✅ Wrong backend domain - fixed to: ${fixed.substring(0, 50)}...`);
+      return fixed;
     }
     
     // Return as-is if already correct
+    console.log(`✅ Full URL already correct: ${imageUrl.substring(0, 50)}...`);
     return imageUrl;
   }
   
   // Case 5: Any other format - try to prepend backend URL
-  return backendBaseUrl + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
+  const fixed = backendBaseUrl + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
+  console.log(`✅ Other format - fixed to: ${fixed.substring(0, 50)}...`);
+  return fixed;
 };
 
 /**

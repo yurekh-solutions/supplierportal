@@ -1769,6 +1769,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => {
                       const userImage = getFixedImageUrl(product.image);
+                      console.log(`📸 Product "${product.name}" image: ${userImage || 'EMPTY'}`);
 
                       return (
                         <div
@@ -1783,7 +1784,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                 onError={(e) => {
-                                  console.warn(`📸 Product card image failed: ${userImage}`);
+                                  console.error(`📸 FAILED to load image: "${userImage}" for product "${product.name}"`);
                                   (e.target as HTMLImageElement).src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
                                 }}
                               />
