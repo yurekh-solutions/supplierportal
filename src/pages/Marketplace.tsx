@@ -236,6 +236,11 @@ const Marketplace = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map(product => {
               const supplierSuggestions = getSupplierSuggestions(product.category);
+              // Fix localhost URLs to use production backend
+              let imageUrl = product.image || '';
+              if (imageUrl.includes('localhost:5000')) {
+                imageUrl = imageUrl.replace('http://localhost:5000', 'https://backendmatrix.onrender.com');
+              }
               return (
                 <div
                   key={product._id}
@@ -243,9 +248,9 @@ const Marketplace = () => {
                 >
                   {/* Product Image */}
                   <div className="relative h-56 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
-                    {product.image ? (
+                    {imageUrl ? (
                       <img
-                        src={product.image}
+                        src={imageUrl}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />

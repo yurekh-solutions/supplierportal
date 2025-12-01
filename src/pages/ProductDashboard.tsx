@@ -1767,8 +1767,12 @@ Does this look good? Reply YES to save or NO to edit.`);
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => {
-                      // Use only user-uploaded image
-                      const userImage = product.image || '';
+                      // Use only user-uploaded image and fix localhost URLs
+                      let userImage = product.image || '';
+                      // Fix localhost URLs to use production backend
+                      if (userImage.includes('localhost:5000')) {
+                        userImage = userImage.replace('http://localhost:5000', 'https://backendmatrix.onrender.com');
+                      }
 
                       return (
                         <div
