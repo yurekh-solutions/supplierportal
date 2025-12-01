@@ -137,20 +137,16 @@ export const handleImageErrorWithFallback = (event: React.SyntheticEvent<HTMLIma
   // Check retry count
   const retryCount = parseInt(img.getAttribute('data-retry-count') || '0');
   
-  // If Cloudinary image failed, try via backend proxy on localhost
+  // If this is a Cloudinary image and first error, retry once
   if (originalSrc.includes('cloudinary.com') && retryCount === 0) {
-    const isProduction = window.location.hostname.includes('vercel.app') || 
-                        window.location.hostname.includes('vercel.com');
-    
-    // On localhost, try to fetch via backend if Cloudinary fails
-    if (!isProduction) {
-      img.setAttribute('data-retry-count', '1');
-      // Give it another chance - sometimes it's just a timing issue
-      setTimeout(() => {
-        img.src = originalSrc + '?t=' + Date.now();
-      }, 500);
-      return;
-    }
+    img.setAttribute('data-retry-count', '1');
+    // Add cache-busting parameter and retry
+    setTimeout(() => {
+      img.src = originalSrc.includes('?') 
+        ? originalSrc + '&t=' + Date.now() 
+        : originalSrc + '?t=' + Date.now();
+    }, 300);
+    return;
   }
   
   // If fallback provided, try it
