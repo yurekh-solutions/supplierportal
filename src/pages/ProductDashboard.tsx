@@ -14,7 +14,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import AIInsightsPanel from '@/components/AIInsightsPanel';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import { useToast } from '@/hooks/use-toast';
-import { getFixedImageUrl } from '@/lib/imageUtils';
+import { getFixedImageUrl, handleImageErrorWithFallback } from '@/lib/imageUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -1783,7 +1783,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
+                                  handleImageErrorWithFallback(e);
                                 }}
                               />
                             ) : (
