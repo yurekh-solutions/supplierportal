@@ -6,6 +6,7 @@ import { Input } from '@/pages/components/ui/input';
 import { Card } from '@/pages/components/ui/card';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
+import { getFixedImageUrl } from '@/lib/imageUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -235,43 +236,7 @@ const Marketplace = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map(product => {
-              // Fix image URLs to work in both dev and production
-              let imageUrl = product.image || '';
-              
-              // Determine if we're in production (Vercel deployment)
-              const isProduction = window.location.hostname.includes('vercel.app') || 
-                                 window.location.hostname.includes('vercel.com');
-              const backendBaseUrl = isProduction
-                ? 'https://backendmatrix.onrender.com'
-                : 'http://localhost:5000';
-              
-              // Fix all possible image URL formats
-              if (imageUrl) {
-                // Case 1: Cloudinary URLs (already https) - keep as is
-                if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
-                  // Cloudinary URLs are already correct, do nothing
-                }
-                // Case 2: Relative path starting with /uploads
-                else if (imageUrl.startsWith('/uploads')) {
-                  imageUrl = backendBaseUrl + imageUrl;
-                }
-                // Case 3: Contains localhost in the URL
-                else if (imageUrl.includes('localhost')) {
-                  imageUrl = imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
-                }
-                // Case 4: Backend URL but wrong protocol or domain
-                else if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-                  // Only fix if it's not already the correct backend URL
-                  if (!imageUrl.includes('cloudinary.com') && 
-                      (imageUrl.includes('localhost') || 
-                       (isProduction && !imageUrl.includes('backendmatrix.onrender.com')))) {
-                    // Extract the path part (after domain)
-                    const urlPath = imageUrl.replace(/https?:\/\/[^/]+/, '');
-                    imageUrl = backendBaseUrl + urlPath;
-                  }
-                }
-              }
-              
+              const imageUrl = getFixedImageUrl(product.image);
               const supplierSuggestions = getSupplierSuggestions(product.category);
               return (
                 <div

@@ -5,6 +5,7 @@ import { Button } from '@/pages/components/ui/button';
 import { Badge } from '@/pages/components/ui/badge';
 import AIRecommendationEngine from './AIRecommendationEngine';
 import SmartProductSearch from './SmartProductSearch';
+import { getFixedImageUrl } from '@/lib/imageUtils';
 
 interface ProductDetail {
   _id: string;
@@ -39,42 +40,6 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
   const [enriching, setEnriching] = useState(false);
 
   if (!product) return null;
-
-  // Fix image URLs for production
-  const getFixedImageUrl = (imageUrl?: string) => {
-    if (!imageUrl) return '';
-    
-    const isProduction = window.location.hostname.includes('vercel.app') || 
-                        window.location.hostname.includes('vercel.com');
-    const backendBaseUrl = isProduction
-      ? 'https://backendmatrix.onrender.com'
-      : 'http://localhost:5000';
-    
-    // Case 1: Cloudinary URLs (already https) - keep as is
-    if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
-      return imageUrl;
-    }
-    // Case 2: Relative path starting with /uploads
-    else if (imageUrl.startsWith('/uploads')) {
-      return backendBaseUrl + imageUrl;
-    }
-    // Case 3: Contains localhost in the URL
-    else if (imageUrl.includes('localhost')) {
-      return imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
-    }
-    // Case 4: Backend URL but wrong protocol or domain
-    else if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      // Only fix if it's not already the correct backend URL
-      if (!imageUrl.includes('cloudinary.com') && 
-          (imageUrl.includes('localhost') || 
-           (isProduction && !imageUrl.includes('backendmatrix.onrender.com')))) {
-        const urlPath = imageUrl.replace(/https?:\/\/[^/]+/, '');
-        return backendBaseUrl + urlPath;
-      }
-    }
-    
-    return imageUrl;
-  };
 
   const fixedImageUrl = getFixedImageUrl((product as any)?.image || (product as any)?.imagePreview);
 
@@ -128,6 +93,7 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {
+                  console.warn(`📸 Image failed to load: ${fixedImageUrl}`);
                   e.currentTarget.style.display = 'none';
                 }}
               />
@@ -171,7 +137,36 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
           )}
 
           {/* All Specifications - Display Everything */}
-          {product.specifications && Object.keys(product.specifications).length > 0 && (
+        {/* Product Images Array - if multiple images exist */}
+        {(product as any)?.images && (product as any).images.length > 0 && (
+          <div>
+            <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-2">
+              <Package className="w-5 h-5 text-primary" />
+              Additional Images
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {(product as any).images.map((imageUrl: string, index: number) => {
+                const fixedUrl = getFixedImageUrl(imageUrl);
+                return (
+                  <div key={index} className="rounded-lg overflow-hidden border-2 border-white/20">
+                    <img
+                      src={fixedUrl}
+                      alt={`${product.name} - ${index + 1}`}
+                      className="w-full h-24 object-cover hover:scale-110 transition-transform"
+                      onError={(e) => {
+                        console.warn(`📸 Image failed to load: ${fixedUrl}`);
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        
+        {/* All Specifications */}
+        {product.specifications && Object.keys(product.specifications).length > 0 && (
             <div>
               <h3 className="font-bold text-lg text-foreground mb-4 flex items-center gap-2">
                 <Settings className="w-5 h-5 text-primary" />

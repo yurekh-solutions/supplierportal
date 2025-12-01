@@ -14,6 +14,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import AIInsightsPanel from '@/components/AIInsightsPanel';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import { useToast } from '@/hooks/use-toast';
+import { getFixedImageUrl } from '@/lib/imageUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -1767,18 +1768,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => {
-                      // Fix image URLs to work in both dev and production
-                      let userImage = product.image || '';
-                      
-                      // Determine if we're in production (Vercel deployment)
-                      const isProduction = window.location.hostname.includes('vercel.app') || 
-                                         window.location.hostname.includes('vercel.com');
-                      const backendBaseUrl = isProduction
-                        ? 'https://backendmatrix.onrender.com'
-                        : 'http://localhost:5000';
-                      
-                      // Fix all possible image URL formats
-                      if (userImage) {
+                      const userImage = getFixedImageUrl(product.image);
                         // Case 1: Cloudinary URLs (already https) - keep as is
                         if (userImage.includes('cloudinary.com') || userImage.includes('res.cloudinary.com')) {
                           // Cloudinary URLs are already correct, do nothing
