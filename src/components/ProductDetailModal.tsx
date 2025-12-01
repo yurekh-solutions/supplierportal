@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Sparkles, TrendingUp, Award, Loader, Users, DollarSign, Tag, Lightbulb, FileText, Settings } from 'lucide-react';
+import { X, Sparkles, TrendingUp, Award, Loader, Users, DollarSign, Tag, Lightbulb, FileText, Settings, Package } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/pages/components/ui/dialog';
 import { Button } from '@/pages/components/ui/button';
 import { Badge } from '@/pages/components/ui/badge';
@@ -39,6 +39,44 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
   const [enriching, setEnriching] = useState(false);
 
   if (!product) return null;
+
+  // Fix image URLs for production
+  const getFixedImageUrl = (imageUrl?: string) => {
+    if (!imageUrl) return '';
+    
+    const isProduction = window.location.hostname.includes('vercel.app') || 
+                        window.location.hostname.includes('vercel.com');
+    const backendBaseUrl = isProduction
+      ? 'https://backendmatrix.onrender.com'
+      : 'http://localhost:5000';
+    
+    // Case 1: Cloudinary URLs (already https) - keep as is
+    if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
+      return imageUrl;
+    }
+    // Case 2: Relative path starting with /uploads
+    else if (imageUrl.startsWith('/uploads')) {
+      return backendBaseUrl + imageUrl;
+    }
+    // Case 3: Contains localhost in the URL
+    else if (imageUrl.includes('localhost')) {
+      return imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
+    }
+    // Case 4: Backend URL but wrong protocol or domain
+    else if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      // Only fix if it's not already the correct backend URL
+      if (!imageUrl.includes('cloudinary.com') && 
+          (imageUrl.includes('localhost') || 
+           (isProduction && !imageUrl.includes('backendmatrix.onrender.com')))) {
+        const urlPath = imageUrl.replace(/https?:\/\/[^/]+/, '');
+        return backendBaseUrl + urlPath;
+      }
+    }
+    
+    return imageUrl;
+  };
+
+  const fixedImageUrl = getFixedImageUrl((product as any)?.image || (product as any)?.imagePreview);
 
   const handleEnrich = async () => {
     try {
@@ -84,9 +122,9 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
         <div className="space-y-6 py-4">
           {/* Product Image - Always Show */}
           <div className="w-full h-80 rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-            {(product as any)?.image || (product as any)?.imagePreview ? (
+            {fixedImageUrl ? (
               <img 
-                src={(product as any)?.image || (product as any)?.imagePreview}
+                src={fixedImageUrl}
                 alt={product.name}
                 className="w-full h-full object-cover"
                 onError={(e) => {

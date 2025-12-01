@@ -21,7 +21,7 @@ import {
 } from '@/pages/components/ui/card';
 import { Badge } from '@/pages/components/ui/badge';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 interface Inquiry {
   _id: string;

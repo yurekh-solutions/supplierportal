@@ -1777,34 +1777,32 @@ Does this look good? Reply YES to save or NO to edit.`);
                         ? 'https://backendmatrix.onrender.com'
                         : 'http://localhost:5000';
                       
-                      // Debug logging
-                      console.log('🖼️ Image Debug:', {
-                        productName: product.name,
-                        originalImage: product.image,
-                        isProduction,
-                        backendBaseUrl
-                      });
-                      
                       // Fix all possible image URL formats
                       if (userImage) {
-                        // Case 1: Relative path starting with /uploads
-                        if (userImage.startsWith('/uploads')) {
+                        // Case 1: Cloudinary URLs (already https) - keep as is
+                        if (userImage.includes('cloudinary.com') || userImage.includes('res.cloudinary.com')) {
+                          // Cloudinary URLs are already correct, do nothing
+                        }
+                        // Case 2: Relative path starting with /uploads
+                        else if (userImage.startsWith('/uploads')) {
                           userImage = backendBaseUrl + userImage;
                         }
-                        // Case 2: Contains localhost in the URL
+                        // Case 3: Contains localhost in the URL
                         else if (userImage.includes('localhost')) {
                           userImage = userImage.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
                         }
-                        // Case 3: Already has full URL but not HTTPS in production
-                        else if (isProduction && userImage.startsWith('http://')) {
-                          // Ensure we're using the correct production backend
-                          if (!userImage.includes('backendmatrix.onrender.com')) {
-                            userImage = userImage.replace(/https?:\/\/[^/]+/, backendBaseUrl);
+                        // Case 4: Backend URL but wrong protocol or domain
+                        else if (userImage.startsWith('http://') || userImage.startsWith('https://')) {
+                          // Only fix if it's not already the correct backend URL
+                          if (!userImage.includes('cloudinary.com') && 
+                              (userImage.includes('localhost') || 
+                               (isProduction && !userImage.includes('backendmatrix.onrender.com')))) {
+                            // Extract the path part (after domain)
+                            const urlPath = userImage.replace(/https?:\/\/[^/]+/, '');
+                            userImage = backendBaseUrl + urlPath;
                           }
                         }
                       }
-                      
-                      console.log('🎯 Fixed Image URL:', userImage);
 
                       return (
                         <div

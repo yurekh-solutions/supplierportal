@@ -247,19 +247,27 @@ const Marketplace = () => {
               
               // Fix all possible image URL formats
               if (imageUrl) {
-                // Case 1: Relative path starting with /uploads
-                if (imageUrl.startsWith('/uploads')) {
+                // Case 1: Cloudinary URLs (already https) - keep as is
+                if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
+                  // Cloudinary URLs are already correct, do nothing
+                }
+                // Case 2: Relative path starting with /uploads
+                else if (imageUrl.startsWith('/uploads')) {
                   imageUrl = backendBaseUrl + imageUrl;
                 }
-                // Case 2: Contains localhost in the URL
+                // Case 3: Contains localhost in the URL
                 else if (imageUrl.includes('localhost')) {
                   imageUrl = imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
                 }
-                // Case 3: Already has full URL but not HTTPS in production
-                else if (isProduction && imageUrl.startsWith('http://')) {
-                  // Ensure we're using the correct production backend
-                  if (!imageUrl.includes('backendmatrix.onrender.com')) {
-                    imageUrl = imageUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
+                // Case 4: Backend URL but wrong protocol or domain
+                else if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+                  // Only fix if it's not already the correct backend URL
+                  if (!imageUrl.includes('cloudinary.com') && 
+                      (imageUrl.includes('localhost') || 
+                       (isProduction && !imageUrl.includes('backendmatrix.onrender.com')))) {
+                    // Extract the path part (after domain)
+                    const urlPath = imageUrl.replace(/https?:\/\/[^/]+/, '');
+                    imageUrl = backendBaseUrl + urlPath;
                   }
                 }
               }
