@@ -28,47 +28,37 @@ export const getBackendBaseUrl = (): string => {
  */
 export const getFixedImageUrl = (imageUrl?: string | null): string => {
   if (!imageUrl) {
-    console.log('📸 No image URL provided');
     return '';
   }
   
   const backendBaseUrl = getBackendBaseUrl();
-  console.log(`📸 Processing image URL: ${imageUrl.substring(0, 50)}...`);
   
   // Case 1: Cloudinary URLs (already https) - keep as-is
   if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
-    console.log('✅ Cloudinary URL - keeping as-is');
     return imageUrl;
   }
   
   // Case 2: Relative path starting with /uploads
   if (imageUrl.startsWith('/uploads')) {
-    const fixed = backendBaseUrl + imageUrl;
-    console.log(`✅ Relative path - fixed to: ${fixed.substring(0, 50)}...`);
-    return fixed;
+    return backendBaseUrl + imageUrl;
   }
   
   // Case 2b: Filesystem path with /uploads (e.g., /opt/render/project/src/uploads/...)
   if (imageUrl.includes('/uploads/')) {
     const uploadsIndex = imageUrl.indexOf('/uploads/');
     const cleanPath = imageUrl.substring(uploadsIndex);
-    const fixed = backendBaseUrl + cleanPath;
-    console.log(`✅ Filesystem path - extracted and fixed to: ${fixed.substring(0, 50)}...`);
-    return fixed;
+    return backendBaseUrl + cleanPath;
   }
   
   // Case 3: Contains localhost in the URL - replace with backend base URL
   if (imageUrl.includes('localhost')) {
-    const fixed = imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
-    console.log(`✅ Localhost URL - fixed to: ${fixed.substring(0, 50)}...`);
-    return fixed;
+    return imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
   }
   
   // Case 4: Full URL but need to validate/fix protocol and domain
   if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
     // If it's a Cloudinary URL, return as-is
     if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
-      console.log('✅ Cloudinary HTTPS URL - keeping as-is');
       return imageUrl;
     }
     
@@ -78,20 +68,15 @@ export const getFixedImageUrl = (imageUrl?: string | null): string => {
     
     if (isProduction && !imageUrl.includes('backendmatrix.onrender.com')) {
       // Replace any backend domain with the correct one
-      const fixed = imageUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
-      console.log(`✅ Wrong backend domain - fixed to: ${fixed.substring(0, 50)}...`);
-      return fixed;
+      return imageUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
     }
     
     // Return as-is if already correct
-    console.log(`✅ Full URL already correct: ${imageUrl.substring(0, 50)}...`);
     return imageUrl;
   }
   
   // Case 5: Any other format - try to prepend backend URL
-  const fixed = backendBaseUrl + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
-  console.log(`✅ Other format - fixed to: ${fixed.substring(0, 50)}...`);
-  return fixed;
+  return backendBaseUrl + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
 };
 
 /**
