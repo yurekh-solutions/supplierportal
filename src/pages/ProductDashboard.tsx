@@ -1769,30 +1769,6 @@ Does this look good? Reply YES to save or NO to edit.`);
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => {
                       const userImage = getFixedImageUrl(product.image);
-                        // Case 1: Cloudinary URLs (already https) - keep as is
-                        if (userImage.includes('cloudinary.com') || userImage.includes('res.cloudinary.com')) {
-                          // Cloudinary URLs are already correct, do nothing
-                        }
-                        // Case 2: Relative path starting with /uploads
-                        else if (userImage.startsWith('/uploads')) {
-                          userImage = backendBaseUrl + userImage;
-                        }
-                        // Case 3: Contains localhost in the URL
-                        else if (userImage.includes('localhost')) {
-                          userImage = userImage.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
-                        }
-                        // Case 4: Backend URL but wrong protocol or domain
-                        else if (userImage.startsWith('http://') || userImage.startsWith('https://')) {
-                          // Only fix if it's not already the correct backend URL
-                          if (!userImage.includes('cloudinary.com') && 
-                              (userImage.includes('localhost') || 
-                               (isProduction && !userImage.includes('backendmatrix.onrender.com')))) {
-                            // Extract the path part (after domain)
-                            const urlPath = userImage.replace(/https?:\/\/[^/]+/, '');
-                            userImage = backendBaseUrl + urlPath;
-                          }
-                        }
-                      }
 
                       return (
                         <div
@@ -1807,6 +1783,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                 onError={(e) => {
+                                  console.warn(`📸 Product card image failed: ${userImage}`);
                                   (e.target as HTMLImageElement).src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
                                 }}
                               />
