@@ -6,7 +6,7 @@ import { Input } from '@/pages/components/ui/input';
 import { Card } from '@/pages/components/ui/card';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
-import { getFixedImageUrl, handleImageErrorWithFallback } from '@/lib/imageUtils';
+import { getFixedImageUrl, handleImageErrorWithFallback, handleImageErrorWithRetry } from '@/lib/imageUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -236,30 +236,31 @@ const Marketplace = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map(product => {
-              const imageUrl = getFixedImageUrl(product.image);
-              const displayImage = imageUrl || 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
+              const hasImage = product.image && product.image.trim() !== '';
+              const imageUrl = hasImage ? getFixedImageUrl(product.image) : '';
               const supplierSuggestions = getSupplierSuggestions(product.category);
               return (
                 <div
                   key={product._id}
                   className="glass-card border-2 border-white/30 rounded-3xl overflow-hidden hover:shadow-3xl transition-all duration-500 backdrop-blur-2xl group hover:-translate-y-2"
                 >
-                  {/* Product Image */}
-                  <div className="relative h-56 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
-                    {imageUrl ? (
+                  {/* Product Image - Only show if exists */}
+                  {imageUrl && imageUrl.length > 0 ? (
+                    <div className="relative h-56 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
                       <img
-                        src={displayImage}
+                        src={imageUrl}
+                        data-src={imageUrl}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         crossOrigin="anonymous"
-                        onError={(e) => handleImageErrorWithFallback(e)}
+                        data-retry="0"
+                        onError={(e) => {
+                          console.error(`❌ Marketplace image failed: ${imageUrl}`);
+                          handleImageErrorWithRetry(e);
+                        }}
                       />
-                    ) : (
-                      <div className="flex items-center justify-center h-full">
-                        <Package className="w-16 h-16 text-muted-foreground/30" />
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  ) : null}
 
                   <div className="p-6">
                     {/* Product Title */}

@@ -285,10 +285,14 @@ const AddProduct = () => {
       formDataToSend.append('availability', productForm.availability);
 
       if (productForm.imageFile) {
-        const imageBlob = await fetch(productForm.imagePreview).then(r => r.blob());
-        const imageFileName = `${productForm.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`;
-        const imageFileToSend = new File([imageBlob], imageFileName, { type: 'image/jpeg' });
-        formDataToSend.append('productImage', imageFileToSend);
+        console.log('📸 Image file found, appending to FormData:', {
+          name: productForm.imageFile.name,
+          type: productForm.imageFile.type,
+          size: productForm.imageFile.size,
+        });
+        formDataToSend.append('productImage', productForm.imageFile);
+      } else {
+        console.warn('⚠️ No image file selected');
       }
 
       const response = await fetch(`${API_URL}/products`, {
@@ -298,6 +302,14 @@ const AddProduct = () => {
       });
 
       const data = await response.json();
+      console.log('📋 Backend Response:', {
+        status: response.status,
+        success: data.success,
+        message: data.message,
+        productId: data.data?._id,
+        imageUrl: data.data?.image,
+      });
+      
       if (data.success) {
         setSubmissionType('product');
         setSubmissionSuccess(true);
@@ -717,7 +729,7 @@ const AddProduct = () => {
 
                   {/* Image Upload */}
                   <div>
-                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Product Image</Label>
+                    <Label className="font-semibold text-xs sm:text-sm" style={{ color: '#1a1a1a' }}>Product Image (Optional)</Label>
                     {productForm.imagePreview ? (
                       <div className="mt-2 relative w-full h-40 rounded-lg overflow-hidden border" style={{ borderColor: '#ddd' }}>
                         <img src={productForm.imagePreview} alt="Preview" className="w-full h-full object-cover" />

@@ -14,7 +14,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import AIInsightsPanel from '@/components/AIInsightsPanel';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import { useToast } from '@/hooks/use-toast';
-import { getFixedImageUrl, handleImageErrorWithFallback } from '@/lib/imageUtils';
+import { getFixedImageUrl, handleImageErrorWithFallback, handleImageErrorWithRetry } from '@/lib/imageUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -992,7 +992,18 @@ Does this look good? Reply YES to save or NO to edit.`);
       if (data.success) {
         console.log('📄 API Response - Total products:', data.data?.length);
         data.data?.forEach((p: any) => {
-          console.log(`📸 ${p.name}: image="${p.image}"`);
+          console.log(`📸 Product: ${p.name}`);
+          console.log(`   Image field exists: ${!!p.image}`);
+          console.log(`   Image value: "${p.image}"`);
+          console.log(`   Image length: ${p.image?.length || 0}`);
+          if (p.image && p.image.length > 0) {
+            const isCloudinary = p.image.includes('cloudinary.com') || p.image.includes('res.cloudinary.com');
+            const isRelative = p.image.startsWith('/');
+            const isHttp = p.image.startsWith('http');
+            console.log(`   Is Cloudinary: ${isCloudinary}`);
+            console.log(`   Is Relative path: ${isRelative}`);
+            console.log(`   Is HTTP(S): ${isHttp}`);
+          }
         });
         setProducts(data.data);
       }
@@ -1772,34 +1783,40 @@ Does this look good? Reply YES to save or NO to edit.`);
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => {
-                      const userImage = getFixedImageUrl(product.image);
-                      const displayImage = userImage || 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
-                      console.log(`📸 Product: ${product.name}, Raw image: ${product.image}, Fixed URL: ${userImage}`);
+                      // Get the image URL and check if it exists
+                      const rawImage = product.image;
+                      const hasImage = rawImage && typeof rawImage === 'string' && rawImage.trim().length > 0;
+                      const userImage = hasImage ? getFixedImageUrl(rawImage) : '';
+                      const displayImage = (userImage && userImage.length > 0) ? userImage : '';
+                      
+                      console.log(`\n--- Rendering Product: ${product.name} ---`);
+                      console.log(`Raw image: "${rawImage}"`);
+                      console.log(`Has image: ${hasImage}`);
+                      console.log(`User image: "${userImage}"`);
+                      console.log(`Display image: "${displayImage}"`);
 
                       return (
                         <div
                           key={product._id}
                           className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 group relative"
                         >
-                          {/* Product Image - User Upload Only */}
-                          <div className="w-full h-56 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 overflow-hidden relative">
-                            {userImage ? (
+                          {/* Product Image - Only show if image exists and has valid URL */}
+                          {displayImage ? (
+                            <div className="w-full h-56 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 overflow-hidden relative">
                               <img
                                 src={displayImage}
+                                data-src={displayImage}
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                 crossOrigin="anonymous"
-                                onError={(e) => handleImageErrorWithFallback(e)}
+                                data-retry="0"
+                                onError={(e) => {
+                                  console.error(`❌ Product image failed: ${displayImage}`);
+                                  handleImageErrorWithRetry(e);
+                                }}
                               />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
-                                <div className="text-center">
-                                  <Package className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">No image</p>
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                            </div>
+                          ) : null}
 
                           {/* Card Content */}
                           <div className="p-6">

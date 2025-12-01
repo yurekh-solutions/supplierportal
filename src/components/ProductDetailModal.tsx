@@ -5,7 +5,7 @@ import { Button } from '@/pages/components/ui/button';
 import { Badge } from '@/pages/components/ui/badge';
 import AIRecommendationEngine from './AIRecommendationEngine';
 import SmartProductSearch from './SmartProductSearch';
-import { getFixedImageUrl } from '@/lib/imageUtils';
+import { getFixedImageUrl, handleImageErrorWithFallback, handleImageErrorWithRetry } from '@/lib/imageUtils';
 
 interface ProductDetail {
   _id: string;
@@ -85,25 +85,23 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Product Image - Always Show */}
-          <div className="w-full h-80 rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
-            {fixedImageUrl ? (
+          {/* Product Image - Only show if exists */}
+          {fixedImageUrl ? (
+            <div className="w-full h-80 rounded-xl overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center">
               <img 
                 src={fixedImageUrl}
+                data-src={fixedImageUrl}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                crossOrigin="anonymous"
+                data-retry="0"
                 onError={(e) => {
-                  console.warn(`📸 Image failed to load: ${fixedImageUrl}`);
-                  e.currentTarget.style.display = 'none';
+                  console.error(`❌ Modal image failed: ${fixedImageUrl}`);
+                  handleImageErrorWithRetry(e);
                 }}
               />
-            ) : (
-              <div className="text-center">
-                <Package className="w-24 h-24 text-muted-foreground/30 mx-auto mb-2" />
-                <p className="text-muted-foreground">No image available</p>
-              </div>
-            )}
-          </div>
+            </div>
+          ) : null}
 
           {/* Description */}
           <div>
@@ -151,11 +149,14 @@ export default function ProductDetailModal({ product, open, onOpenChange, onEdit
                   <div key={index} className="rounded-lg overflow-hidden border-2 border-white/20">
                     <img
                       src={fixedUrl}
+                      data-src={fixedUrl}
                       alt={`${product.name} - ${index + 1}`}
                       className="w-full h-24 object-cover hover:scale-110 transition-transform"
+                      crossOrigin="anonymous"
+                      data-retry="0"
                       onError={(e) => {
-                        console.warn(`📸 Image failed to load: ${fixedUrl}`);
-                        e.currentTarget.style.display = 'none';
+                        console.error(`❌ Additional image failed: ${fixedUrl}`);
+                        handleImageErrorWithRetry(e);
                       }}
                     />
                   </div>

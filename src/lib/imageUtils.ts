@@ -18,24 +18,6 @@ export const getBackendBaseUrl = (): string => {
 };
 
 /**
- * Use backend proxy for Cloudinary images on localhost
- * This bypasses CORS issues by routing through the backend
- */
-export const getCloudinaryProxyUrl = (cloudinaryUrl: string): string => {
-  const isProduction = window.location.hostname.includes('vercel.app') || 
-                      window.location.hostname.includes('vercel.com');
-  
-  console.log(`📋 getCloudinaryProxyUrl:`);
-  console.log(`   Input URL: "${cloudinaryUrl}"`);
-  console.log(`   Is Production: ${isProduction}`);
-  
-  // For now, use direct Cloudinary URLs on both to test
-  // Cloudinary CDN should work from anywhere
-  console.log(`   ✅ Using direct CDN URL (disabling proxy for testing)`);
-  return cloudinaryUrl;
-};
-
-/**
  * Fix image URLs to work correctly in both development and production
  * Handles multiple URL formats:
  * 1. Cloudinary URLs - kept as-is
@@ -46,69 +28,60 @@ export const getCloudinaryProxyUrl = (cloudinaryUrl: string): string => {
  */
 export const getFixedImageUrl = (imageUrl?: string | null): string => {
   if (!imageUrl) {
-    console.log('🖼️ getFixedImageUrl: No image URL provided');
     return '';
   }
   
   const backendBaseUrl = getBackendBaseUrl();
-  let processedUrl = imageUrl;
   
-  console.log(`🖼️ getFixedImageUrl processing:`);
-  console.log(`   Input: "${imageUrl}"`);
-  console.log(`   Backend URL: ${backendBaseUrl}`);
-  
-  // Case 1: Cloudinary URLs (already https) - use proxy on localhost
-  if (processedUrl.includes('cloudinary.com') || processedUrl.includes('res.cloudinary.com')) {
-    console.log(`   ✅ Detected Cloudinary URL`);
-    const result = getCloudinaryProxyUrl(processedUrl);
-    console.log(`   Final URL: "${result}"`);
-    return result;
+  // Case 1: Cloudinary URLs (already https) - keep as-is
+  if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
+    return imageUrl;
   }
   
   // Case 2: Relative path starting with /uploads
-  if (processedUrl.startsWith('/uploads')) {
-    return backendBaseUrl + processedUrl;
+  if (imageUrl.startsWith('/uploads')) {
+    return backendBaseUrl + imageUrl;
   }
   
   // Case 2b: Filesystem path with /uploads (e.g., /opt/render/project/src/uploads/...)
-  if (processedUrl.includes('/uploads/')) {
-    const uploadsIndex = processedUrl.indexOf('/uploads/');
-    const cleanPath = processedUrl.substring(uploadsIndex);
+  if (imageUrl.includes('/uploads/')) {
+    const uploadsIndex = imageUrl.indexOf('/uploads/');
+    const cleanPath = imageUrl.substring(uploadsIndex);
     return backendBaseUrl + cleanPath;
   }
   
   // Case 3: Contains localhost in the URL - replace with backend base URL
-  if (processedUrl.includes('localhost')) {
-    return processedUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
+  if (imageUrl.includes('localhost')) {
+    return imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
   }
   
   // Case 4: Full URL but need to validate/fix protocol and domain
-  if (processedUrl.startsWith('http://') || processedUrl.startsWith('https://')) {
-    // If it's a Cloudinary URL, use proxy on localhost
-    if (processedUrl.includes('cloudinary.com') || processedUrl.includes('res.cloudinary.com')) {
-      return getCloudinaryProxyUrl(processedUrl);
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    // If it's a Cloudinary URL, return as-is
+    if (imageUrl.includes('cloudinary.com') || imageUrl.includes('res.cloudinary.com')) {
+      return imageUrl;
     }
     
     // If in production and not using correct backend domain
     const isProduction = window.location.hostname.includes('vercel.app') || 
                         window.location.hostname.includes('vercel.com');
     
-    if (isProduction && !processedUrl.includes('backendmatrix.onrender.com')) {
+    if (isProduction && !imageUrl.includes('backendmatrix.onrender.com')) {
       // Replace any backend domain with the correct one
-      return processedUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
+      return imageUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
     }
     
     // Return as-is if already correct
-    return processedUrl;
+    return imageUrl;
   }
   
   // Case 5: Any other format - try to prepend backend URL
-  return backendBaseUrl + (processedUrl.startsWith('/') ? '' : '/') + processedUrl;
+  return backendBaseUrl + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
 };
 
 /**
  * Get image source with error handling and fallback
- * Returns the fixed image URL with fallback support
+ * Returns the fixed image URL or a placeholder if no image
  */
 export const getImageSource = (imageUrl?: string | null): {
   src: string;
@@ -120,81 +93,6 @@ export const getImageSource = (imageUrl?: string | null): {
     src: fixedUrl || 'https://placehold.co/400x300/6366f1/ffffff?text=Product',
     hasFallback: !fixedUrl
   };
-};
-
-/**
- * Handle image errors with fallback strategies
- * Tries multiple fallback options when image fails to load
- */
-export const handleImageError = (event: React.SyntheticEvent<HTMLImageElement>) => {
-  const img = event.currentTarget;
-  const currentSrc = img.src;
-  
-  // Don't retry if already a fallback placeholder
-  if (currentSrc.includes('placehold.co') || currentSrc.includes('unsplash.com')) {
-    return;
-  }
-  
-  // Fallback 1: Try with data-retry attribute if not already retried
-  if (!img.getAttribute('data-retry')) {
-    img.setAttribute('data-retry', 'true');
-    // Give the image one more chance to load
-    img.src = currentSrc;
-    return;
-  }
-  
-  // Fallback 2: Use placeholder
-  img.src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
-};
-
-/**
- * Handle image error with retry for product cards
- * Provides better fallback handling
- */
-export const handleImageErrorWithFallback = (event: React.SyntheticEvent<HTMLImageElement>, fallbackUrl?: string) => {
-  const img = event.currentTarget;
-  const originalSrc = img.getAttribute('data-original-src') || img.src;
-  
-  // Store original source if not already stored
-  if (!img.getAttribute('data-original-src')) {
-    img.setAttribute('data-original-src', img.src);
-  }
-  
-  // Check retry count
-  const retryCount = parseInt(img.getAttribute('data-retry-count') || '0');
-  
-  console.error('🖼️ Image load error:', {
-    src: originalSrc,
-    retryCount,
-    isCloudinary: originalSrc.includes('cloudinary.com'),
-    timestamp: new Date().toISOString()
-  });
-  
-  // If this is a Cloudinary image and first error, retry with cache bust
-  if (originalSrc.includes('cloudinary.com') && retryCount < 2) {
-    img.setAttribute('data-retry-count', String(retryCount + 1));
-    // Retry after delay with cache-busting parameter
-    setTimeout(() => {
-      const newSrc = originalSrc.includes('?') 
-        ? originalSrc + '&retry=' + Date.now() 
-        : originalSrc + '?retry=' + Date.now();
-      console.log('🔄 Retrying Cloudinary image:', newSrc);
-      img.src = newSrc;
-    }, 500);
-    return;
-  }
-  
-  // If fallback provided, try it
-  if (fallbackUrl && !img.getAttribute('data-fallback-tried')) {
-    img.setAttribute('data-fallback-tried', 'true');
-    console.log('📸 Using fallback image:', fallbackUrl);
-    img.src = fallbackUrl;
-    return;
-  }
-  
-  // Otherwise use placeholder
-  console.log('⚠️ Using placeholder for:', originalSrc);
-  img.src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
 };
 
 /**
@@ -220,20 +118,40 @@ export const isImageAccessible = async (imageUrl: string): Promise<boolean> => {
 };
 
 /**
- * Get alternative image URL if primary fails
- * Useful for having multiple fallback sources
+ * Handle image load errors with retry mechanism
+ * Retries up to 2 times before showing fallback
  */
-export const getAlternativeImageUrl = (imageUrl?: string | null, includeUnsplash: boolean = true): string => {
-  if (imageUrl) {
-    return getFixedImageUrl(imageUrl);
-  }
+export const handleImageErrorWithRetry = (e: React.SyntheticEvent<HTMLImageElement>, retries = 0) => {
+  const target = e.target as HTMLImageElement;
+  const maxRetries = 2;
   
-  // If no image, return a nice placeholder
-  if (includeUnsplash) {
-    return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop';
-  }
+  // Get the current retry count from data attribute
+  const currentRetry = parseInt(target.getAttribute('data-retry') || '0');
   
-  return 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
+  if (currentRetry < maxRetries) {
+    // Increment retry count and try again
+    target.setAttribute('data-retry', String(currentRetry + 1));
+    // Reload the image by setting src again (forces browser to retry)
+    const src = target.getAttribute('data-src');
+    if (src) {
+      setTimeout(() => {
+        target.src = src;
+      }, 500 + (currentRetry * 300)); // Incremental delay between retries
+    }
+  } else {
+    // All retries exhausted, show fallback
+    target.src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=Image+Not+Available';
+    console.error(`❌ Image failed after ${maxRetries} retries`);
+  }
+};
+
+/**
+ * Handle image load errors and set fallback placeholder
+ * Used when image URL is broken or inaccessible
+ */
+export const handleImageErrorWithFallback = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const target = e.target as HTMLImageElement;
+  target.src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=Failed+to+Load';
 };
 
 export default {
