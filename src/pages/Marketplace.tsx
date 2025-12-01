@@ -68,6 +68,20 @@ const Marketplace = () => {
       const response = await fetch(`${API_URL}/products/active`);
       const data = await response.json();
       if (data.success) {
+        console.log('📦 Marketplace Products Fetched:', {
+          total: data.data?.length || 0,
+          timestamp: new Date().toISOString(),
+        });
+        // Log first 3 products for verification
+        data.data?.slice(0, 3).forEach((p: Product, idx: number) => {
+          console.log(`\n✨ Product ${idx + 1}: ${p.name}`);
+          console.log(`   Image field: ${!!p.image}`);
+          console.log(`   Image URL: "${p.image}"`);
+          if (p.image) {
+            const isCloudinary = p.image.includes('cloudinary.com') || p.image.includes('res.cloudinary.com');
+            console.log(`   From Cloudinary: ${isCloudinary ? '✅ YES' : '❌ NO'}`);
+          }
+        });
         setProducts(data.data || []);
       }
     } catch (error) {
@@ -239,6 +253,12 @@ const Marketplace = () => {
               const hasImage = product.image && product.image.trim() !== '';
               const imageUrl = hasImage ? getFixedImageUrl(product.image) : '';
               const supplierSuggestions = getSupplierSuggestions(product.category);
+              
+              // Log image details when rendering
+              if (imageUrl && imageUrl.includes('cloudinary')) {
+                console.log(`📸 Rendering Cloudinary image for "${product.name}"`);
+              }
+              
               return (
                 <div
                   key={product._id}
