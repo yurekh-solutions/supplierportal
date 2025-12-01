@@ -990,6 +990,10 @@ Does this look good? Reply YES to save or NO to edit.`);
       });
       const data = await response.json();
       if (data.success) {
+        console.log('📄 API Response - Total products:', data.data?.length);
+        data.data?.forEach((p: any) => {
+          console.log(`📸 ${p.name}: image="${p.image}"`);
+        });
         setProducts(data.data);
       }
     } catch (error) {
@@ -1769,6 +1773,8 @@ Does this look good? Reply YES to save or NO to edit.`);
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredProducts.map((product) => {
                       const userImage = getFixedImageUrl(product.image);
+                      const displayImage = userImage || 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
+                      console.log(`📸 Product: ${product.name}, Raw image: ${product.image}, Fixed URL: ${userImage}`);
 
                       return (
                         <div
@@ -1779,7 +1785,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                           <div className="w-full h-56 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 overflow-hidden relative">
                             {userImage ? (
                               <img
-                                src={userImage}
+                                src={displayImage}
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                 crossOrigin="anonymous"
@@ -1788,7 +1794,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
                                 <div className="text-center">
                                   <Package className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">No image uploaded</p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">No image</p>
                                 </div>
                               </div>
                             )}

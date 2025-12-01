@@ -237,6 +237,7 @@ const Marketplace = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map(product => {
               const imageUrl = getFixedImageUrl(product.image);
+              const displayImage = imageUrl || 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
               const supplierSuggestions = getSupplierSuggestions(product.category);
               return (
                 <div
@@ -247,7 +248,7 @@ const Marketplace = () => {
                   <div className="relative h-56 bg-gradient-to-br from-primary/10 to-secondary/10 overflow-hidden">
                     {imageUrl ? (
                       <img
-                        src={imageUrl}
+                        src={displayImage}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         crossOrigin="anonymous"
