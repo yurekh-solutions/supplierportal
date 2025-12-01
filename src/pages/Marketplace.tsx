@@ -236,10 +236,13 @@ const Marketplace = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map(product => {
               const supplierSuggestions = getSupplierSuggestions(product.category);
-              // Fix localhost URLs to use production backend
+              // Fix image URLs to work in both dev and production
               let imageUrl = product.image || '';
               if (imageUrl.includes('localhost:5000')) {
-                imageUrl = imageUrl.replace('http://localhost:5000', 'https://backendmatrix.onrender.com');
+                const backendBaseUrl = import.meta.env.PROD 
+                  ? 'https://backendmatrix.onrender.com'
+                  : 'http://localhost:5000';
+                imageUrl = imageUrl.replace('http://localhost:5000', backendBaseUrl);
               }
               return (
                 <div
