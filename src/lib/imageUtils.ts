@@ -29,19 +29,10 @@ export const getCloudinaryProxyUrl = (cloudinaryUrl: string): string => {
   console.log(`   Input URL: "${cloudinaryUrl}"`);
   console.log(`   Is Production: ${isProduction}`);
   
-  // On Vercel, use direct Cloudinary URLs (CDN works fine)
-  if (isProduction) {
-    console.log(`   ✅ Using direct CDN URL (Vercel)`);
-    return cloudinaryUrl;
-  }
-  
-  // On localhost, proxy through backend to avoid CORS issues
-  const backendUrl = getBackendBaseUrl();
-  const encodedUrl = encodeURIComponent(cloudinaryUrl);
-  const proxyUrl = `${backendUrl}/api/image-proxy?url=${encodedUrl}`;
-  console.log(`   ✅ Using proxy URL (localhost)`);
-  console.log(`   Proxy URL: "${proxyUrl}"`);
-  return proxyUrl;
+  // For now, use direct Cloudinary URLs on both to test
+  // Cloudinary CDN should work from anywhere
+  console.log(`   ✅ Using direct CDN URL (disabling proxy for testing)`);
+  return cloudinaryUrl;
 };
 
 /**
