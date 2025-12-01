@@ -235,22 +235,36 @@ const Marketplace = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredProducts.map(product => {
-              const supplierSuggestions = getSupplierSuggestions(product.category);
               // Fix image URLs to work in both dev and production
               let imageUrl = product.image || '';
-              if (imageUrl && (imageUrl.includes('localhost:5000') || imageUrl.startsWith('/uploads'))) {
-                const isProduction = window.location.hostname.includes('vercel.app') || 
-                                   window.location.hostname === 'supplierportal-mu.vercel.app';
-                const backendBaseUrl = isProduction
-                  ? 'https://backendmatrix.onrender.com'
-                  : 'http://localhost:5000';
-                
+              
+              // Determine if we're in production (Vercel deployment)
+              const isProduction = window.location.hostname.includes('vercel.app') || 
+                                 window.location.hostname.includes('vercel.com');
+              const backendBaseUrl = isProduction
+                ? 'https://backendmatrix.onrender.com'
+                : 'http://localhost:5000';
+              
+              // Fix all possible image URL formats
+              if (imageUrl) {
+                // Case 1: Relative path starting with /uploads
                 if (imageUrl.startsWith('/uploads')) {
                   imageUrl = backendBaseUrl + imageUrl;
-                } else {
-                  imageUrl = imageUrl.replace('http://localhost:5000', backendBaseUrl);
+                }
+                // Case 2: Contains localhost in the URL
+                else if (imageUrl.includes('localhost')) {
+                  imageUrl = imageUrl.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
+                }
+                // Case 3: Already has full URL but not HTTPS in production
+                else if (isProduction && imageUrl.startsWith('http://')) {
+                  // Ensure we're using the correct production backend
+                  if (!imageUrl.includes('backendmatrix.onrender.com')) {
+                    imageUrl = imageUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
+                  }
                 }
               }
+              
+              const supplierSuggestions = getSupplierSuggestions(product.category);
               return (
                 <div
                   key={product._id}

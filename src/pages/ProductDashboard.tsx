@@ -1769,19 +1769,30 @@ Does this look good? Reply YES to save or NO to edit.`);
                     {filteredProducts.map((product) => {
                       // Fix image URLs to work in both dev and production
                       let userImage = product.image || '';
-                      // Always replace localhost URLs with appropriate backend
-                      if (userImage && (userImage.includes('localhost:5000') || userImage.startsWith('/uploads'))) {
-                        // ALWAYS use production backend on Vercel (check hostname)
-                        const isProduction = window.location.hostname.includes('vercel.app') || 
-                                           window.location.hostname === 'supplierportal-mu.vercel.app';
-                        const backendBaseUrl = isProduction
-                          ? 'https://backendmatrix.onrender.com'
-                          : 'http://localhost:5000';
-                        
+                      
+                      // Determine if we're in production (Vercel deployment)
+                      const isProduction = window.location.hostname.includes('vercel.app') || 
+                                         window.location.hostname.includes('vercel.com');
+                      const backendBaseUrl = isProduction
+                        ? 'https://backendmatrix.onrender.com'
+                        : 'http://localhost:5000';
+                      
+                      // Fix all possible image URL formats
+                      if (userImage) {
+                        // Case 1: Relative path starting with /uploads
                         if (userImage.startsWith('/uploads')) {
                           userImage = backendBaseUrl + userImage;
-                        } else {
-                          userImage = userImage.replace('http://localhost:5000', backendBaseUrl);
+                        }
+                        // Case 2: Contains localhost in the URL
+                        else if (userImage.includes('localhost')) {
+                          userImage = userImage.replace(/http:\/\/localhost:\d+/, backendBaseUrl);
+                        }
+                        // Case 3: Already has full URL but not HTTPS in production
+                        else if (isProduction && userImage.startsWith('http://')) {
+                          // Ensure we're using the correct production backend
+                          if (!userImage.includes('backendmatrix.onrender.com')) {
+                            userImage = userImage.replace(/https?:\/\/[^/]+/, backendBaseUrl);
+                          }
                         }
                       }
 
