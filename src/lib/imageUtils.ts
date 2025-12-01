@@ -25,15 +25,23 @@ export const getCloudinaryProxyUrl = (cloudinaryUrl: string): string => {
   const isProduction = window.location.hostname.includes('vercel.app') || 
                       window.location.hostname.includes('vercel.com');
   
+  console.log(`📋 getCloudinaryProxyUrl:`);
+  console.log(`   Input URL: "${cloudinaryUrl}"`);
+  console.log(`   Is Production: ${isProduction}`);
+  
   // On Vercel, use direct Cloudinary URLs (CDN works fine)
   if (isProduction) {
+    console.log(`   ✅ Using direct CDN URL (Vercel)`);
     return cloudinaryUrl;
   }
   
   // On localhost, proxy through backend to avoid CORS issues
   const backendUrl = getBackendBaseUrl();
   const encodedUrl = encodeURIComponent(cloudinaryUrl);
-  return `${backendUrl}/api/image-proxy?url=${encodedUrl}`;
+  const proxyUrl = `${backendUrl}/api/image-proxy?url=${encodedUrl}`;
+  console.log(`   ✅ Using proxy URL (localhost)`);
+  console.log(`   Proxy URL: "${proxyUrl}"`);
+  return proxyUrl;
 };
 
 /**
@@ -47,15 +55,23 @@ export const getCloudinaryProxyUrl = (cloudinaryUrl: string): string => {
  */
 export const getFixedImageUrl = (imageUrl?: string | null): string => {
   if (!imageUrl) {
+    console.log('🖼️ getFixedImageUrl: No image URL provided');
     return '';
   }
   
   const backendBaseUrl = getBackendBaseUrl();
   let processedUrl = imageUrl;
   
+  console.log(`🖼️ getFixedImageUrl processing:`);
+  console.log(`   Input: "${imageUrl}"`);
+  console.log(`   Backend URL: ${backendBaseUrl}`);
+  
   // Case 1: Cloudinary URLs (already https) - use proxy on localhost
   if (processedUrl.includes('cloudinary.com') || processedUrl.includes('res.cloudinary.com')) {
-    return getCloudinaryProxyUrl(processedUrl);
+    console.log(`   ✅ Detected Cloudinary URL`);
+    const result = getCloudinaryProxyUrl(processedUrl);
+    console.log(`   Final URL: "${result}"`);
+    return result;
   }
   
   // Case 2: Relative path starting with /uploads
