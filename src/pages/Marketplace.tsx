@@ -239,7 +239,9 @@ const Marketplace = () => {
               // Fix image URLs to work in both dev and production
               let imageUrl = product.image || '';
               if (imageUrl && (imageUrl.includes('localhost:5000') || imageUrl.startsWith('/uploads'))) {
-                const backendBaseUrl = import.meta.env.PROD 
+                const isProduction = window.location.hostname.includes('vercel.app') || 
+                                   window.location.hostname === 'supplierportal-mu.vercel.app';
+                const backendBaseUrl = isProduction
                   ? 'https://backendmatrix.onrender.com'
                   : 'http://localhost:5000';
                 

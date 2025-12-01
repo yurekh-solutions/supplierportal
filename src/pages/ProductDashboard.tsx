@@ -1771,8 +1771,10 @@ Does this look good? Reply YES to save or NO to edit.`);
                       let userImage = product.image || '';
                       // Always replace localhost URLs with appropriate backend
                       if (userImage && (userImage.includes('localhost:5000') || userImage.startsWith('/uploads'))) {
-                        // In production, always use production backend
-                        const backendBaseUrl = import.meta.env.PROD 
+                        // ALWAYS use production backend on Vercel (check hostname)
+                        const isProduction = window.location.hostname.includes('vercel.app') || 
+                                           window.location.hostname === 'supplierportal-mu.vercel.app';
+                        const backendBaseUrl = isProduction
                           ? 'https://backendmatrix.onrender.com'
                           : 'http://localhost:5000';
                         
