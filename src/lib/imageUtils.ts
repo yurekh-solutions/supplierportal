@@ -137,26 +137,37 @@ export const handleImageErrorWithFallback = (event: React.SyntheticEvent<HTMLIma
   // Check retry count
   const retryCount = parseInt(img.getAttribute('data-retry-count') || '0');
   
-  // If this is a Cloudinary image and first error, retry once
+  // Log error for debugging
+  console.error('Image load error:', {
+    src: originalSrc,
+    retryCount,
+    timestamp: new Date().toISOString()
+  });
+  
+  // If this is a Cloudinary image and first error, retry once with cache bust
   if (originalSrc.includes('cloudinary.com') && retryCount === 0) {
     img.setAttribute('data-retry-count', '1');
-    // Add cache-busting parameter and retry
+    // Add cache-busting parameter and retry after short delay
     setTimeout(() => {
-      img.src = originalSrc.includes('?') 
-        ? originalSrc + '&t=' + Date.now() 
-        : originalSrc + '?t=' + Date.now();
-    }, 300);
+      const newSrc = originalSrc.includes('?') 
+        ? originalSrc + '&bust=' + Date.now() 
+        : originalSrc + '?bust=' + Date.now();
+      console.log('Retrying Cloudinary image:', newSrc);
+      img.src = newSrc;
+    }, 200);
     return;
   }
   
   // If fallback provided, try it
   if (fallbackUrl && !img.getAttribute('data-fallback-tried')) {
     img.setAttribute('data-fallback-tried', 'true');
+    console.log('Using fallback image:', fallbackUrl);
     img.src = fallbackUrl;
     return;
   }
   
   // Otherwise use placeholder
+  console.log('Using placeholder for:', originalSrc);
   img.src = 'https://placehold.co/400x300/e5e7eb/9ca3af?text=No+Image';
 };
 
