@@ -7,7 +7,21 @@ import { Label } from '@/pages/components/ui/label';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useToast } from '@/hooks/use-toast';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Get API URL - use production URL if on Vercel, otherwise use env var or localhost
+const getApiUrl = () => {
+  // Check if running on Vercel production
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://backendmatrix.onrender.com/api';
+  }
+  // Check if env var is set (for local dev and preview)
+  if (import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_URL.includes('localhost')) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Fallback to localhost for local development
+  return 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
 
 const SupplierLogin = () => {
   const navigate = useNavigate();

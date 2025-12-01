@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, Building2, User, Mail, Phone, MapPin, FileText, Check, Eye, Trash2, ArrowLeft, LogIn, Sparkles, CheckCircle } from 'lucide-react';
+import { Store, Building2, User, Mail, Phone, MapPin, FileText, Check, Eye, Trash2, ArrowLeft, LogIn, Sparkles, CheckCircle, Upload, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -14,7 +14,21 @@ import {
   SelectValue,
 } from '@/pages/components/ui/select';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// Get API URL - use production URL if on Vercel, otherwise use env var or localhost
+const getApiUrl = () => {
+  // Check if running on Vercel production
+  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+    return 'https://backendmatrix.onrender.com/api';
+  }
+  // Check if env var is set (for local dev and preview)
+  if (import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_URL.includes('localhost')) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // Fallback to localhost for local development
+  return 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
 
 const SupplierOnboarding = () => {
   const navigate = useNavigate();
@@ -42,6 +56,7 @@ const SupplierOnboarding = () => {
   });
 
   const [files, setFiles] = useState<{ [key: string]: File | null }>({
+    logo: null,
     gst: null,
     cin: null,
     pan: null,
@@ -397,6 +412,63 @@ const SupplierOnboarding = () => {
                         <SelectItem value="individual">Individual</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  {/* Company Logo - Optional */}
+                  <div className="space-y-2">
+                    <Label className="text-foreground font-semibold flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4" />
+                      Company Logo (Optional)
+                    </Label>
+                    <p className="text-xs text-muted-foreground">Upload JPG, PNG, or WebP (Max 5MB) - Stored on Cloudinary</p>
+                    {!files.logo ? (
+                      <div className="relative border-2 border-dashed border-primary/30 rounded-lg p-6 hover:border-primary/60 transition-colors bg-primary/5 cursor-pointer group">
+                        <input
+                          type="file"
+                          accept=".jpg,.jpeg,.png,.webp"
+                          onChange={(e) => handleFileChange(e, 'logo')}
+                          className="absolute inset-0 opacity-0 cursor-pointer"
+                        />
+                        <div className="flex flex-col items-center justify-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center group-hover:shadow-lg transition-all">
+                            <Upload className="w-6 h-6 text-white" />
+                          </div>
+                          <div className="text-center">
+                            <p className="font-semibold text-foreground">Click to upload logo</p>
+                            <p className="text-xs text-muted-foreground">or drag and drop</p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start gap-3 flex-1">
+                            <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                              {files.logo && (
+                                <img
+                                  src={URL.createObjectURL(files.logo)}
+                                  alt="Logo preview"
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-foreground truncate">{files.logo.name}</p>
+                              <p className="text-xs text-muted-foreground">{(files.logo.size / 1024 / 1024).toFixed(2)} MB</p>
+                              <p className="text-xs text-green-600 font-medium mt-1">✓ Ready to upload to Cloudinary</p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setFiles(prev => ({ ...prev, logo: null }))}
+                            className="p-2 hover:bg-red-100 rounded-lg transition-colors flex-shrink-0"
+                            title="Remove logo"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="space-y-3">
