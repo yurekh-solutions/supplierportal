@@ -14,7 +14,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import AIInsightsPanel from '@/components/AIInsightsPanel';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import { useToast } from '@/hooks/use-toast';
-import { getFixedImageUrl } from '@/lib/imageUtils';
+import { getFixedImageUrl, handleImageErrorWithFallback } from '@/lib/imageUtils';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -1789,6 +1789,7 @@ Does this look good? Reply YES to save or NO to edit.`);
                                 alt={product.name}
                                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                                 crossOrigin="anonymous"
+                                onError={(e) => handleImageErrorWithFallback(e)}
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
