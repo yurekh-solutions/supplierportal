@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, Shield, LogIn, Eye, EyeOff, Sparkles, ArrowLeft, CheckCircle } from 'lucide-react';
+import { Lock, Mail, Shield, LogIn, Eye, EyeOff, Sparkles, ArrowLeft, CheckCircle, Copy, Check } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -42,6 +42,8 @@ const SupplierLogin = () => {
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [showConfirmResetPassword, setShowConfirmResetPassword] = useState(false);
   const [forgotStep, setForgotStep] = useState<'request' | 'verify' | 'reset'>('request');
+  const [testCode, setTestCode] = useState('');
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,6 +168,7 @@ const SupplierLogin = () => {
       const data = await response.json();
 
       if (data.success) {
+        setTestCode(data.testCode || '');
         setForgotStep('verify');
         toast({
           title: 'Success',
@@ -182,6 +185,18 @@ const SupplierLogin = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const copyCodeToClipboard = () => {
+    if (testCode) {
+      navigator.clipboard.writeText(testCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+      toast({
+        title: 'Copied!',
+        description: 'Reset code copied to clipboard',
+      });
     }
   };
 
@@ -497,23 +512,44 @@ const SupplierLogin = () => {
                 )}
 
                 {forgotStep === 'verify' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="reset-token" className="text-foreground font-semibold">Verification Code</Label>
-                    <div className="relative group">
-                      <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-br from-primary to-secondary rounded-l-lg flex items-center justify-center group-hover:shadow-lg transition-all z-10">
-                        <CheckCircle className="w-6 h-6 text-white drop-shadow-md" />
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-token" className="text-foreground font-semibold">Verification Code</Label>
+                      <div className="relative group">
+                        <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-br from-primary to-secondary rounded-l-lg flex items-center justify-center group-hover:shadow-lg transition-all z-10">
+                          <CheckCircle className="w-6 h-6 text-white drop-shadow-md" />
+                        </div>
+                        <Input
+                          id="reset-token"
+                          type="text"
+                          placeholder="Enter the code from your email"
+                          value={resetToken}
+                          onChange={(e) => setResetToken(e.target.value)}
+                          className="pl-16 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
+                          required
+                        />
                       </div>
-                      <Input
-                        id="reset-token"
-                        type="text"
-                        placeholder="Enter the code from your email"
-                        value={resetToken}
-                        onChange={(e) => setResetToken(e.target.value)}
-                        className="pl-16 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
-                        required
-                      />
                     </div>
-                  </div>
+
+                    {testCode && (
+                      <div className="bg-amber-50/80 border-2 border-amber-200/80 rounded-lg p-4 backdrop-blur-sm">
+                        <p className="text-xs text-amber-800 text-center font-medium mb-2">🔑 Test Code (for development)</p>
+                        <div className="flex items-center justify-between gap-2">
+                          <code className="flex-1 text-center font-mono text-lg font-bold text-amber-900 bg-white/50 px-3 py-2 rounded">
+                            {testCode}
+                          </code>
+                          <button
+                            type="button"
+                            onClick={copyCodeToClipboard}
+                            className="px-3 py-2 rounded bg-amber-600 hover:bg-amber-700 text-white transition-colors"
+                            title="Copy code"
+                          >
+                            {copiedCode ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {forgotStep === 'reset' && (
