@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, Mail, Shield, LogIn, Eye, EyeOff, Sparkles, ArrowLeft } from 'lucide-react';
+import { Lock, Mail, Shield, LogIn, Eye, EyeOff, Sparkles, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -34,6 +34,14 @@ const SupplierLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [resetToken, setResetToken] = useState('');
+  const [resetPassword, setResetPassword] = useState('');
+  const [confirmResetPassword, setConfirmResetPassword] = useState('');
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [showConfirmResetPassword, setShowConfirmResetPassword] = useState(false);
+  const [forgotStep, setForgotStep] = useState<'request' | 'verify' | 'reset'>('request');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,6 +135,153 @@ const SupplierLogin = () => {
       toast({
         title: 'Error',
         description: error.message || 'Failed to set up password',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPasswordRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!forgotEmail) {
+      toast({
+        title: 'Error',
+        description: 'Please enter your email address',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/supplier/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setForgotStep('verify');
+        toast({
+          title: 'Success',
+          description: 'Check your email for the password reset code',
+        });
+      } else {
+        throw new Error(data.message || 'Failed to send reset email');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to send reset email',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyResetToken = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!resetToken) {
+      toast({
+        title: 'Error',
+        description: 'Please enter the verification code',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/supplier/verify-reset-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail, token: resetToken }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setForgotStep('reset');
+        toast({
+          title: 'Success',
+          description: 'Code verified! Now create your new password',
+        });
+      } else {
+        throw new Error(data.message || 'Invalid verification code');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Invalid verification code',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (resetPassword.length < 6) {
+      toast({
+        title: 'Error',
+        description: 'Password must be at least 6 characters long',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (resetPassword !== confirmResetPassword) {
+      toast({
+        title: 'Error',
+        description: 'Passwords do not match',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/supplier/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: forgotEmail,
+          token: resetToken,
+          newPassword: resetPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast({
+          title: 'Success',
+          description: 'Password reset successfully! Please login with your new password',
+        });
+        setShowForgotPassword(false);
+        setForgotStep('request');
+        setForgotEmail('');
+        setResetToken('');
+        setResetPassword('');
+        setConfirmResetPassword('');
+      } else {
+        throw new Error(data.message || 'Failed to reset password');
+      }
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to reset password',
         variant: 'destructive',
       });
     } finally {
@@ -287,6 +442,16 @@ const SupplierLogin = () => {
                   )}
                 </Button>
 
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="text-sm text-primary hover:text-primary/80 font-medium transition-colors hover:underline"
+                  >
+                    Forgot your password?
+                  </button>
+                </div>
+
                 <div className="glass-card border-2 border-blue-200/50 rounded-xl p-5 backdrop-blur-xl bg-blue-50/30">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -300,6 +465,148 @@ const SupplierLogin = () => {
                     </div>
                   </div>
                 </div>
+              </form>
+            ) : showForgotPassword ? (
+              <form onSubmit={forgotStep === 'request' ? handleForgotPasswordRequest : forgotStep === 'verify' ? handleVerifyResetToken : handleResetPassword} className="space-y-6">
+                <div className="bg-primary/10 border-2 border-primary/20 rounded-lg p-4 mb-4 backdrop-blur-sm">
+                  <p className="text-sm text-primary font-medium text-center">
+                    {forgotStep === 'request' && '📧 Enter your email to receive a reset code'}
+                    {forgotStep === 'verify' && '🔐 Enter the verification code sent to your email'}
+                    {forgotStep === 'reset' && '✨ Create your new password'}
+                  </p>
+                </div>
+
+                {forgotStep === 'request' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email" className="text-foreground font-semibold">Email Address</Label>
+                    <div className="relative group">
+                      <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-br from-primary to-secondary rounded-l-lg flex items-center justify-center group-hover:shadow-lg transition-all z-10">
+                        <Mail className="w-6 h-6 text-white drop-shadow-md" />
+                      </div>
+                      <Input
+                        id="forgot-email"
+                        type="email"
+                        placeholder="your.email@example.com"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        className="pl-16 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {forgotStep === 'verify' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="reset-token" className="text-foreground font-semibold">Verification Code</Label>
+                    <div className="relative group">
+                      <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-br from-primary to-secondary rounded-l-lg flex items-center justify-center group-hover:shadow-lg transition-all z-10">
+                        <CheckCircle className="w-6 h-6 text-white drop-shadow-md" />
+                      </div>
+                      <Input
+                        id="reset-token"
+                        type="text"
+                        placeholder="Enter the code from your email"
+                        value={resetToken}
+                        onChange={(e) => setResetToken(e.target.value)}
+                        className="pl-16 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {forgotStep === 'reset' && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-password" className="text-foreground font-semibold">New Password</Label>
+                      <div className="relative group">
+                        <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-br from-primary to-secondary rounded-l-lg flex items-center justify-center group-hover:shadow-lg transition-all z-10">
+                          <Lock className="w-6 h-6 text-white drop-shadow-md" />
+                        </div>
+                        <Input
+                          id="reset-password"
+                          type={showResetPassword ? "text" : "password"}
+                          placeholder="Enter new password (min 6 characters)"
+                          value={resetPassword}
+                          onChange={(e) => setResetPassword(e.target.value)}
+                          className="pl-16 pr-12 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
+                          required
+                          minLength={6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowResetPassword(!showResetPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-primary/10"
+                        >
+                          {showResetPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-reset-password" className="text-foreground font-semibold">Confirm Password</Label>
+                      <div className="relative group">
+                        <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-br from-primary to-secondary rounded-l-lg flex items-center justify-center group-hover:shadow-lg transition-all z-10">
+                          <Lock className="w-6 h-6 text-white drop-shadow-md" />
+                        </div>
+                        <Input
+                          id="confirm-reset-password"
+                          type={showConfirmResetPassword ? "text" : "password"}
+                          placeholder="Re-enter password"
+                          value={confirmResetPassword}
+                          onChange={(e) => setConfirmResetPassword(e.target.value)}
+                          className="pl-16 pr-12 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
+                          required
+                          minLength={6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmResetPassword(!showConfirmResetPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-primary/10"
+                        >
+                          {showConfirmResetPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <Button
+                  type="submit"
+                  className="w-full h-12 bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl hover:scale-[1.02] text-white font-semibold text-base transition-all duration-300 disabled:opacity-50"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Processing...
+                    </span>
+                  ) : (
+                    <span>
+                      {forgotStep === 'request' && 'Send Reset Code'}
+                      {forgotStep === 'verify' && 'Verify Code'}
+                      {forgotStep === 'reset' && 'Reset Password'}
+                    </span>
+                  )}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotStep('request');
+                    setForgotEmail('');
+                    setResetToken('');
+                    setResetPassword('');
+                    setConfirmResetPassword('');
+                  }}
+                  className="w-full h-12 border-2 border-primary/50 text-primary hover:bg-primary hover:text-white transition-all"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Login
+                </Button>
               </form>
             ) : (
               <form onSubmit={handlePasswordSetup} className="space-y-6">
