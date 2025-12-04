@@ -13,6 +13,8 @@ import ScrollToTop from './components/ScrollToTop';
 // Supplier Pages
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import ProductDashboard from './pages/ProductDashboard';
@@ -68,6 +70,8 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/status" element={<SupplierStatus />} />
             <Route path="/dashboard" element={<Dashboard />} />
