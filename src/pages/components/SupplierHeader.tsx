@@ -10,14 +10,25 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import LogoutModal from '@/components/LogoutModal';
 
 const SupplierHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
     localStorage.removeItem('supplierToken');
     localStorage.removeItem('supplierUser');
+    setShowLogoutModal(false);
     window.location.href = '/supplier/login';
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   const navItems = [
@@ -56,7 +67,7 @@ const SupplierHeader = () => {
             })}
             
             <Button
-              onClick={handleLogout}
+              onClick={handleLogoutClick}
               variant="outline"
               className="flex items-center text-sm font-medium text-gray-700 hover:text-[#B85C38] border-gray-300 hover:border-[#B85C38]"
             >
@@ -101,7 +112,7 @@ const SupplierHeader = () => {
             })}
             <button
               onClick={() => {
-                handleLogout();
+                handleLogoutClick();
                 setIsMenuOpen(false);
               }}
               className="w-full flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-[#B85C38] hover:bg-gray-50"
@@ -112,6 +123,13 @@ const SupplierHeader = () => {
           </div>
         </div>
       )}
+
+      {/* Logout Modal */}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+      />
     </header>
   );
 };

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import LanguageSwitcher from './components/LanguageSwitcher';
 import AIInsightsPanel from '@/components/AIInsightsPanel';
 import ProductDetailModal from '@/components/ProductDetailModal';
+import LogoutModal from '@/components/LogoutModal';
 import { useToast } from '@/hooks/use-toast';
 import { getFixedImageUrl, handleImageErrorWithFallback, handleImageErrorWithRetry } from '@/lib/imageUtils';
 
@@ -130,6 +131,7 @@ const SupplierProductDashboard = () => {
   const [analyticsHubInput, setAnalyticsHubInput] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const productInputRef = useRef<HTMLDivElement>(null);
 
   const token = localStorage.getItem('supplierToken');
@@ -1093,10 +1095,19 @@ Does this look good? Reply YES to save or NO to edit.`);
     setShowCustomSubcategory(false);
   };
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
     localStorage.removeItem('supplierToken');
     localStorage.removeItem('supplierUser');
+    setShowLogoutModal(false);
     navigate('/login');
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
   };
 
   const getStatusBadge = (status: string) => {
@@ -1187,7 +1198,7 @@ Does this look good? Reply YES to save or NO to edit.`);
               <LanguageSwitcher />
               <Button
                 className="bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-xl hover:scale-105 transition-all"
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
               >
                 <LogOut className="w-4 h-4 mr-2" />
                 Logout
@@ -2649,6 +2660,12 @@ Does this look good? Reply YES to save or NO to edit.`);
         </>
       )}
 
+      {/* Logout Modal */}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+      />
     </div>
   );
 };

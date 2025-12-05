@@ -20,6 +20,7 @@ import {
   CardTitle,
 } from '@/pages/components/ui/card';
 import { Badge } from '@/pages/components/ui/badge';
+import LogoutModal from '@/components/LogoutModal';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -44,6 +45,7 @@ const ProductInquiries = () => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'new' | 'responded' | 'quoted' | 'converted'>('all');
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -102,6 +104,20 @@ const ProductInquiries = () => {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const handleConfirmLogout = () => {
+    localStorage.removeItem('supplierToken');
+    setShowLogoutModal(false);
+    navigate('/login');
+  };
+
+  const handleCancelLogout = () => {
+    setShowLogoutModal(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Header */}
@@ -128,10 +144,7 @@ const ProductInquiries = () => {
             </div>
             <Button
               className="bg-red-500 hover:bg-red-600 text-white"
-              onClick={() => {
-                localStorage.removeItem('supplierToken');
-                navigate('/login');
-              }}
+              onClick={handleLogoutClick}
               size="sm"
             >
               <LogOut className="w-4 h-4" />
@@ -256,6 +269,13 @@ const ProductInquiries = () => {
           </div>
         )}
       </div>
+
+      {/* Logout Modal */}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onConfirm={handleConfirmLogout}
+        onCancel={handleCancelLogout}
+      />
     </div>
   );
 };
