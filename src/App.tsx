@@ -10,6 +10,7 @@ import FirstVisitLanguageModal from './pages/components/FirstVisitLanguageModal'
 import { TranslationPopup } from './pages/components/TranslationPopup';
 import { applyTranslation } from './lib/translationUtils';
 import ScrollToTop from './components/ScrollToTop';
+import WhatsAppContact from './components/WhatsAppContact';
 // Supplier Pages
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
@@ -61,6 +62,9 @@ function App() {
           isTranslating={isTranslating} 
           language={selectedLanguage} 
         />
+        
+        {/* WhatsApp Contact Button */}
+        <WhatsAppContact />
         
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           {/* ✅ Correct placement for ScrollToTop - Inside BrowserRouter */}
