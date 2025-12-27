@@ -7,15 +7,15 @@ import { Label } from '@/pages/components/ui/label';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useToast } from '@/hooks/use-toast';
 
-// Get API URL - use production URL if on Vercel, otherwise use env var or localhost
+// Get API URL - use production URL from env or Render backend
 const getApiUrl = () => {
-  // Check if running on Vercel production
-  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-    return 'https://backendmatrix.onrender.com/api';
-  }
-  // Check if env var is set (for local dev and preview)
-  if (import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_URL.includes('localhost')) {
+  // Always use the environment variable if available and not localhost
+  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'http://localhost:5000/api') {
     return import.meta.env.VITE_API_URL;
+  }
+  // For production deployment (Vercel, custom domain, etc.)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    return 'https://backendmatrix.onrender.com/api';
   }
   // Fallback to localhost for local development
   return 'http://localhost:5000/api';

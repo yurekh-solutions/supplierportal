@@ -8,12 +8,15 @@ import { useToast } from '@/hooks/use-toast';
 
 // Get API URL
 const getApiUrl = () => {
-  if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
-    return 'https://backendmatrix.onrender.com/api';
-  }
-  if (import.meta.env.VITE_API_URL && !import.meta.env.VITE_API_URL.includes('localhost')) {
+  // Always use the environment variable if available and not localhost
+  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'http://localhost:5000/api') {
     return import.meta.env.VITE_API_URL;
   }
+  // For production deployment (Vercel, custom domain, etc.)
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    return 'https://backendmatrix.onrender.com/api';
+  }
+  // Fallback to localhost for local development
   return 'http://localhost:5000/api';
 };
 

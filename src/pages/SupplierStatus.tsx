@@ -4,7 +4,17 @@ import { CheckCircle, Clock, XCircle, Mail, ArrowLeft, Building2, FileText } fro
 import { Button } from '@/pages/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'http://localhost:5000/api') {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+    return 'https://backendmatrix.onrender.com/api';
+  }
+  return 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
 
 type ApplicationStatus = 'pending' | 'approved' | 'rejected';
 
