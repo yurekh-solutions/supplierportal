@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Store, Building2, User, Mail, Phone, MapPin, FileText, Check, Eye, Trash2, ArrowLeft, LogIn, Sparkles, CheckCircle, Upload, Image as ImageIcon } from 'lucide-react';
+import { Store, Building2, User, Mail, Phone, MapPin, FileText, Check, Eye, EyeOff, Trash2, ArrowLeft, LogIn, Sparkles, CheckCircle, Upload, Image as ImageIcon, Lock } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -36,6 +36,8 @@ const SupplierOnboarding = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -43,6 +45,8 @@ const SupplierOnboarding = () => {
     phone: '',
     contactPerson: '',
     businessType: 'business',
+    password: '',
+    confirmPassword: '',
     address: {
       street: '',
       city: '',
@@ -85,14 +89,79 @@ const SupplierOnboarding = () => {
   };
 
   const handleSubmit = async () => {
+    console.log('🎯 Starting submission validation...');
     setLoading(true);
     
     // Validation before submission
     if (!formData.companyName || !formData.email || !formData.phone || !formData.contactPerson) {
+      console.error('❌ Step 1 validation failed:', {
+        companyName: !!formData.companyName,
+        email: !!formData.email,
+        phone: !!formData.phone,
+        contactPerson: !!formData.contactPerson
+      });
+      
+      const missingFields = [];
+      if (!formData.companyName) missingFields.push('Company Name');
+      if (!formData.email) missingFields.push('Email');
+      if (!formData.phone) missingFields.push('Phone');
+      if (!formData.contactPerson) missingFields.push('Contact Person');
+      
       toast({
-        title: 'Missing Information',
-        description: 'Please fill in all required fields in Step 1',
+        title: '⚠️ Step 1 Incomplete',
+        description: `Please go back to Step 1 and fill: ${missingFields.join(', ')}`,
         variant: 'destructive',
+        duration: 6000,
+      });
+      setLoading(false);
+      setStep(1);
+      return;
+    }
+
+    // Validate password
+    if (!formData.password || !formData.confirmPassword) {
+      console.error('❌ Password validation failed:', {
+        password: !!formData.password,
+        confirmPassword: !!formData.confirmPassword
+      });
+      
+      const issue = !formData.password && !formData.confirmPassword 
+        ? 'both Password and Confirm Password'
+        : !formData.password 
+        ? 'Password'
+        : 'Confirm Password';
+      
+      toast({
+        title: '⚠️ Password Required',
+        description: `Please go back to Step 1 and enter ${issue}`,
+        variant: 'destructive',
+        duration: 6000,
+      });
+      setLoading(false);
+      setStep(1);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      console.error('❌ Password too short:', formData.password.length);
+      toast({
+        title: '⚠️ Password Too Short',
+        description: `Password must be at least 6 characters (current: ${formData.password.length})`,
+        variant: 'destructive',
+        duration: 6000,
+      });
+      setLoading(false);
+      setStep(1);
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      console.error('❌ Passwords do not match');
+      toast({
+        title: '⚠️ Passwords Don\'t Match',
+        description: 'Please go back to Step 1 and ensure both password fields match',
+        variant: 'destructive',
+        duration: 6000,
       });
       setLoading(false);
       setStep(1);
@@ -100,10 +169,23 @@ const SupplierOnboarding = () => {
     }
 
     if (!formData.businessDescription || !formData.productsOffered || !formData.yearsInBusiness) {
+      console.error('❌ Step 2 validation failed:', {
+        businessDescription: !!formData.businessDescription,
+        productsOffered: !!formData.productsOffered,
+        yearsInBusiness: !!formData.yearsInBusiness
+      });
+      
+      // Build specific error message
+      const missingFields = [];
+      if (!formData.businessDescription) missingFields.push('Business Description');
+      if (!formData.productsOffered) missingFields.push('Products/Services Offered');
+      if (!formData.yearsInBusiness) missingFields.push('Years in Business');
+      
       toast({
-        title: 'Missing Information',
-        description: 'Please fill in all required fields in Step 2',
+        title: '⚠️ Step 2 Incomplete',
+        description: `Please go back to Step 2 and fill: ${missingFields.join(', ')}`,
         variant: 'destructive',
+        duration: 6000,
       });
       setLoading(false);
       setStep(2);
@@ -111,14 +193,18 @@ const SupplierOnboarding = () => {
     }
 
     if (!files.pan) {
+      console.error('❌ Step 3 validation failed: PAN Card missing');
       toast({
-        title: 'Missing Document',
-        description: 'PAN Card is required. Please upload it.',
+        title: '⚠️ Document Required',
+        description: 'Please upload your PAN Card (Required)',
         variant: 'destructive',
+        duration: 6000,
       });
       setLoading(false);
       return;
     }
+
+    console.log('✅ All validations passed! Proceeding with submission...');
 
     try {
       const submitData = new FormData();
@@ -129,6 +215,7 @@ const SupplierOnboarding = () => {
       submitData.append('phone', formData.phone);
       submitData.append('contactPerson', formData.contactPerson);
       submitData.append('businessType', formData.businessType);
+      submitData.append('password', formData.password);
       submitData.append('address', JSON.stringify(formData.address));
       submitData.append('businessDescription', formData.businessDescription);
       submitData.append('productsOffered', JSON.stringify(formData.productsOffered.split(',').map(p => p.trim())));
@@ -149,6 +236,8 @@ const SupplierOnboarding = () => {
         phone: formData.phone,
         contactPerson: formData.contactPerson,
         businessType: formData.businessType,
+        password: formData.password ? '***' : 'MISSING',
+        confirmPassword: formData.confirmPassword ? '***' : 'MISSING',
         address: formData.address,
         businessDescription: formData.businessDescription,
         productsOffered: formData.productsOffered,
@@ -412,6 +501,62 @@ const SupplierOnboarding = () => {
                         <SelectItem value="individual">Individual</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  {/* Password Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-foreground font-semibold">Password *</Label>
+                      <div className="relative group">
+                        <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-br from-primary to-secondary rounded-l-lg flex items-center justify-center group-hover:shadow-lg transition-all z-10">
+                          <Lock className="w-6 h-6 text-white drop-shadow-md" />
+                        </div>
+                        <Input
+                          id="password"
+                          name="password"
+                          type={showPassword ? "text" : "password"}
+                          value={formData.password}
+                          onChange={handleInputChange}
+                          placeholder="Enter password (min 6 characters)"
+                          className="pl-16 pr-12 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
+                          required
+                          minLength={6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-primary/10"
+                        >
+                          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-foreground font-semibold">Confirm Password *</Label>
+                      <div className="relative group">
+                        <div className="absolute left-0 top-0 bottom-0 w-14 bg-gradient-to-br from-primary to-secondary rounded-l-lg flex items-center justify-center group-hover:shadow-lg transition-all z-10">
+                          <Lock className="w-6 h-6 text-white drop-shadow-md" />
+                        </div>
+                        <Input
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          placeholder="Re-enter password"
+                          className="pl-16 pr-12 h-12 border-2 border-border/50 focus:border-primary/50 bg-background/50 backdrop-blur-sm rounded-lg"
+                          required
+                          minLength={6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-primary/10"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Company Logo - Optional */}
