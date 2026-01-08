@@ -1216,11 +1216,33 @@ Does this look good? Reply YES to save or NO to edit.`);
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6">
               {/* Profile Section */}
               <div className="flex items-center gap-3 sm:gap-4 flex-1 w-full">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
-                  <span className="text-white font-bold text-lg sm:text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
-                </div>
+                {/* Logo or Initial Avatar */}
+                {user?.logo ? (
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl shadow-lg flex-shrink-0 overflow-hidden bg-white">
+                    <img 
+                      src={user.logo} 
+                      alt={user?.companyName || 'Company Logo'}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to initial if logo fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        if (target.nextElementSibling) {
+                          (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                        }
+                      }}
+                    />
+                    <div className="w-full h-full rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center" style={{display: 'none'}}>
+                      <span className="text-white font-bold text-lg sm:text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
+                    <span className="text-white font-bold text-lg sm:text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-2xl font-bold text-foreground mb-1 truncate">{user?.companyName || 'Business Ventures'}</h2>
+                  <h2 className="text-lg sm:text-2xl font-bold text-foreground mb-1 truncate max-w-full">{user?.companyName || 'Business Ventures'}</h2>
                   <div className="flex flex-wrap gap-2 sm:gap-3 text-xs text-muted-foreground">
                     <span className="truncate">📊 {analytics.total} Products</span>
                     <span className="truncate">✅ {aiInsights.approvalRate}% Success</span>
