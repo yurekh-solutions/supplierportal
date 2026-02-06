@@ -1,0 +1,22 @@
+# robots.txt for ritzyard Supplier Portal
+# https://ritzyardseller.com/
+
+User-agent: *
+Allow: /
+Allow: /login
+Allow: /onboarding
+Allow: /marketplace
+Allow: /milo
+
+# Disallow admin and internal pages
+Disallow: /admin/
+Disallow: /api/
+Disallow: /supplier/dashboard
+Disallow: /products
+Disallow: /supplier/profile
+
+# Sitemap location
+Sitemap: https://ritzyardseller.com/sitemap.xml
+
+# Crawl-delay (optional, helps with server load)
+Crawl-delay: 1

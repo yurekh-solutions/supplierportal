@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Shield, LogIn, Eye, EyeOff, Sparkles, ArrowLeft } from 'lucide-react';
+import ritzyardLogo from "@/assets/RITZYARD3.svg";
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -158,12 +159,18 @@ const SupplierLogin = () => {
             {/* Logo & Brand */}
             <div className="glass-card border-2 border-white/30 p-8 rounded-3xl backdrop-blur-2xl">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary flex items-center justify-center shadow-xl">
-                  <span className="text-white font-bold text-2xl">RY</span>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-xl overflow-hidden">
+                  <img src={ritzyardLogo} alt="ritzyard logo" className="w-full h-full object-cover" />
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gradient">RitzYard</h1>
-                  <p className="text-sm text-muted-foreground">Supplier Portal</p>
+                <div className="flex flex-col">
+                  <span className="text-3xl font-bold leading-tight notranslate">
+                    <span className="text-primary">r</span>
+                    <span className="text-[#452a21]">itz </span>
+                    <span className="text-[#452a21]">yard</span>
+                  </span>
+                  <span className="text-sm font-medium text-[#452a21] notranslate">
+                    Where Value Meets Velocity
+                  </span>
                 </div>
               </div>
               <p className="text-lg text-foreground leading-relaxed">

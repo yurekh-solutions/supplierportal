@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Search, Filter, ShoppingCart, Star, MapPin, Package, ChevronRight, Menu, X, Globe } from 'lucide-react';
+import ritzyardLogo from "@/assets/RITZYARD3.svg";
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Card } from '@/pages/components/ui/card';
@@ -148,9 +149,18 @@ const Marketplace = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <div onClick={() => navigate('/')} className="cursor-pointer flex items-center gap-2">
-                <Package className="w-8 h-8 text-primary" />
-                <h1 className="text-2xl font-bold text-gradient">RitzYard Marketplace</h1>
+              <div onClick={() => navigate('/')} className="cursor-pointer flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center overflow-hidden">
+                  <img src={ritzyardLogo} alt="ritzyard logo" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold leading-tight notranslate">
+                    <span className="text-primary">r</span>
+                    <span className="text-[#452a21]">itz </span>
+                    <span className="text-[#452a21]">yard</span>
+                  </span>
+                  <span className="text-xs font-medium text-muted-foreground">Marketplace</span>
+                </div>
               </div>
             </div>
             <div className="hidden md:flex items-center gap-4">

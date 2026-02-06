@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, CheckCircle, AlertCircle, Scale, UserX, RefreshCw } from 'lucide-react';
+import ritzyardLogo from "@/assets/RITZYARD3.svg";
 import { Button } from '@/pages/components/ui/button';
 import { Card } from '@/pages/components/ui/card';
 
@@ -90,11 +91,15 @@ const TermsOfService = () => {
               Back to Home
             </Button>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                <span className="text-white font-bold text-lg">RY</span>
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center overflow-hidden">
+                <img src={ritzyardLogo} alt="ritzyard logo" className="w-full h-full object-cover" />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-gradient">RitzYard</h1>
+              <div className="hidden sm:flex flex-col">
+                <span className="text-xl font-bold leading-tight notranslate">
+                  <span className="text-primary">r</span>
+                  <span className="text-[#452a21]">itz </span>
+                  <span className="text-[#452a21]">yard</span>
+                </span>
               </div>
             </div>
           </div>

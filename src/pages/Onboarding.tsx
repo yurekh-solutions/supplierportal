@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Building2, User, Mail, Phone, MapPin, FileText, Check, Eye, EyeOff, Trash2, ArrowLeft, LogIn, Sparkles, CheckCircle, Upload, Image as ImageIcon, Lock } from 'lucide-react';
+import ritzyardLogo from "@/assets/RITZYARD3.svg";
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -218,7 +219,9 @@ const SupplierOnboarding = () => {
       submitData.append('password', formData.password);
       submitData.append('address', JSON.stringify(formData.address));
       submitData.append('businessDescription', formData.businessDescription);
-      submitData.append('productsOffered', JSON.stringify(formData.productsOffered.split(',').map(p => p.trim())));
+      // Parse products offered as array, then stringify it (backend will parse once)
+      const productsArray = formData.productsOffered.split(',').map(p => p.trim()).filter(p => p.length > 0);
+      submitData.append('productsOffered', JSON.stringify(productsArray));
       submitData.append('yearsInBusiness', formData.yearsInBusiness);
 
       // Append files
@@ -256,6 +259,13 @@ const SupplierOnboarding = () => {
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
         console.error('❌ Server error response:', errorData);
+        
+        // If backend provides missing fields, show them
+        if (errorData?.missingFields && Array.isArray(errorData.missingFields)) {
+          const fieldsList = errorData.missingFields.map((f: string) => `• ${f}`).join('\n');
+          throw new Error(`Missing Required Fields:\n\n${fieldsList}`);
+        }
+        
         throw new Error(errorData?.message || `Server error: ${response.status}`);
       }
 
@@ -263,15 +273,24 @@ const SupplierOnboarding = () => {
       console.log('✅ Success response data:', data);
 
       if (data.success) {
+        console.log('🎉 SUCCESS! Showing toast and redirecting...');
+        console.log('📧 Redirecting to status page with email:', formData.email);
+        
         toast({
           title: '🎉 Application Submitted!',
-          description: 'Your application is pending admin review. You will be notified via email once approved.',
-          duration: 6000,
+          description: 'Your application is pending admin review. Redirecting to status page...',
+          duration: 3000,
         });
+        
         // Redirect to status page with email parameter
+        const redirectUrl = `/status?email=${encodeURIComponent(formData.email)}`;
+        console.log('🔗 Redirect URL:', redirectUrl);
+        
+        // Use a shorter delay and ensure redirect happens
         setTimeout(() => {
-          navigate(`/status?email=${encodeURIComponent(formData.email)}`);
-        }, 1500);
+          console.log('🚀 Executing redirect now...');
+          navigate(redirectUrl);
+        }, 1000);
       } else {
         throw new Error(data.message || 'Submission failed');
       }
@@ -282,8 +301,7 @@ const SupplierOnboarding = () => {
         description: error.message || 'Failed to submit application. Please check your connection and try again.',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only set loading to false on error
     }
   };
 
@@ -314,12 +332,18 @@ const SupplierOnboarding = () => {
             {/* Logo & Brand */}
             <div className="glass-card border-2 border-white/30 p-8 rounded-3xl backdrop-blur-2xl">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary flex items-center justify-center shadow-xl">
-                  <span className="text-white font-bold text-2xl">RY</span>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-xl overflow-hidden">
+                  <img src={ritzyardLogo} alt="ritzyard logo" className="w-full h-full object-cover" />
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold text-gradient">RitzYard</h1>
-                  <p className="text-sm text-muted-foreground">Supplier Onboarding</p>
+                <div className="flex flex-col">
+                  <span className="text-3xl font-bold leading-tight notranslate">
+                    <span className="text-primary">r</span>
+                    <span className="text-[#452a21]">itz </span>
+                    <span className="text-[#452a21]">yard</span>
+                  </span>
+                  <span className="text-sm font-medium text-[#452a21] notranslate">
+                    Where Value Meets Velocity
+                  </span>
                 </div>
               </div>
               <p className="text-lg text-foreground leading-relaxed">

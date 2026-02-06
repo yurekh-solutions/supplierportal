@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Clock, XCircle, Mail, ArrowLeft, Building2, FileText } from 'lucide-react';
+import { CheckCircle, Clock, XCircle, Mail, ArrowLeft, Building2, FileText, LogIn, AlertCircle, RefreshCw, Home } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,8 +37,20 @@ const SupplierStatus = () => {
   const email = searchParams.get('email');
 
   useEffect(() => {
+    console.log('📍 SupplierStatus: Component mounted');
+    console.log('📧 Email from URL:', email);
+    console.log('🌐 API URL:', API_URL);
+    
     if (!email) {
-      navigate('/');
+      console.error('❌ No email parameter in URL');
+      toast({
+        title: 'Missing Email',
+        description: 'Please submit your application first or access this page with a valid email parameter.',
+        variant: 'destructive',
+      });
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
       return;
     }
 
@@ -47,22 +59,30 @@ const SupplierStatus = () => {
 
   const fetchStatus = async () => {
     try {
+      console.log('🔍 Fetching status for:', email);
+      console.log('🔗 API endpoint:', `${API_URL}/supplier/check-status?email=${encodeURIComponent(email!)}`);
+      
       const response = await fetch(`${API_URL}/supplier/check-status?email=${encodeURIComponent(email!)}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
 
+      console.log('📊 Response status:', response.status);
       const data = await response.json();
+      console.log('📦 Response data:', data);
 
       if (data.success) {
+        console.log('✅ Status data loaded:', data.data);
         setStatusData(data.data);
       } else {
+        console.error('❌ API error:', data.message);
         throw new Error(data.message);
       }
     } catch (error: any) {
+      console.error('❌ Fetch error:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to fetch status',
+        description: error.message || 'Failed to fetch status. Please check your email or try again.',
         variant: 'destructive',
       });
     } finally {
@@ -101,7 +121,7 @@ const SupplierStatus = () => {
 
     switch (statusData.status) {
       case 'approved':
-        return 'Congratulations! Your supplier application has been approved. You can now login to your dashboard.';
+        return 'Congratulations! Your supplier application has been approved. Click below to set up your password and login to your dashboard.';
       case 'rejected':
         return statusData.rejectionReason || 'Unfortunately, your application has been rejected. Please contact support for more information.';
       default:
@@ -110,15 +130,15 @@ const SupplierStatus = () => {
   };
 
   const getStatusColor = () => {
-    if (!statusData) return 'from-primary to-secondary';
+    if (!statusData) return 'from-emerald-500 to-green-600';
 
     switch (statusData.status) {
       case 'approved':
-        return 'from-primary to-secondary';
+        return 'from-emerald-500 to-green-600';
       case 'rejected':
-        return 'from-primary to-secondary';
+        return 'from-red-500 to-rose-600';
       default:
-        return 'from-primary to-secondary';
+        return 'from-amber-500 to-orange-600';
     }
   };
 
@@ -127,7 +147,40 @@ const SupplierStatus = () => {
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center">
         <div className="text-center glass-card border-2 border-white/20 p-8 rounded-3xl bg-white/40 dark:bg-black/20 backdrop-blur-2xl">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary mx-auto mb-4"></div>
-          <p className="text-foreground font-semibold">Loading status...</p>
+          <p className="text-foreground font-semibold">Loading your application status...</p>
+          <p className="text-sm text-muted-foreground mt-2">Checking email: {email}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!statusData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background flex items-center justify-center p-4">
+        <div className="text-center glass-card border-2 border-red-500/30 p-8 rounded-3xl bg-white/40 dark:bg-black/20 backdrop-blur-2xl max-w-md">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center mx-auto mb-4">
+            <XCircle className="w-8 h-8 text-white" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">No Application Found</h2>
+          <p className="text-muted-foreground mb-6">
+            We couldn't find an application associated with the email: <span className="font-semibold text-primary">{email}</span>
+          </p>
+          <div className="space-y-3">
+            <Button
+              onClick={() => navigate('/onboarding')}
+              className="w-full bg-gradient-to-r from-primary to-secondary text-white"
+            >
+              Submit New Application
+            </Button>
+            <Button
+              onClick={() => navigate('/')}
+              variant="outline"
+              className="w-full border-2 border-primary/30 text-primary"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Return to Homepage
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -195,13 +248,23 @@ const SupplierStatus = () => {
                     {/* Status Card */}
                     <div className="glass-card border-2 border-primary/15 rounded-2xl p-5 bg-white/40 dark:bg-black/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
                       <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-lg">
+                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${
+                          statusData.status === 'approved' ? 'from-emerald-500 to-green-600' :
+                          statusData.status === 'rejected' ? 'from-red-500 to-rose-600' :
+                          'from-amber-500 to-orange-600'
+                        } flex items-center justify-center flex-shrink-0 shadow-lg`}>
                           <FileText className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-muted-foreground mb-1">Status</p>
-                          <span className="inline-block px-3 py-1.5 rounded-full text-sm font-bold bg-primary/20 text-primary border-2 border-primary/30">
-                            {statusData.status}
+                          <span className={`inline-block px-3 py-1.5 rounded-full text-sm font-bold border-2 ${
+                            statusData.status === 'approved' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' :
+                            statusData.status === 'rejected' ? 'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30' :
+                            'bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30'
+                          }`}>
+                            {statusData.status === 'approved' ? '✓ Approved' :
+                             statusData.status === 'rejected' ? '✕ Rejected' :
+                             '⏳ Pending Review'}
                           </span>
                         </div>
                       </div>
@@ -220,6 +283,23 @@ const SupplierStatus = () => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Rejection Reason */}
+                  {statusData.status === 'rejected' && statusData.rejectionReason && (
+                    <div className="glass-card border-2 border-red-500/30 rounded-2xl p-5 bg-red-500/10 backdrop-blur-sm shadow-lg">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center flex-shrink-0">
+                          <AlertCircle className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-red-700 dark:text-red-400 mb-2">Rejection Reason</p>
+                          <p className="text-sm text-foreground leading-relaxed">
+                            {statusData.rejectionReason}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Note/Alert Box */}
                   {statusData.status === 'pending' && (
@@ -240,21 +320,45 @@ const SupplierStatus = () => {
 
                   {/* Action Buttons */}
                   {statusData.status === 'approved' && (
-                    <Button
-                      onClick={() => navigate('/login')}
-                      className="w-full px-8 py-3.5 text-lg font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 mt-6"
-                    >
-                      Login to Dashboard
-                    </Button>
+                    <div className="space-y-4 mt-6">
+                      <Button
+                        onClick={() => navigate('/login')}
+                        className="w-full px-8 py-3.5 text-lg font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+                      >
+                        <LogIn className="w-5 h-5 mr-2" />
+                        Set Up Password & Login
+                      </Button>
+                      <div className="glass-card border-2 border-primary/20 rounded-2xl p-4 bg-primary/5 backdrop-blur-sm">
+                        <p className="text-sm text-muted-foreground text-center">
+                          <span className="font-semibold text-primary">First time login?</span> You'll be prompted to create a secure password for your account using your registered email: <span className="font-semibold text-foreground">{statusData.email}</span>
+                        </p>
+                      </div>
+                    </div>
                   )}
 
                   {statusData.status === 'rejected' && (
-                    <Button
-                      onClick={() => navigate('/onboarding')}
-                      className="w-full px-8 py-3.5 text-lg font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 mt-6"
-                    >
-                      Reapply
-                    </Button>
+                    <div className="space-y-4 mt-6">
+                      <Button
+                        onClick={() => navigate('/onboarding')}
+                        className="w-full px-8 py-3.5 text-lg font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+                      >
+                        <RefreshCw className="w-5 h-5 mr-2" />
+                        Reapply for Supplier Onboarding
+                      </Button>
+                      <div className="glass-card border-2 border-primary/20 rounded-2xl p-4 bg-primary/5 backdrop-blur-sm">
+                        <p className="text-sm text-muted-foreground text-center">
+                          <span className="font-semibold text-primary">Need help?</span> Please address the rejection reasons mentioned above and resubmit your application with updated information.
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => navigate('/')}
+                        variant="outline"
+                        className="w-full px-8 py-3 font-semibold border-2 border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300"
+                      >
+                        <Home className="w-4 h-4 mr-2" />
+                        Return to Homepage
+                      </Button>
+                    </div>
                   )}
                 </div>
               )}

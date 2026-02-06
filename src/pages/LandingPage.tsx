@@ -7,6 +7,7 @@ import { Card } from '@/pages/components/ui/card';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import ritzyardLogo from "@/assets/RITZYARD3.svg";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -381,12 +382,18 @@ const LandingPage = () => {
           <div className="flex items-center justify-between h-16 sm:h-20">
             {/* Logo */}
             <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => navigate('/')}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-primary via-primary-glow to-secondary flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300">
-                <span className="text-white font-bold text-lg sm:text-xl">RY</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md group-hover:shadow-lg transition-all overflow-hidden">
+                <img src={ritzyardLogo} alt="ritzyard logo" className="w-full h-full object-cover" />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl sm:text-2xl font-bold text-gradient">RitzYard</h1>
-                <p className="text-xs text-muted-foreground">Supplier Portal</p>
+              <div className="hidden sm:flex flex-col">
+                <span className="text-xl sm:text-2xl font-bold leading-tight notranslate">
+                  <span className="text-primary">r</span>
+                  <span className="text-[#452a21]">itz </span>
+                  <span className="text-[#452a21]">yard</span>
+                </span>
+                <span className="text-xs font-medium text-[#452a21] notranslate">
+                  Where Value Meets Velocity
+                </span>
               </div>
             </div>
 
@@ -402,6 +409,10 @@ const LandingPage = () => {
               </a>
               <a href="#process" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group">
                 How It Works
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
+              </a>
+              <a href="https://ritzyard.com/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group">
+                Buyer Portal
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300"></span>
               </a>
               <a href="#contact" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors relative group">
@@ -448,6 +459,7 @@ const LandingPage = () => {
               <a href="#home" className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>Home</a>
               <a href="#features" className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>Features</a>
               <a href="#process" className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>How It Works</a>
+              <a href="https://ritzyard.com/" target="_blank" rel="noopener noreferrer" className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>Buyer Portal</a>
               <a href="#contact" className="block py-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>Contact</a>
               <div className="space-y-2 pt-2 border-t border-border">
                 <div className="py-2"><LanguageSwitcher /></div>
@@ -956,12 +968,18 @@ const LandingPage = () => {
             {/* Company Info */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3 group cursor-pointer">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                  <span className="text-white font-bold text-lg">RY</span>
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center overflow-hidden">
+                  <img src={ritzyardLogo} alt="ritzyard logo" className="w-full h-full object-cover" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold">RitzYard</h3>
-                  <p className="text-xs text-white/70">Supplier Portal</p>
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold notranslate leading-tight">
+                    <span className="text-primary">r</span>
+                    <span className="text-white">itz </span>
+                    <span className="text-white">yard</span>
+                  </span>
+                  <span className="text-xs font-medium text-white notranslate">
+                    Where Value Meets Velocity
+                  </span>
                 </div>
               </div>
               <p className="text-sm text-white/80 leading-relaxed">
@@ -982,6 +1000,7 @@ const LandingPage = () => {
               <ul className="space-y-3 text-sm text-white/80">
                 <li><a href="#about" className="hover:text-white hover:translate-x-1 inline-block transition-all">About Us</a></li>
                 <li><a href="#contact" className="hover:text-white hover:translate-x-1 inline-block transition-all">Contact</a></li>
+                <li><a href="https://ritzyard.com/" target="_blank" rel="noopener noreferrer" className="hover:text-white hover:translate-x-1 inline-block transition-all">Buyer Portal</a></li>
                 <li><a href="#" className="hover:text-white hover:translate-x-1 inline-block transition-all">Careers</a></li>
                 <li><a href="#" className="hover:text-white hover:translate-x-1 inline-block transition-all">Blogs</a></li>
               </ul>
@@ -1028,7 +1047,9 @@ const LandingPage = () => {
 
           <div className="border-t border-white/20 pt-8">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-white/80">
-              <p>&copy; 2025 RitzYard. All rights reserved. Powered by YUREKH SOLUTIONS</p>
+              <p>&copy; {new Date().getFullYear()} <span className="font-semibold notranslate">ritzyard.</span> All rights reserved. Powered by{" "}
+                <a href="https://yurekh.com" target="_blank" rel="noopener noreferrer" className="font-normal text-white/60">YUREKH SOLUTIONS</a>
+              </p>
               <div className="flex gap-4">
                 <button onClick={() => navigate('/login')} className="hover:text-white transition-colors hover:scale-105">
                   Login

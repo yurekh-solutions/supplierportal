@@ -11,6 +11,7 @@ import {
   X
 } from 'lucide-react';
 import LogoutModal from '@/components/LogoutModal';
+import ritzyardLogo from "@/assets/RITZYARD3.svg";
 
 const SupplierHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,12 +43,28 @@ const SupplierHeader = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <Link to="/supplier/dashboard" className="flex-shrink-0 flex items-center">
+            {/* <Link to="/supplier/dashboard" className="flex-shrink-0 flex items-center">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#B85C38] to-[#8B4513] flex items-center justify-center">
                 <Package className="h-5 w-5 text-white" />
               </div>
               <span className="ml-2 text-xl font-bold text-gray-900">Supplier Portal</span>
-            </Link>
+            </Link> */}
+            <Link to="/" className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md group-hover:shadow-lg transition-all overflow-hidden">
+              <img src={ritzyardLogo} alt="ritzyard logo" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-bold leading-tight notranslate">
+                <span className="text-primary">r</span>
+                <span className="text-[#452a21]">itz </span>
+                <span className="text-[#452a21]">yard</span>
+              </span>
+              <span className="text-xs md:text-xs font-medium  text-[#452a21]  notranslate">
+                Where Value Meets Velocity 
+              </span>
+            </div>
+          </Link>
+
           </div>
 
           {/* Desktop Navigation */}
