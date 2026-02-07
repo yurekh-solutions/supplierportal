@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Building2, User, Mail, Phone, MapPin, FileText, Check, Eye, EyeOff, Trash2, ArrowLeft, LogIn, Sparkles, CheckCircle, Upload, Image as ImageIcon, Lock } from 'lucide-react';
 import ritzyardLogo from "@/assets/RITZYARD3.svg";
@@ -31,6 +31,15 @@ const getApiUrl = () => {
 
 const API_URL = getApiUrl();
 
+// Pre-warm server function
+const warmUpServer = async () => {
+  try {
+    await fetch(`${API_URL}/health`, { method: 'GET' }).catch(() => {});
+  } catch {
+    // Silently ignore - just warming up
+  }
+};
+
 const SupplierOnboarding = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -39,6 +48,13 @@ const SupplierOnboarding = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Pre-warm server when reaching step 2 or 3 (before submission)
+  useEffect(() => {
+    if (step >= 2) {
+      warmUpServer();
+    }
+  }, [step]);
 
   const [formData, setFormData] = useState({
     companyName: '',
