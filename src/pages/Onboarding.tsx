@@ -258,10 +258,24 @@ const SupplierOnboarding = () => {
         files: Object.keys(files).filter(key => files[key] !== null)
       });
 
+      // Show warming up toast for slow servers
+      toast({
+        title: '🚀 Submitting Application...',
+        description: 'Server may take 30-60 seconds to respond. Please wait...',
+        duration: 5000,
+      });
+
+      // Add timeout with AbortController (90 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000);
+
       const response = await fetch(`${API_URL}/supplier/submit`, {
         method: 'POST',
         body: submitData,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       console.log('✅ Response status:', response.status);
       console.log('✅ Response ok:', response.ok);
@@ -306,10 +320,18 @@ const SupplierOnboarding = () => {
       }
     } catch (error: any) {
       console.error('❌ Submission error:', error);
+      
+      // Handle timeout/abort errors
+      let errorMessage = error.message || 'Failed to submit application. Please check your connection and try again.';
+      if (error.name === 'AbortError') {
+        errorMessage = 'Request timed out. The server may be starting up. Please try again in 1-2 minutes.';
+      }
+      
       toast({
         title: 'Error',
-        description: error.message || 'Failed to submit application. Please check your connection and try again.',
+        description: errorMessage,
         variant: 'destructive',
+        duration: 8000,
       });
       setLoading(false); // Only set loading to false on error
     }
