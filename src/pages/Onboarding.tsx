@@ -62,12 +62,9 @@ const SupplierOnboarding = () => {
 
   const [files, setFiles] = useState<{ [key: string]: File | null }>({
     logo: null,
-    gst: null,
-    cin: null,
     pan: null,
-    bankProof: null,
-    businessLicense: null,
     aadhaar: null,
+    bankProof: null,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -860,167 +857,14 @@ const SupplierOnboarding = () => {
                   </div>
                 </div>
 
-                {/* Business Type Specific Documents */}
-                {formData.businessType === 'business' && (
-                  <>
-                    {/* GST Certificate */}
-                    <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
-                          <FileText className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Label htmlFor="gst" className="font-semibold text-foreground">
-                              GST Certificate
-                            </Label>
-                            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">Recommended</span>
-                          </div>
-                          {!files.gst ? (
-                            <Input
-                              id="gst"
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                              onChange={(e) => handleFileChange(e, 'gst')}
-                              className="cursor-pointer"
-                            />
-                          ) : (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                  <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                  <span className="text-sm text-green-700 font-medium truncate">{files.gst.name}</span>
-                                </div>
-                                <div className="flex gap-2 flex-shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => window.open(URL.createObjectURL(files.gst!), '_blank')}
-                                    className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors"
-                                  >
-                                    <Eye className="w-4 h-4 text-blue-600" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setFiles(prev => ({ ...prev, gst: null }))}
-                                    className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-600" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                  {/* Aadhaar Card */}
+                  <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
+                        <FileText className="w-6 h-6 text-white" />
                       </div>
-                    </div>
-
-                    {/* CIN Certificate */}
-                    <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
-                          <FileText className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <Label htmlFor="cin" className="font-semibold text-foreground mb-2 block">
-                            CIN/Registration Certificate
-                          </Label>
-                          {!files.cin ? (
-                            <Input
-                              id="cin"
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                              onChange={(e) => handleFileChange(e, 'cin')}
-                              className="cursor-pointer"
-                            />
-                          ) : (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                  <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                  <span className="text-sm text-green-700 font-medium truncate">{files.cin.name}</span>
-                                </div>
-                                <div className="flex gap-2 flex-shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => window.open(URL.createObjectURL(files.cin!), '_blank')}
-                                    className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors"
-                                  >
-                                    <Eye className="w-4 h-4 text-blue-600" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setFiles(prev => ({ ...prev, cin: null }))}
-                                    className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-600" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Business License */}
-                    <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
-                          <FileText className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <Label htmlFor="businessLicense" className="font-semibold text-foreground mb-2 block">
-                            Business License
-                          </Label>
-                          {!files.businessLicense ? (
-                            <Input
-                              id="businessLicense"
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                              onChange={(e) => handleFileChange(e, 'businessLicense')}
-                              className="cursor-pointer"
-                            />
-                          ) : (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                              <div className="flex items-center justify-between gap-2">
-                                <div className="flex items-center gap-2 min-w-0 flex-1">
-                                  <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                                  <span className="text-sm text-green-700 font-medium truncate">{files.businessLicense.name}</span>
-                                </div>
-                                <div className="flex gap-2 flex-shrink-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => window.open(URL.createObjectURL(files.businessLicense!), '_blank')}
-                                    className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors"
-                                  >
-                                    <Eye className="w-4 h-4 text-blue-600" />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setFiles(prev => ({ ...prev, businessLicense: null }))}
-                                    className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-600" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                  {/* Aadhaar Card - For Individual */}
-                  {formData.businessType === 'individual' && (
-                    <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
-                      <div className="flex items-start gap-3">
-                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
-                          <FileText className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <Label htmlFor="aadhaar" className="font-semibold text-foreground mb-2 block">
+                      <div className="flex-1 min-w-0">
+                        <Label htmlFor="aadhaar" className="font-semibold text-foreground mb-2 block">
                           Aadhaar Card
                         </Label>
                         {!files.aadhaar ? (
@@ -1060,7 +904,6 @@ const SupplierOnboarding = () => {
                       </div>
                     </div>
                   </div>
-                )}
 
                   {/* Bank Proof - Optional for all */}
                   <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
