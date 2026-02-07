@@ -65,6 +65,7 @@ const SupplierOnboarding = () => {
     pan: null,
     aadhaar: null,
     bankProof: null,
+    gst: null,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -195,6 +196,18 @@ const SupplierOnboarding = () => {
       toast({
         title: '⚠️ Document Required',
         description: 'Please upload your PAN Card (Required)',
+        variant: 'destructive',
+        duration: 6000,
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!files.bankProof) {
+      console.error('❌ Step 3 validation failed: Bank Proof missing');
+      toast({
+        title: '⚠️ Document Required',
+        description: 'Please upload your Bank Proof (Required)',
         variant: 'destructive',
         duration: 6000,
       });
@@ -857,16 +870,19 @@ const SupplierOnboarding = () => {
                   </div>
                 </div>
 
-                  {/* Aadhaar Card */}
+                  {/* Aadhaar Card - Optional */}
                   <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
                     <div className="flex items-start gap-3">
                       <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                         <FileText className="w-6 h-6 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Label htmlFor="aadhaar" className="font-semibold text-foreground mb-2 block">
-                          Aadhaar Card
-                        </Label>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Label htmlFor="aadhaar" className="font-semibold text-foreground">
+                            Aadhaar Card
+                          </Label>
+                          <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-medium">Optional</span>
+                        </div>
                         {!files.aadhaar ? (
                           <Input
                             id="aadhaar"
@@ -905,8 +921,8 @@ const SupplierOnboarding = () => {
                     </div>
                   </div>
 
-                  {/* Bank Proof - Optional for all */}
-                  <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
+                  {/* Bank Proof - Required */}
+                  <div className="glass-card border-2 border-primary/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
                     <div className="flex items-start gap-3">
                       <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
                         <FileText className="w-6 h-6 text-white" />
@@ -914,47 +930,99 @@ const SupplierOnboarding = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
                           <Label htmlFor="bankProof" className="font-semibold text-foreground">
-                          Bank Proof
-                        </Label>
-                        <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">Recommended</span>
-                      </div>
-                      {!files.bankProof ? (
-                        <Input
-                          id="bankProof"
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                          onChange={(e) => handleFileChange(e, 'bankProof')}
-                          className="cursor-pointer"
-                        />
-                      ) : (
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
-                              <span className="text-sm text-green-700 font-medium truncate">{files.bankProof.name}</span>
-                            </div>
-                            <div className="flex gap-2 flex-shrink-0">
-                              <button
-                                type="button"
-                                onClick={() => window.open(URL.createObjectURL(files.bankProof!), '_blank')}
-                                className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors"
-                              >
-                                <Eye className="w-4 h-4 text-blue-600" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setFiles(prev => ({ ...prev, bankProof: null }))}
-                                className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
-                              >
-                                <Trash2 className="w-4 h-4 text-red-600" />
-                              </button>
+                            Bank Proof
+                          </Label>
+                          <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">Required</span>
+                        </div>
+                        {!files.bankProof ? (
+                          <Input
+                            id="bankProof"
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                            onChange={(e) => handleFileChange(e, 'bankProof')}
+                            className="cursor-pointer"
+                            required
+                          />
+                        ) : (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                <span className="text-sm text-green-700 font-medium truncate">{files.bankProof.name}</span>
+                              </div>
+                              <div className="flex gap-2 flex-shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => window.open(URL.createObjectURL(files.bankProof!), '_blank')}
+                                  className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors"
+                                >
+                                  <Eye className="w-4 h-4 text-blue-600" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setFiles(prev => ({ ...prev, bankProof: null }))}
+                                  className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4 text-red-600" />
+                                </button>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
+
+                  {/* GST/Business License - Recommended */}
+                  <div className="glass-card border-2 border-white/30 rounded-xl p-4 bg-white/50 hover:shadow-lg transition-all backdrop-blur-sm">
+                    <div className="flex items-start gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
+                        <FileText className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Label htmlFor="gst" className="font-semibold text-foreground">
+                            GST/Business License
+                          </Label>
+                          <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">Recommended</span>
+                        </div>
+                        {!files.gst ? (
+                          <Input
+                            id="gst"
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                            onChange={(e) => handleFileChange(e, 'gst')}
+                            className="cursor-pointer"
+                          />
+                        ) : (
+                          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                <span className="text-sm text-green-700 font-medium truncate">{files.gst.name}</span>
+                              </div>
+                              <div className="flex gap-2 flex-shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => window.open(URL.createObjectURL(files.gst!), '_blank')}
+                                  className="p-1.5 hover:bg-blue-100 rounded-lg transition-colors"
+                                >
+                                  <Eye className="w-4 h-4 text-blue-600" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setFiles(prev => ({ ...prev, gst: null }))}
+                                  className="p-1.5 hover:bg-red-100 rounded-lg transition-colors"
+                                >
+                                  <Trash2 className="w-4 h-4 text-red-600" />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
                   {/* What happens next info */}
                   <div className="glass-card border-2 border-blue-200/50 rounded-xl p-5 backdrop-blur-xl bg-blue-50/30">
