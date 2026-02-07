@@ -5,7 +5,7 @@ const WhatsAppContact = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  const whatsappNumber = "919136242706";
+  const whatsappNumber = "919559262525";
   const whatsappMessage = "Hello! I'm interested in learning more about RitzYard services.";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 

@@ -1039,7 +1039,7 @@ const LandingPage = () => {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors">
                   <Phone className="w-4 h-4" />
-                  <a href="tel:+919136242706">+91 91362 42706</a>
+                  <a href="tel:+919559262525">+91 9559262525</a>
                 </div>
               </div>
             </div>

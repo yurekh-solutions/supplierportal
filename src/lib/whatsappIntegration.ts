@@ -69,7 +69,7 @@ export const formatWhatsAppMessage = (data: WhatsAppData): string => {
 };
 
 export const sendToWhatsApp = (data: WhatsAppData): void => {
-  const phoneNumber = '919136242706';
+  const phoneNumber = '919559262525';
   const message = formatWhatsAppMessage(data);
   const encodedMessage = encodeURIComponent(message);
   const url = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
