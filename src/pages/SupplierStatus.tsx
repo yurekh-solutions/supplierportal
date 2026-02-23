@@ -95,11 +95,11 @@ const SupplierStatus = () => {
 
     switch (statusData.status) {
       case 'approved':
-        return <CheckCircle className="w-16 h-16 sm:w-20 sm:h-20 text-white" />;
+        return <CheckCircle className="w-8 h-8 text-white" />;
       case 'rejected':
-        return <XCircle className="w-16 h-16 sm:w-20 sm:h-20 text-white" />;
+        return <XCircle className="w-8 h-8 text-white" />;
       default:
-        return <Clock className="w-16 h-16 sm:w-20 sm:h-20 text-white" />;
+        return <Clock className="w-8 h-8 text-white" />;
     }
   };
 
@@ -187,112 +187,99 @@ const SupplierStatus = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background py-8 px-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-background py-6 px-4 relative overflow-hidden">
       {/* Subtle Background Elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="max-w-4xl mx-auto relative z-10">
+      <div className="max-w-lg mx-auto relative z-10">
         {/* Header Badge */}
-        <div className="text-center mb-8 animate-slide-up">
-          <div className="inline-block mb-4">
-            <span className="text-sm font-semibold text-primary bg-primary/10 px-5 py-2.5 rounded-full border-2 border-primary/20">
-              Supplier Dashboard
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3">
-            <span className="text-foreground">Application </span>
-            <span className="text-gradient">Status</span>
-          </h1>
-          <p className="text-muted-foreground text-base sm:text-lg">Track your supplier application progress</p>
+        <div className="text-center mb-5 animate-slide-up">
+          <p className="text-muted-foreground text-sm">Track your supplier application progress</p>
         </div>
 
         {/* Status Card - Glassmorphism */}
-        <div className="animate-slide-up glass-card border-2 border-white/20 rounded-3xl bg-white/50 dark:bg-black/30 backdrop-blur-2xl shadow-3xl overflow-hidden" style={{ animationDelay: '100ms' }}>
+        <div className="animate-slide-up glass-card border-2 border-white/20 rounded-2xl bg-white/50 dark:bg-black/30 backdrop-blur-2xl shadow-xl overflow-hidden" style={{ animationDelay: '100ms' }}>
           {/* Status Icon and Title */}
-          <div className="text-center pt-10 pb-8 px-6 bg-gradient-to-b from-primary/10 to-transparent border-b-2 border-white/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-primary/10 rounded-full blur-3xl"></div>
-            <div className="flex justify-center mb-6 relative z-10">
-              <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br ${getStatusColor()} flex items-center justify-center shadow-2xl`}>
+          <div className="text-center py-6 px-5 bg-gradient-to-b from-primary/10 to-transparent border-b border-white/20 relative overflow-hidden">
+            <div className="flex justify-center mb-4 relative z-10">
+              <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${getStatusColor()} flex items-center justify-center shadow-xl`}>
                 {getStatusIcon()}
               </div>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3 relative z-10">
+            <h2 className="text-xl font-bold text-foreground mb-2 relative z-10">
               {getStatusTitle()}
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto relative z-10 leading-relaxed">
+            <p className="text-sm text-muted-foreground max-w-md mx-auto relative z-10 leading-relaxed">
               {getStatusDescription()}
             </p>
           </div>
 
-          <div className="p-6 sm:p-8">
+          <div className="p-5">
             {statusData && (
-              <div className="space-y-4 sm:space-y-6">
-                  {/* Info Cards Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Company Name Card */}
-                    <div className="glass-card border-2 border-primary/15 rounded-2xl p-5 bg-white/40 dark:bg-black/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
-                      <div className="flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-lg">
-                          <Building2 className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-muted-foreground mb-1">Company Name</p>
-                          <p className="text-lg font-bold text-foreground truncate">{statusData.companyName}</p>
-                        </div>
+              <div className="space-y-3">
+                  {/* Company Name Card */}
+                  <div className="glass-card border border-primary/15 rounded-xl p-4 bg-white/40 dark:bg-black/20 backdrop-blur-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
+                        <Building2 className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-muted-foreground">COMPANY NAME</p>
+                        <p className="text-base font-semibold text-foreground truncate">{statusData.companyName}</p>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Status Card */}
-                    <div className="glass-card border-2 border-primary/15 rounded-2xl p-5 bg-white/40 dark:bg-black/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
-                      <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${
-                          statusData.status === 'approved' ? 'from-emerald-500 to-green-600' :
-                          statusData.status === 'rejected' ? 'from-red-500 to-rose-600' :
-                          'from-amber-500 to-orange-600'
-                        } flex items-center justify-center flex-shrink-0 shadow-lg`}>
-                          <FileText className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-muted-foreground mb-1">Status</p>
-                          <span className={`inline-block px-3 py-1.5 rounded-full text-sm font-bold border-2 ${
-                            statusData.status === 'approved' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' :
-                            statusData.status === 'rejected' ? 'bg-red-500/20 text-red-700 dark:text-red-400 border-red-500/30' :
-                            'bg-amber-500/20 text-amber-700 dark:text-amber-400 border-amber-500/30'
-                          }`}>
-                            {statusData.status === 'approved' ? '✓ Approved' :
-                             statusData.status === 'rejected' ? '✕ Rejected' :
-                             '⏳ Pending Review'}
-                          </span>
-                        </div>
+                  {/* Status Card */}
+                  <div className="glass-card border border-primary/15 rounded-xl p-4 bg-white/40 dark:bg-black/20 backdrop-blur-sm">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${
+                        statusData.status === 'approved' ? 'from-emerald-500 to-green-600' :
+                        statusData.status === 'rejected' ? 'from-red-500 to-rose-600' :
+                        'from-amber-500 to-orange-600'
+                      } flex items-center justify-center flex-shrink-0 shadow-md`}>
+                        <FileText className="w-5 h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-medium text-muted-foreground">STATUS</p>
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-bold ${
+                          statusData.status === 'approved' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
+                          statusData.status === 'rejected' ? 'bg-red-500/20 text-red-700 dark:text-red-400' :
+                          'bg-amber-500/20 text-amber-700 dark:text-amber-400'
+                        }`}>
+                          {statusData.status === 'approved' ? 'Approved' :
+                           statusData.status === 'rejected' ? 'Rejected' :
+                           'Pending'}
+                        </span>
                       </div>
                     </div>
                   </div>
 
                   {/* Submitted On Card */}
-                  <div className="glass-card border-2 border-primary/15 rounded-2xl p-5 bg-white/40 dark:bg-black/20 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-lg">
-                        <Clock className="w-6 h-6 text-white" />
+                  <div className="glass-card border border-primary/15 rounded-xl p-4 bg-white/40 dark:bg-black/20 backdrop-blur-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 shadow-md">
+                        <Clock className="w-5 h-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-muted-foreground mb-1">Submitted On</p>
-                        <p className="text-lg font-bold text-foreground">{new Date(statusData.submittedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        <p className="text-xs font-medium text-muted-foreground">SUBMITTED ON</p>
+                        <p className="text-base font-semibold text-foreground">{new Date(statusData.submittedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Rejection Reason */}
                   {statusData.status === 'rejected' && statusData.rejectionReason && (
-                    <div className="glass-card border-2 border-red-500/30 rounded-2xl p-5 bg-red-500/10 backdrop-blur-sm shadow-lg">
+                    <div className="glass-card border border-red-500/30 rounded-xl p-4 bg-red-500/10 backdrop-blur-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center flex-shrink-0">
-                          <AlertCircle className="w-5 h-5 text-white" />
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center flex-shrink-0">
+                          <AlertCircle className="w-4 h-4 text-white" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-bold text-red-700 dark:text-red-400 mb-2">Rejection Reason</p>
+                          <p className="text-xs font-bold text-red-700 dark:text-red-400 mb-1">Rejection Reason</p>
                           <p className="text-sm text-foreground leading-relaxed">
                             {statusData.rejectionReason}
                           </p>
@@ -303,14 +290,14 @@ const SupplierStatus = () => {
 
                   {/* Note/Alert Box */}
                   {statusData.status === 'pending' && (
-                    <div className="glass-card border-2 border-primary/20 rounded-2xl p-5 bg-primary/5 backdrop-blur-sm shadow-lg">
+                    <div className="glass-card border border-primary/20 rounded-xl p-4 bg-primary/5 backdrop-blur-sm">
                       <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
                           <Mail className="w-4 h-4 text-white" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-sm font-bold text-foreground mb-2">Your application is under review</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-xs font-bold text-foreground mb-1">Your application is under review</p>
+                          <p className="text-xs text-muted-foreground">
                             We will notify you via email at <span className="font-semibold text-primary">{statusData.email}</span> once a decision has been made.
                           </p>
                         </div>
@@ -320,43 +307,28 @@ const SupplierStatus = () => {
 
                   {/* Action Buttons */}
                   {statusData.status === 'approved' && (
-                    <div className="space-y-4 mt-6">
+                    <div className="space-y-3 mt-4">
                       <Button
                         onClick={() => navigate('/login')}
-                        className="w-full px-8 py-3.5 text-lg font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+                        className="w-full py-3 font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-md hover:shadow-lg transition-all"
                       >
-                        <LogIn className="w-5 h-5 mr-2" />
+                        <LogIn className="w-4 h-4 mr-2" />
                         Set Up Password & Login
                       </Button>
-                      <div className="glass-card border-2 border-primary/20 rounded-2xl p-4 bg-primary/5 backdrop-blur-sm">
-                        <p className="text-sm text-muted-foreground text-center">
-                          <span className="font-semibold text-primary">First time login?</span> You'll be prompted to create a secure password for your account using your registered email: <span className="font-semibold text-foreground">{statusData.email}</span>
-                        </p>
-                      </div>
+                      <p className="text-xs text-muted-foreground text-center">
+                        First time login? You'll create a password using: <span className="font-semibold text-primary">{statusData.email}</span>
+                      </p>
                     </div>
                   )}
 
                   {statusData.status === 'rejected' && (
-                    <div className="space-y-4 mt-6">
+                    <div className="space-y-3 mt-4">
                       <Button
                         onClick={() => navigate('/onboarding')}
-                        className="w-full px-8 py-3.5 text-lg font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300"
+                        className="w-full py-3 font-semibold bg-gradient-to-r from-primary to-secondary text-white shadow-md hover:shadow-lg transition-all"
                       >
-                        <RefreshCw className="w-5 h-5 mr-2" />
-                        Reapply for Supplier Onboarding
-                      </Button>
-                      <div className="glass-card border-2 border-primary/20 rounded-2xl p-4 bg-primary/5 backdrop-blur-sm">
-                        <p className="text-sm text-muted-foreground text-center">
-                          <span className="font-semibold text-primary">Need help?</span> Please address the rejection reasons mentioned above and resubmit your application with updated information.
-                        </p>
-                      </div>
-                      <Button
-                        onClick={() => navigate('/')}
-                        variant="outline"
-                        className="w-full px-8 py-3 font-semibold border-2 border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300"
-                      >
-                        <Home className="w-4 h-4 mr-2" />
-                        Return to Homepage
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Reapply
                       </Button>
                     </div>
                   )}
@@ -364,14 +336,14 @@ const SupplierStatus = () => {
               )}
 
               {/* Back Button */}
-              <div className="text-center pt-6 mt-6 border-t-2 border-white/20">
+              <div className="text-center pt-4 mt-4 border-t border-white/20">
                 <Button
                   variant="outline"
                   onClick={() => navigate('/')}
-                  className="px-8 py-3 font-semibold border-2 border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300"
+                  className="px-6 py-2 text-sm font-medium border border-primary/30 text-primary hover:bg-primary/10 transition-all"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Return to Homepage
+                  Back to Home
                 </Button>
               </div>
           </div>

@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    
+    <!-- DNS Prefetch & Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://backendmatrix.onrender.com" />
 
     <!-- Primary Meta Tags -->
     <title>ritzyard Supplier Portal | Join India's Leading AI Procurement Platform</title>
@@ -14,12 +21,21 @@
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="googlebot" content="index, follow" />
     <meta name="bingbot" content="index, follow" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="canonical" href="https://ritzyardseller.com/" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/src/assets/ritzlogo.png" />
-    <link rel="apple-touch-icon" href="/src/assets/ritzlogo.png" />
-    <link rel="shortcut icon" href="/src/assets/ritzlogo.png" />
+    <link rel="icon" type="image/png" href="/ritzlogo.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/ritzlogo.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/ritzlogo.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/ritzlogo.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/ritzlogo.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/ritzlogo.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/ritzlogo.png" />
+    <link rel="shortcut icon" href="/ritzlogo.png" />
+    <link rel="manifest" href="/manifest.json" />
     
     <!-- Theme Color -->
     <meta name="theme-color" content="#d35400" />
@@ -84,7 +100,7 @@
       "name": "ritzyard",
       "alternateName": "ritzyard Supplier Portal",
       "url": "https://ritzyardseller.com/",
-      "logo": "https://ritzyardseller.com/src/assets/ritzlogo.png",
+      "logo": "https://ritzyardseller.com/ritzlogo.png",
       "description": "India's leading AI-powered procurement platform for construction material suppliers",
       "address": {
         "@type": "PostalAddress",
@@ -102,7 +118,113 @@
       },
       "sameAs": [
         "https://ritzyard.com/",
-        "https://ritzyardseller.com/"
+        "https://ritzyardseller.com/",
+        "https://twitter.com/ritzyard",
+        "https://www.linkedin.com/company/ritzyard",
+        "https://www.facebook.com/ritzyard"
+      ]
+    }
+    </script>
+
+    <!-- LocalBusiness Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "@id": "https://ritzyardseller.com/#organization",
+      "name": "ritzyard Supplier Portal",
+      "image": "https://ritzyardseller.com/ritzlogo.png",
+      "url": "https://ritzyardseller.com",
+      "telephone": "+91-9559262525",
+      "email": "support@ritzyard.ai",
+      "priceRange": "Free",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Pune",
+        "addressRegion": "Maharashtra",
+        "addressCountry": "IN"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 18.5204,
+        "longitude": 73.8567
+      },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday"
+          ],
+          "opens": "09:00",
+          "closes": "18:00"
+        }
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.7",
+        "reviewCount": "350",
+        "bestRating": "5",
+        "worstRating": "1"
+      },
+      "sameAs": [
+        "https://twitter.com/ritzyard",
+        "https://www.linkedin.com/company/ritzyard",
+        "https://www.facebook.com/ritzyard"
+      ]
+    }
+    </script>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How do I register as a supplier on ritzyard?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Registration is simple and free. Click on 'Join as Supplier', complete the onboarding form with your business details, upload required documents, and submit for verification. Our team will review and activate your account within 24-48 hours."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What are the benefits of joining ritzyard supplier portal?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Benefits include access to verified buyers across India, AI-powered demand forecasting, real-time analytics dashboard, secure payment processing, zero commission on first 100 orders, marketing support, and dedicated account manager."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is there any registration fee for suppliers?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No, supplier registration on ritzyard is completely free. We offer zero commission on your first 100 orders, and competitive commission rates thereafter to help grow your business."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does payment work on ritzyard?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ritzyard ensures secure and timely payments. Once an order is delivered and confirmed, payment is processed within 7-14 business days directly to your registered bank account. We support multiple payment methods including NEFT, RTGS, and UPI."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What documents are required for supplier verification?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Required documents include: GST registration certificate, PAN card, business address proof, bank account details with cancelled cheque, and product catalog. Additional industry-specific certifications may enhance your profile visibility."
+          }
+        }
       ]
     }
     </script>

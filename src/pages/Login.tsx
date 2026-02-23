@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Shield, LogIn, Eye, EyeOff, Sparkles, ArrowLeft } from 'lucide-react';
-import ritzyardLogo from "@/assets/RITZYARD3.svg";
+import ritzLogo from "@/assets/ritz.png";
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -159,8 +159,8 @@ const SupplierLogin = () => {
             {/* Logo & Brand */}
             <div className="glass-card border-2 border-white/30 p-8 rounded-3xl backdrop-blur-2xl">
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-xl overflow-hidden">
-                  <img src={ritzyardLogo} alt="ritzyard logo" className="w-full h-full object-cover" />
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#B85C38] to-[#8B4513] flex items-center justify-center shadow-xl overflow-hidden">
+                  <img src={ritzLogo} alt="ritz yard logo" className="w-12 h-12 object-contain" />
                 </div>
                 <div className="flex flex-col">
                   <span className="text-3xl font-bold leading-tight notranslate">
@@ -218,14 +218,21 @@ const SupplierLogin = () => {
           {/* Right Side - Login Form */}
           <div className="glass-card border-2 border-white/30 shadow-2xl rounded-3xl overflow-hidden backdrop-blur-2xl">
             <div className="bg-gradient-to-r from-primary/10 via-primary-glow/10 to-secondary/10 border-b border-white/20 p-8">
-              <div className="flex justify-center mb-4">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary via-primary-glow to-secondary flex items-center justify-center shadow-xl animate-glow-pulse">
-                  <LogIn className="w-10 h-10 text-white" />
+              <div className="flex flex-col items-center gap-3 mb-4">
+                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#B85C38] to-[#8B4513] flex items-center justify-center shadow-xl overflow-hidden">
+                  <img src={ritzLogo} alt="ritz yard logo" className="w-14 h-14 object-contain" />
+                </div>
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-foreground notranslate">
+                    <span className="text-primary">r</span>
+                    <span className="text-[#452a21]">itz yard</span>
+                  </h2>
+                  <p className="text-sm text-muted-foreground notranslate">Where Value Meets Velocity</p>
                 </div>
               </div>
-              <h2 className="text-2xl font-bold text-center text-foreground mb-2">
+              <h3 className="text-xl font-semibold text-center text-foreground mb-1">
                 Supplier Login
-              </h2>
+              </h3>
               <p className="text-center text-muted-foreground text-sm">
                 Enter your credentials to access your dashboard
               </p>

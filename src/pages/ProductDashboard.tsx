@@ -1216,37 +1216,50 @@ Does this look good? Reply YES to save or NO to edit.`);
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6">
               {/* Profile Section */}
               <div className="flex items-center gap-3 sm:gap-4 flex-1 w-full">
-                {/* Logo or Initial Avatar */}
-                {user?.logo ? (
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl shadow-lg flex-shrink-0 overflow-hidden bg-white">
-                    <img 
-                      src={user.logo} 
-                      alt={user?.companyName || 'Company Logo'}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // Fallback to initial if logo fails to load
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        if (target.nextElementSibling) {
-                          (target.nextElementSibling as HTMLElement).style.display = 'flex';
-                        }
-                      }}
-                    />
-                    <div className="w-full h-full rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center" style={{display: 'none'}}>
+                {/* Logo or Initial Avatar with Edit Option */}
+                <div className="relative group">
+                  {user?.logo ? (
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl shadow-lg flex-shrink-0 overflow-hidden bg-white">
+                      <img 
+                        src={getFixedImageUrl(user.logo)} 
+                        alt={user?.companyName || 'Company Logo'}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to initial if logo fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          if (target.nextElementSibling) {
+                            (target.nextElementSibling as HTMLElement).style.display = 'flex';
+                          }
+                        }}
+                      />
+                      <div className="w-full h-full rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center" style={{display: 'none'}}>
+                        <span className="text-white font-bold text-lg sm:text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
                       <span className="text-white font-bold text-lg sm:text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
                     </div>
-                  </div>
-                ) : (
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
-                    <span className="text-white font-bold text-lg sm:text-2xl">{user?.companyName?.charAt(0) || 'S'}</span>
-                  </div>
-                )}
+                  )}
+                  {/* Edit Profile Button - Always visible */}
+                  <button 
+                    onClick={() => navigate('/profile')}
+                    className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:bg-primary/90 hover:scale-110 transition-all"
+                    title="Edit Profile"
+                  >
+                    <Edit className="w-3 h-3" />
+                  </button>
+                </div>
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg sm:text-2xl font-bold text-foreground mb-1 truncate max-w-full">{user?.companyName || 'Business Ventures'}</h2>
                   <div className="flex flex-wrap gap-2 sm:gap-3 text-xs text-muted-foreground">
+                    {user?.email && <span className="truncate">📧 {user.email}</span>}
+                    {user?.phone && <span className="truncate">📞 {user.phone}</span>}
+                  </div>
+                  <div className="flex flex-wrap gap-2 sm:gap-3 text-xs text-muted-foreground mt-1">
                     <span className="truncate">📊 {analytics.total} Products</span>
                     <span className="truncate">✅ {aiInsights.approvalRate}% Success</span>
-                    <span className="truncate">📅 {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2024'}</span>
                   </div>
                 </div>
               </div>
@@ -1833,9 +1846,9 @@ Does this look good? Reply YES to save or NO to edit.`);
                           key={product._id}
                           className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 group relative"
                         >
-                          {/* Product Image - Only show if image exists and has valid URL */}
-                          {displayImage ? (
-                            <div className="w-full h-56 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-600 overflow-hidden relative">
+                          {/* Product Image - Show placeholder if no image */}
+                          <div className="w-full h-56 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 overflow-hidden relative">
+                            {displayImage ? (
                               <img
                                 src={displayImage}
                                 data-src={displayImage}
@@ -1847,9 +1860,15 @@ Does this look good? Reply YES to save or NO to edit.`);
                                   console.error(`❌ Product image failed: ${displayImage}`);
                                   handleImageErrorWithRetry(e);
                                 }}
+                                onLoad={() => console.log(`✅ Image loaded: ${product.name}`)}
                               />
-                            </div>
-                          ) : null}
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">
+                                <Package className="w-16 h-16 text-primary/40 mb-2" />
+                                <span className="text-sm text-muted-foreground">No image uploaded</span>
+                              </div>
+                            )}
+                          </div>
 
                           {/* Card Content */}
                           <div className="p-6">
