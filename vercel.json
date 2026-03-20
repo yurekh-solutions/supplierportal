@@ -1,4 +1,6 @@
 {
+  "buildCommand": "vite build",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",
@@ -98,11 +100,6 @@
       ]
     }
   ],
-  "build": {
-    "env": {
-      "VITE_API_URL": "https://backendmatrix.onrender.com/api"
-    }
-  },
   "env": {
     "VITE_API_URL": "https://backendmatrix.onrender.com/api"
   }
