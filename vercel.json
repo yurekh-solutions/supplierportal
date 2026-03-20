@@ -98,6 +98,11 @@
       ]
     }
   ],
+  "build": {
+    "env": {
+      "VITE_API_URL": "https://backendmatrix.onrender.com/api"
+    }
+  },
   "env": {
     "VITE_API_URL": "https://backendmatrix.onrender.com/api"
   }
