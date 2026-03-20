@@ -28,7 +28,7 @@ const testimonials = [
   {
     name: 'Amit Patel',
     company: 'Patel Construction Supplies',
-    location: 'Pune, Maharashtra',
+    location: 'Mumbai, Maharashtra',
     rating: 5,
     text: 'The automated inventory management has saved us countless hours. We can now focus on expanding our product range instead of paperwork.',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&auto=format',

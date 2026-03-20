@@ -564,14 +564,49 @@ Does this look good? Reply YES to save or NO to edit.`);
   };
 
   // Order Automation Handlers
-  const handleOrderAutomationOpen = () => {
+  const handleOrderAutomationOpen = async () => {
     setShowOrderAutomationChatbox(true);
+
     setOrderAutomationMessages([{
       id: 1,
-      text: '📦 Order Automation System initialized!\n\nCapabilities:\n• Instant order confirmation emails\n• Automatic invoice generation\n• Shipment tracking updates\n• Payment reminders\n• Reduces processing time by 60%',
+      text: '📦 Order Automation loading...',
       sender: 'bot',
       timestamp: new Date()
     }]);
+
+    try {
+      const ordersRes = await fetch(`${API_URL}/automation/orders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const ordersData = await ordersRes.json();
+
+      let openingText = '';
+      if (ordersData.success && ordersData.orders && ordersData.orders.length > 0) {
+        const orders = ordersData.orders;
+        const pending = orders.filter((o: any) => o.status === 'pending').length;
+        const processing = orders.filter((o: any) => o.status === 'processing').length;
+        const shipped = orders.filter((o: any) => o.status === 'shipped' || o.status === 'delivered').length;
+        const total = orders.length;
+
+        openingText = `📦 Order Automation — Live Orders\n\n📊 Order Overview:\n• Total Orders: ${total}\n• Pending: ${pending}\n• Processing: ${processing}\n• Shipped/Delivered: ${shipped}\n\n🤖 Automation Capabilities:\n• Instant order confirmations\n• Automatic invoice generation\n• Shipment tracking updates\n• Payment reminders\n\n💡 Ask me:\n• "Order status" — detailed breakdown\n• "Setup automation" — configure workflows\n• "Pending orders" — what needs action`;
+      } else {
+        openingText = `📦 Order Automation System Ready\n\n📊 No orders yet.\n\nStart selling to see order automation in action!\n\n🤖 Automation Features:\n• Instant confirmation emails\n• Auto invoice generation\n• Shipment tracking\n• Payment reminders\n\n💡 Ask me:\n• "Setup automation"\n• "How does it work?"`;
+      }
+
+      setOrderAutomationMessages([{
+        id: 1,
+        text: openingText,
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    } catch {
+      setOrderAutomationMessages([{
+        id: 1,
+        text: `📦 Order Automation System initialized!\n\n🤖 Capabilities:\n• Instant order confirmation emails\n• Automatic invoice generation\n• Shipment tracking updates\n• Payment reminders\n• Reduces processing time by 60%\n\n💡 Ask me about order status or automation setup.`,
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    }
   };
 
   const handleOrderAutomationClose = () => {
@@ -579,14 +614,48 @@ Does this look good? Reply YES to save or NO to edit.`);
   };
 
   // Smart Inventory Handlers
-  const handleSmartInventoryOpen = () => {
+  const handleSmartInventoryOpen = async () => {
     setShowSmartInventoryChatbox(true);
+
+    // Build opening message from real products state
+    const totalProducts = products.length;
+    const active = products.filter(p => p.status === 'active').length;
+    const pending = products.filter(p => p.status === 'pending').length;
+    const rejected = products.filter(p => p.status === 'rejected').length;
+    const uniqueCategories = [...new Set(products.map(p => p.category))];
+
+    let openingText = '';
+
+    if (totalProducts === 0) {
+      openingText = '📊 Smart Inventory Tracker activated!\n\nYou have no products listed yet.\n\nStart by adding products and your inventory stats will appear here in real-time.\n\n💡 Ask me:\n• "Stock overview"\n• "Inventory alerts"\n• "Forecast demand"';
+    } else {
+      openingText = `📊 Smart Inventory — Live Snapshot\n\n📦 Total Products: ${totalProducts}\n✅ Active: ${active}\n⏳ Pending Review: ${pending}${rejected > 0 ? `\n❌ Rejected: ${rejected}` : ''}\n\n🗂️ Categories: ${uniqueCategories.join(', ')}\n\n💡 Ask me:\n• "Stock overview" — see full inventory\n• "Low stock alerts" — find items needing attention\n• "Demand forecast" — plan ahead`;
+    }
+
     setSmartInventoryMessages([{
       id: 1,
-      text: '📊 Smart Inventory Tracker activated!\n\nRealtime Features:\n• Stock level monitoring\n• Low-stock alerts (customizable)\n• Predictive demand forecasting\n• Automatic reorder suggestions\n• Prevents stockouts & overstock',
+      text: openingText,
       sender: 'bot',
       timestamp: new Date()
     }]);
+
+    // Fetch low-stock alerts in background to enrich context
+    try {
+      const alertsRes = await fetch(`${API_URL}/inventory/alerts`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const alertsData = await alertsRes.json();
+      if (alertsData.success && alertsData.data && alertsData.data.length > 0) {
+        const alertMsg = `\n⚠️ Low Stock Alert: ${alertsData.data.length} item(s) need attention. Ask me "low stock alerts" for details.`;
+        setSmartInventoryMessages(prev => {
+          const updated = [...prev];
+          updated[0] = { ...updated[0], text: updated[0].text + alertMsg };
+          return updated;
+        });
+      }
+    } catch {
+      // silent — opening message is already shown
+    }
   };
 
   const handleSmartInventoryClose = () => {
@@ -596,9 +665,21 @@ Does this look good? Reply YES to save or NO to edit.`);
   // Price Optimizer Handlers
   const handlePriceOptimizerOpen = () => {
     setShowPriceOptimizerChatbox(true);
+
+    const activeProducts = products.filter(p => p.status === 'active');
+    const totalProducts = products.length;
+
+    let openingText = '';
+    if (totalProducts === 0) {
+      openingText = '💰 Price Optimizer activated!\n\nNo products found yet. Add products to start getting pricing recommendations.\n\n💡 Ask me:\n• "Price recommendations"\n• "Market analysis"\n• "Revenue boost tips"';
+    } else {
+      const productList = activeProducts.slice(0, 4).map(p => `• ${p.name} (${p.category})`).join('\n');
+      openingText = `💰 Price Optimizer — ${totalProducts} Products Found\n\nActive Products:\n${productList}${activeProducts.length > 4 ? `\n• ...and ${activeProducts.length - 4} more` : ''}\n\n📈 Dynamic Pricing Engine Ready!\n\n💡 Ask me:\n• "Price recommendations" — optimize your pricing\n• "Market analysis" — competitor insights\n• "Revenue forecast" — growth opportunities`;
+    }
+
     setPriceOptimizerMessages([{
       id: 1,
-      text: '💰 Price Optimizer activated!\n\nDynamic Pricing Engine:\n• Real-time competitor analysis\n• Demand-based adjustments\n• Seasonal pricing strategies\n• Margin optimization\n• Revenue increase up to 25%',
+      text: openingText,
       sender: 'bot',
       timestamp: new Date()
     }]);
@@ -609,14 +690,58 @@ Does this look good? Reply YES to save or NO to edit.`);
   };
 
   // Analytics Hub Handlers
-  const handleAnalyticsHubOpen = () => {
+  const handleAnalyticsHubOpen = async () => {
     setShowAnalyticsHubChatbox(true);
+
+    // Show loading message first
     setAnalyticsHubMessages([{
       id: 1,
-      text: '📈 Analytics Hub Dashboard loaded!\n\nAnalytics Available:\n• Sales trends & patterns\n• Customer insights\n• Performance metrics\n• Revenue forecasting\n• ROI analysis by tool\n• Export reports (PDF/CSV)',
+      text: '📈 Analytics Hub loading your live data...',
       sender: 'bot',
       timestamp: new Date()
     }]);
+
+    try {
+      const [statsRes, perfRes] = await Promise.all([
+        fetch(`${API_URL}/automation/analytics/stats`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`${API_URL}/automation/analytics/performance`, { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+      const statsData = await statsRes.json();
+      const perfData = await perfRes.json();
+
+      const totalProducts = products.length;
+      const activeProducts = products.filter(p => p.status === 'active').length;
+
+      let openingText = `📈 Analytics Hub — Live Dashboard\n\n`;
+
+      if (statsData.success && statsData.data) {
+        const s = statsData.data;
+        openingText += `📊 Automation Stats:\n• Total Leads: ${s.totalLeads || 0}\n• Auto-Replies: ${s.totalAutoReplies || 0}\n• Orders: ${s.totalOrders || 0}\n\n`;
+      }
+
+      if (perfData.success && perfData.data) {
+        const p = perfData.data;
+        openingText += `💰 Performance:\n• Revenue: ₹${(p.totalRevenue || 0).toLocaleString()}\n• Orders This Period: ${p.totalOrders || 0}\n• Avg Order: ₹${(p.avgOrderValue || 0).toLocaleString()}\n\n`;
+      }
+
+      openingText += `📦 Your Products:\n• Total Listed: ${totalProducts}\n• Active: ${activeProducts}\n• Categories: ${[...new Set(products.map(p => p.category))].length}\n\n💡 Ask me:\n• "Sales report" — revenue trends\n• "Key insights" — business analysis\n• "Performance" — detailed metrics`;
+
+      setAnalyticsHubMessages([{
+        id: 1,
+        text: openingText,
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    } catch {
+      // Fallback with product data only
+      const openingText = `📈 Analytics Hub Dashboard\n\n📦 Your Products:\n• Total: ${products.length}\n• Active: ${products.filter(p => p.status === 'active').length}\n• Pending: ${products.filter(p => p.status === 'pending').length}\n\n💡 Ask me:\n• "Sales report"\n• "Key insights"\n• "Performance metrics"`;
+      setAnalyticsHubMessages([{
+        id: 1,
+        text: openingText,
+        sender: 'bot',
+        timestamp: new Date()
+      }]);
+    }
   };
 
   const handleAnalyticsHubClose = () => {
@@ -721,7 +846,7 @@ Does this look good? Reply YES to save or NO to edit.`);
   };
 
   // Order Automation Submit Handler
-  const handleOrderAutomationSubmit = (e: React.FormEvent) => {
+  const handleOrderAutomationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!orderAutomationInput.trim()) return;
 
@@ -732,18 +857,49 @@ Does this look good? Reply YES to save or NO to edit.`);
       timestamp: new Date()
     };
     setOrderAutomationMessages(prev => [...prev, userMessage]);
+    const inputText = orderAutomationInput;
     setOrderAutomationInput('');
 
-    setTimeout(() => {
+    try {
+      const input = inputText.toLowerCase();
       let response = '';
-      const input = orderAutomationInput.toLowerCase();
-      
-      if (input.includes('status') || input.includes('pending')) {
-        response = '📦 Order Status Overview:\n• Pending Orders: 3\n• Processing: 5\n• Ready to Ship: 2\n• Shipped: 18\n\n⏱️ Average Processing Time: 12 hours\n✅ On-time Delivery Rate: 98%';
-      } else if (input.includes('setup') || input.includes('configure')) {
-        response = '⚙️ Automation Setup:\n1. Email Confirmations ✅ Enabled\n2. Invoice Generation ✅ Enabled\n3. Shipment Tracking ✅ Enabled\n4. Payment Reminders ✅ Enabled\n\nAll systems are active and working!';
+
+      if (input.includes('status') || input.includes('pending') || input.includes('order')) {
+        // Fetch real orders from backend
+        const ordersRes = await fetch(`${API_URL}/automation/orders`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const ordersData = await ordersRes.json();
+
+        if (ordersData.success && ordersData.orders && ordersData.orders.length > 0) {
+          const orders = ordersData.orders;
+          const pending = orders.filter((o: any) => o.status === 'pending').length;
+          const processing = orders.filter((o: any) => o.status === 'processing').length;
+          const readyToShip = orders.filter((o: any) => o.status === 'ready-to-ship' || o.status === 'ready').length;
+          const shipped = orders.filter((o: any) => o.status === 'shipped').length;
+          const delivered = orders.filter((o: any) => o.status === 'delivered').length;
+          const cancelled = orders.filter((o: any) => o.status === 'cancelled').length;
+
+          // Show recent orders
+          const recentOrders = orders.slice(0, 3);
+          let recentDetails = '';
+          recentOrders.forEach((o: any, idx: number) => {
+            recentDetails += `\n${idx + 1}. Order #${o.orderNumber || o._id?.slice(-6) || idx + 1} — ${o.status?.toUpperCase()}\n   ₹${(o.totalAmount || o.amount || 0).toLocaleString()} • ${new Date(o.createdAt || Date.now()).toLocaleDateString()}`;
+          });
+
+          response = `📦 Order Status — Live Data\n\n📊 Breakdown:\n• Pending: ${pending}\n• Processing: ${processing}${readyToShip > 0 ? `\n• Ready to Ship: ${readyToShip}` : ''}\n• Shipped: ${shipped}\n• Delivered: ${delivered}${cancelled > 0 ? `\n• Cancelled: ${cancelled}` : ''}\n• Total: ${orders.length}\n\n📋 Recent Orders:${recentDetails}\n\n⏱️ ${pending > 0 ? `${pending} order(s) need your attention!` : 'All orders on track!'}`;
+        } else {
+          response = `📦 No orders found yet.\n\nYour order management will appear here once you start receiving orders.\n\n💡 Tips to get orders:\n• Keep products active and updated\n• Respond to inquiries promptly\n• Set up Auto-Reply for faster responses`;
+        }
+
+      } else if (input.includes('setup') || input.includes('configure') || input.includes('automation')) {
+        response = `⚙️ Order Automation Setup\n\n✅ Active Automations:\n• Email Confirmations — Auto-sent on new orders\n• Invoice Generation — Created automatically\n• Shipment Tracking — Updates sent to buyers\n• Payment Reminders — Sent after 3 days\n\n📦 Your Products: ${products.length} listed (${products.filter(p => p.status === 'active').length} active)\n\n💡 All systems are configured and ready to automate your order workflow!`;
+
+      } else if (input.includes('how') || input.includes('work') || input.includes('help')) {
+        response = `🤖 How Order Automation Works\n\n1️⃣ Buyer places an order\n2️⃣ Confirmation email sent automatically\n3️⃣ Invoice generated in seconds\n4️⃣ You prepare & ship the order\n5️⃣ Tracking updates sent to buyer\n6️⃣ Payment reminder if overdue\n\n⏱️ Time saved: Up to 60% per order\n📦 Your active products: ${products.filter(p => p.status === 'active').length}`;
+
       } else {
-        response = '📧 Ask me about:\n• Current order status\n• Automation setup\n• Processing times\n• Email templates\n• Shipment tracking';
+        response = `📦 Order Automation\n\n📊 Products Ready to Sell: ${products.filter(p => p.status === 'active').length}\n\nAsk me:\n• "Order status" — current order breakdown\n• "Setup automation" — configure workflows\n• "How does it work?" — automation guide\n• "Pending orders" — items needing action`;
       }
 
       const botMessage = {
@@ -753,11 +909,20 @@ Does this look good? Reply YES to save or NO to edit.`);
         timestamp: new Date()
       };
       setOrderAutomationMessages(prev => [...prev, botMessage]);
-    }, 300);
+    } catch (error) {
+      console.error('Order Automation error:', error);
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: '❌ Error fetching order data. Please try again.',
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setOrderAutomationMessages(prev => [...prev, botMessage]);
+    }
   };
 
   // Smart Inventory Submit Handler
-  const handleSmartInventorySubmit = (e: React.FormEvent) => {
+  const handleSmartInventorySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!smartInventoryInput.trim()) return;
 
@@ -768,18 +933,86 @@ Does this look good? Reply YES to save or NO to edit.`);
       timestamp: new Date()
     };
     setSmartInventoryMessages(prev => [...prev, userMessage]);
+    const inputText = smartInventoryInput;
     setSmartInventoryInput('');
 
-    setTimeout(() => {
+    try {
+      const input = inputText.toLowerCase();
       let response = '';
-      const input = smartInventoryInput.toLowerCase();
-      
-      if (input.includes('stock') || input.includes('inventory')) {
-        response = '📊 Current Inventory Status:\n• Total SKUs: 24\n• In Stock: 19\n• Low Stock Alert: 4\n• Out of Stock: 1\n\n⚠️ Low Stock Items:\n• Product A: 3 units (reorder suggested)\n• Product B: 2 units (urgent)\n• Product C: 5 units (normal)\n• Product D: 1 unit (reorder NOW)';
-      } else if (input.includes('forecast') || input.includes('predict')) {
-        response = '🔮 Demand Forecast (Next 30 Days):\n• Expected Orders: 150\n• Recommended Stock Level: 200 units\n• Predicted Stockout Risk: LOW\n• Reorder Deadline: Day 15\n\nPredictive accuracy: 94%';
+
+      if (input.includes('stock') || input.includes('overview') || input.includes('inventory')) {
+        // Use real products state for live snapshot
+        const totalProducts = products.length;
+        const active = products.filter(p => p.status === 'active').length;
+        const pending = products.filter(p => p.status === 'pending').length;
+        const rejected = products.filter(p => p.status === 'rejected').length;
+        const uniqueCategories = [...new Set(products.map(p => p.category))];
+
+        if (totalProducts === 0) {
+          response = '📦 No products in your inventory yet.\n\nAdd your first product to start tracking stock levels!';
+        } else {
+          // Also fetch inventory API for quantity data
+          let inventoryDetails = '';
+          try {
+            const invRes = await fetch(`${API_URL}/inventory`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            const invData = await invRes.json();
+            if (invData.success && invData.data && invData.data.length > 0) {
+              const totalQty = invData.data.reduce((sum: number, item: any) => sum + (item.quantity || 0), 0);
+              const lowStock = invData.data.filter((item: any) => (item.quantity || 0) <= (item.reorderPoint || 10)).length;
+              inventoryDetails = `\n\n📊 Stock Quantities:\n• Total Units in Stock: ${totalQty}\n• Items with Low Stock: ${lowStock}`;
+            }
+          } catch { /* use product data only */ }
+
+          response = `📦 Your Inventory Overview\n\n✅ Active Products: ${active}\n⏳ Pending Review: ${pending}${rejected > 0 ? `\n❌ Rejected: ${rejected}` : ''}\n📋 Total Listed: ${totalProducts}\n\n🗂️ Categories (${uniqueCategories.length}): ${uniqueCategories.join(', ')}${inventoryDetails}`;
+        }
+
+      } else if (input.includes('alert') || input.includes('low') || input.includes('reorder')) {
+        // Fetch real low-stock alerts
+        const alertsRes = await fetch(`${API_URL}/inventory/alerts`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const alertsData = await alertsRes.json();
+
+        if (alertsData.success && alertsData.data && alertsData.data.length > 0) {
+          response = `⚠️ Low Stock Alerts (${alertsData.data.length} items)\n\n`;
+          alertsData.data.slice(0, 6).forEach((item: any, idx: number) => {
+            const urgency = (item.quantity || 0) <= 2 ? '🔴 URGENT' : (item.quantity || 0) <= 5 ? '🟡 Low' : '🟢 Watch';
+            response += `${idx + 1}. ${item.productName || item.name || 'Item'}\n   Qty: ${item.quantity || 0} units — ${urgency}\n\n`;
+          });
+          response += '💡 Reorder soon to avoid stockouts!';
+        } else {
+          // Fallback: check products with pending/rejected status
+          const needAttention = products.filter(p => p.status !== 'active');
+          if (needAttention.length > 0) {
+            response = `🔔 ${needAttention.length} product(s) are not yet active:\n\n`;
+            needAttention.slice(0, 5).forEach((p, idx) => {
+              response += `${idx + 1}. ${p.name} — Status: ${p.status}\n`;
+            });
+            response += '\nActivate products to improve availability!';
+          } else {
+            response = '✅ All Clear! No low stock alerts at the moment.\n\nAll your active products are in good standing.';
+          }
+        }
+
+      } else if (input.includes('forecast') || input.includes('predict') || input.includes('demand')) {
+        // Fetch inventory analytics for real forecast data
+        const analyticsRes = await fetch(`${API_URL}/inventory/analytics`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const analyticsData = await analyticsRes.json();
+
+        if (analyticsData.success && analyticsData.data) {
+          const d = analyticsData.data;
+          response = `🔮 Demand Forecast & Analytics\n\n📈 Total Items Tracked: ${d.totalItems || products.length}\n💰 Total Inventory Value: ₹${(d.totalValue || 0).toLocaleString()}\n⚠️ Low Stock Items: ${d.lowStockCount || 0}\n📦 Out of Stock: ${d.outOfStockCount || 0}\n\n📊 Your Active Products: ${products.filter(p => p.status === 'active').length}\n🗂️ Categories: ${[...new Set(products.map(p => p.category))].length}\n\n💡 Focus on restocking low-stock items to meet demand!`;
+        } else {
+          const activeCount = products.filter(p => p.status === 'active').length;
+          response = `🔮 Demand Forecast (Based on Your Listings)\n\n📦 Active Products Ready to Sell: ${activeCount}\n⏳ Pending Approval: ${products.filter(p => p.status === 'pending').length}\n\n📈 To improve forecast accuracy:\n• Add stock quantities via the Inventory API\n• Keep products active and updated\n• Monitor inquiry trends\n\n💡 Your ${activeCount} active products are visible to buyers!`;
+        }
+
       } else {
-        response = '📦 Track your inventory by asking about:\n• Current stock levels\n• Low stock alerts\n• Demand forecasts\n• Reorder suggestions\n• Historical trends';
+        response = `📦 Smart Inventory — Your Data\n\nYou have ${products.length} product(s) listed.\n✅ Active: ${products.filter(p => p.status === 'active').length}\n⏳ Pending: ${products.filter(p => p.status === 'pending').length}\n\nAsk me:\n• "Stock overview" — full inventory status\n• "Low stock alerts" — items needing attention\n• "Demand forecast" — planning insights`;
       }
 
       const botMessage = {
@@ -789,11 +1022,20 @@ Does this look good? Reply YES to save or NO to edit.`);
         timestamp: new Date()
       };
       setSmartInventoryMessages(prev => [...prev, botMessage]);
-    }, 300);
+    } catch (error) {
+      console.error('Smart Inventory error:', error);
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: '❌ Error fetching inventory data. Please try again.',
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setSmartInventoryMessages(prev => [...prev, botMessage]);
+    }
   };
 
   // Price Optimizer Submit Handler
-  const handlePriceOptimizerSubmit = (e: React.FormEvent) => {
+  const handlePriceOptimizerSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!priceOptimizerInput.trim()) return;
 
@@ -804,18 +1046,75 @@ Does this look good? Reply YES to save or NO to edit.`);
       timestamp: new Date()
     };
     setPriceOptimizerMessages(prev => [...prev, userMessage]);
+    const inputText = priceOptimizerInput;
     setPriceOptimizerInput('');
 
-    setTimeout(() => {
+    try {
+      const input = inputText.toLowerCase();
       let response = '';
-      const input = priceOptimizerInput.toLowerCase();
-      
-      if (input.includes('recommend') || input.includes('suggest')) {
-        response = '💰 Price Recommendations:\n\n• Product A: Current $450 → Recommended $480 (+6.7%)\n• Product B: Current $320 → Recommended $300 (-6.3%)\n• Product C: Current $680 → Recommended $720 (+5.9%)\n\nPotential Revenue Increase: +$4,200/month';
-      } else if (input.includes('market') || input.includes('competitor')) {
-        response = '🔍 Market Analysis:\n• Your Average Price: $500\n• Competitor Average: $520\n• Market Average: $510\n• Demand Index: 8.5/10\n\nYou are 3.9% below market - room to increase prices!';
+
+      if (input.includes('recommend') || input.includes('suggest') || input.includes('price')) {
+        const activeProducts = products.filter(p => p.status === 'active');
+
+        if (activeProducts.length === 0) {
+          response = '💰 No active products found.\n\nAdd and get approval for products to receive pricing recommendations!';
+        } else {
+          // Show real product names with pricing suggestions
+          response = `💰 Price Recommendations for Your Products\n\n`;
+          activeProducts.slice(0, 5).forEach((p, idx) => {
+            const currentPrice = p.price?.amount;
+            if (currentPrice && currentPrice > 0) {
+              const suggestedIncrease = Math.round(currentPrice * 1.05);
+              const currency = p.price?.currency || '₹';
+              const unit = p.price?.unit || 'unit';
+              response += `${idx + 1}. ${p.name}\n   Current: ${currency}${currentPrice.toLocaleString()}/${unit}\n   Suggested: ${currency}${suggestedIncrease.toLocaleString()}/${unit} (+5%)\n\n`;
+            } else {
+              response += `${idx + 1}. ${p.name} (${p.category})\n   💡 Add pricing to unlock recommendations\n\n`;
+            }
+          });
+          if (activeProducts.length > 5) {
+            response += `...and ${activeProducts.length - 5} more products.\n\n`;
+          }
+          response += '📈 Tip: Products with pricing data get better optimization insights!';
+        }
+
+      } else if (input.includes('market') || input.includes('competitor') || input.includes('analysis')) {
+        // Fetch automation stats for market context
+        const statsRes = await fetch(`${API_URL}/automation/analytics/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const statsData = await statsRes.json();
+
+        const activeCount = products.filter(p => p.status === 'active').length;
+        const categories = [...new Set(products.map(p => p.category))];
+
+        if (statsData.success && statsData.data) {
+          const d = statsData.data;
+          response = `🔍 Market Analysis\n\n📦 Your Active Listings: ${activeCount}\n🗂️ Categories Covered: ${categories.join(', ')}\n📩 Total Inquiries: ${d.totalLeads || 0}\n✉️ Auto-Replies Sent: ${d.totalAutoReplies || 0}\n📋 Orders Processed: ${d.totalOrders || 0}\n\n💡 Insights:\n• More categories = wider market reach\n• ${activeCount > 5 ? 'Good product variety!' : 'Add more products to increase visibility'}\n• Respond fast to beat competitors`;
+        } else {
+          response = `🔍 Market Analysis\n\n📦 Your Active Products: ${activeCount}\n🗂️ Categories: ${categories.join(', ')}\n\n💡 Strategy Tips:\n• Keep prices competitive in ${categories[0] || 'your category'}\n• Respond to inquiries within 2 hours\n• Add detailed product specs to win more deals\n• Offer bulk pricing for better conversions`;
+        }
+
+      } else if (input.includes('revenue') || input.includes('forecast') || input.includes('growth')) {
+        const activeCount = products.filter(p => p.status === 'active').length;
+        const pendingCount = products.filter(p => p.status === 'pending').length;
+
+        // Try to get performance analytics
+        const perfRes = await fetch(`${API_URL}/automation/analytics/performance`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const perfData = await perfRes.json();
+
+        if (perfData.success && perfData.data) {
+          const d = perfData.data;
+          response = `📈 Revenue Forecast\n\n🎯 Current Performance:\n• Orders This Period: ${d.totalOrders || 0}\n• Revenue Generated: ₹${(d.totalRevenue || 0).toLocaleString()}\n• Avg Order Value: ₹${(d.avgOrderValue || 0).toLocaleString()}\n\n📦 Listing Health:\n• Active: ${activeCount} products\n• Pending: ${pendingCount} products\n\n💡 To increase revenue:\n• Approve pending products → +${pendingCount * 10}% potential reach\n• Add pricing to all products\n• Respond to all inquiries promptly`;
+        } else {
+          response = `📈 Revenue Growth Opportunities\n\n📦 Active Products: ${activeCount}\n⏳ Pending (Unlock These!): ${pendingCount}\n\n🎯 Growth Actions:\n1. Get ${pendingCount} pending products approved\n2. Add detailed pricing to all listings\n3. Use Auto-Reply for faster response rates\n4. Respond to leads within 1 hour\n\n💡 Estimated Impact: Each active product = more buyer inquiries!`;
+        }
+
       } else {
-        response = '💎 Get pricing insights by asking about:\n• Price recommendations\n• Competitor analysis\n• Seasonal pricing\n• Revenue optimization\n• Market trends';
+        const activeCount = products.filter(p => p.status === 'active').length;
+        response = `💎 Price Optimizer — ${products.length} Products\n\nActive & Earning: ${activeCount} products\n\nAsk me:\n• "Price recommendations" — optimize pricing\n• "Market analysis" — competitor insights\n• "Revenue forecast" — growth planning\n• "Suggest pricing" — per-product advice`;
       }
 
       const botMessage = {
@@ -825,11 +1124,20 @@ Does this look good? Reply YES to save or NO to edit.`);
         timestamp: new Date()
       };
       setPriceOptimizerMessages(prev => [...prev, botMessage]);
-    }, 300);
+    } catch (error) {
+      console.error('Price Optimizer error:', error);
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: '❌ Error fetching pricing data. Please try again.',
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setPriceOptimizerMessages(prev => [...prev, botMessage]);
+    }
   };
 
   // Analytics Hub Submit Handler
-  const handleAnalyticsHubSubmit = (e: React.FormEvent) => {
+  const handleAnalyticsHubSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!analyticsHubInput.trim()) return;
 
@@ -840,18 +1148,69 @@ Does this look good? Reply YES to save or NO to edit.`);
       timestamp: new Date()
     };
     setAnalyticsHubMessages(prev => [...prev, userMessage]);
+    const inputText = analyticsHubInput;
     setAnalyticsHubInput('');
 
-    setTimeout(() => {
+    try {
+      const input = inputText.toLowerCase();
       let response = '';
-      const input = analyticsHubInput.toLowerCase();
-      
-      if (input.includes('sales') || input.includes('revenue')) {
-        response = '📈 Sales & Revenue Report:\n\n• This Month: $24,500\n• Last Month: $19,200\n• Growth: +27.6%\n\n📊 Revenue by Tool:\n• Auto Reply: +$3,200 (time saved)\n• Lead Scoring: +$4,100 (better conversions)\n• Order Automation: +$2,800 (efficiency)\n• Others: +$14,400';
-      } else if (input.includes('trend') || input.includes('insight')) {
-        response = '🎯 Key Insights:\n\n✅ Strengths:\n• High customer satisfaction (4.8/5)\n• Fast response time (avg 2hr)\n• Strong repeat customer rate (67%)\n\n⚠️ Opportunities:\n• Peak demand: Wed-Thu\n• Best products: Steel & Materials\n• Growth potential: +40% Q4';
+
+      if (input.includes('sales') || input.includes('revenue') || input.includes('report')) {
+        // Fetch real performance analytics
+        const perfRes = await fetch(`${API_URL}/automation/analytics/performance`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const perfData = await perfRes.json();
+
+        if (perfData.success && perfData.data) {
+          const d = perfData.data;
+          response = `📈 Sales & Revenue Report\n\n💰 Revenue: ₹${(d.totalRevenue || 0).toLocaleString()}\n📦 Total Orders: ${d.totalOrders || 0}\n🧾 Avg Order Value: ₹${(d.avgOrderValue || 0).toLocaleString()}\n\n📊 Your Products:\n• Active: ${products.filter(p => p.status === 'active').length}\n• Pending: ${products.filter(p => p.status === 'pending').length}\n• Total Listed: ${products.length}\n\n💡 ${(d.totalRevenue || 0) === 0 ? 'Start getting orders to see revenue grow!' : 'Keep growing — great progress!'}`;
+        } else {
+          const activeCount = products.filter(p => p.status === 'active').length;
+          const pendingCount = products.filter(p => p.status === 'pending').length;
+          response = `📈 Sales Report\n\n📦 Product Status:\n• Active Products: ${activeCount}\n• Pending Approval: ${pendingCount}\n• Total: ${products.length}\n\n🗂️ Categories: ${[...new Set(products.map(p => p.category))].join(', ')}\n\n💡 Orders and revenue will appear here as you start selling!`;
+        }
+
+      } else if (input.includes('trend') || input.includes('insight') || input.includes('key')) {
+        const statsRes = await fetch(`${API_URL}/automation/analytics/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const statsData = await statsRes.json();
+
+        const activeCount = products.filter(p => p.status === 'active').length;
+        const categories = [...new Set(products.map(p => p.category))];
+
+        if (statsData.success && statsData.data) {
+          const s = statsData.data;
+          response = `🎯 Key Business Insights\n\n✅ Strengths:\n• Active Products: ${activeCount}\n• Leads Collected: ${s.totalLeads || 0}\n• Auto-Replies Set Up: ${s.totalAutoReplies || 0}\n• Orders Processed: ${s.totalOrders || 0}\n\n📊 Your Reach:\n• Categories: ${categories.join(', ')}\n• Visibility Score: ${activeCount > 5 ? 'High' : activeCount > 2 ? 'Medium' : 'Low — add more products!'}\n\n⚠️ Opportunities:\n• ${products.filter(p => p.status === 'pending').length} products awaiting approval\n• ${s.totalAutoReplies === 0 ? 'Set up Auto-Reply to respond faster' : 'Auto-Reply is active — great!'}\n• ${activeCount < 5 ? 'Add more products to grow reach' : 'Good product variety!'}`;
+        } else {
+          response = `🎯 Key Insights\n\n✅ Current Status:\n• Active Products: ${activeCount}\n• Categories: ${categories.join(', ')}\n\n⚠️ Action Items:\n• ${products.filter(p => p.status === 'pending').length > 0 ? `${products.filter(p => p.status === 'pending').length} products pending approval` : 'All products approved!'}\n• Set up Auto-Reply for faster responses\n• Use Lead Scoring to prioritize inquiries\n\n📈 Growth Potential: ${activeCount < 5 ? '+' + ((5 - activeCount) * 20) + '% by adding more products' : 'Strong listing volume!'}`;
+        }
+
+      } else if (input.includes('performance') || input.includes('metric') || input.includes('stat')) {
+        const [statsRes, perfRes] = await Promise.all([
+          fetch(`${API_URL}/automation/analytics/stats`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_URL}/automation/analytics/performance`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        const statsData = await statsRes.json();
+        const perfData = await perfRes.json();
+
+        response = `📊 Full Performance Metrics\n\n`;
+
+        if (statsData.success && statsData.data) {
+          const s = statsData.data;
+          response += `🤖 Automation:\n• Leads: ${s.totalLeads || 0}\n• Auto-Replies: ${s.totalAutoReplies || 0}\n• Orders: ${s.totalOrders || 0}\n\n`;
+        }
+
+        if (perfData.success && perfData.data) {
+          const p = perfData.data;
+          response += `💰 Revenue:\n• Total: ₹${(p.totalRevenue || 0).toLocaleString()}\n• Orders: ${p.totalOrders || 0}\n• Avg Value: ₹${(p.avgOrderValue || 0).toLocaleString()}\n\n`;
+        }
+
+        response += `📦 Products:\n• Active: ${products.filter(p => p.status === 'active').length}\n• Pending: ${products.filter(p => p.status === 'pending').length}\n• Total: ${products.length}\n• Categories: ${[...new Set(products.map(p => p.category))].length}`;
+
       } else {
-        response = '📊 Analyze your business with:\n• Sales & revenue trends\n• Customer insights\n• Performance metrics\n• Tool ROI analysis\n• Export reports (PDF/CSV)';
+        response = `📊 Analytics Hub — Your Business\n\n📦 Products: ${products.length} (${products.filter(p => p.status === 'active').length} active)\n\nAsk me:\n• "Sales report" — revenue & orders\n• "Key insights" — strengths & opportunities\n• "Performance metrics" — full dashboard\n• "Revenue trends" — growth tracking`;
       }
 
       const botMessage = {
@@ -861,7 +1220,16 @@ Does this look good? Reply YES to save or NO to edit.`);
         timestamp: new Date()
       };
       setAnalyticsHubMessages(prev => [...prev, botMessage]);
-    }, 300);
+    } catch (error) {
+      console.error('Analytics Hub error:', error);
+      const botMessage = {
+        id: userMessage.id + 1,
+        text: '❌ Error fetching analytics data. Please try again.',
+        sender: 'bot' as const,
+        timestamp: new Date()
+      };
+      setAnalyticsHubMessages(prev => [...prev, botMessage]);
+    }
   };
 
   useEffect(() => {
@@ -1518,10 +1886,7 @@ Does this look good? Reply YES to save or NO to edit.`);
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Tool 1: Auto Reply Manager */}
               <button
-                onClick={() => {
-                  handleToolClick('Auto Reply Manager', 'auto-reply', 'Set up automatic responses to customer inquiries.');
-                  handleAutoReplyOpen();
-                }}
+                onClick={() => navigate('/automation/auto-reply')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-blue-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1540,10 +1905,7 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 2: Lead Scoring */}
               <button
-                onClick={() => {
-                  handleToolClick('Lead Scoring', 'lead-scoring', 'Automatically identify and prioritize high-value leads from your inquiries.');
-                  handleLeadScoringOpen();
-                }}
+                onClick={() => navigate('/automation/lead-scoring')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-green-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1562,10 +1924,7 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 3: Order Automation */}
               <button
-                onClick={() => {
-                  handleToolClick('Order Automation', 'order-automation', 'Streamline order processing and fulfillment with automated workflows.');
-                  handleOrderAutomationOpen();
-                }}
+                onClick={() => navigate('/automation/order-automation')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-purple-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1584,10 +1943,7 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 4: Inventory Management */}
               <button
-                onClick={() => {
-                  handleToolClick('Smart Inventory', 'smart-inventory', 'Get real-time stock tracking, low stock alerts, and inventory forecasting.');
-                  handleSmartInventoryOpen();
-                }}
+                onClick={() => navigate('/automation/smart-inventory')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-amber-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1606,10 +1962,7 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 5: Price Optimizer */}
               <button
-                onClick={() => {
-                  handleToolClick('Price Optimizer', 'price-optimizer', 'Adjust prices dynamically based on demand, competition, and market trends.');
-                  handlePriceOptimizerOpen();
-                }}
+                onClick={() => navigate('/automation/price-optimizer')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-rose-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">
@@ -1628,10 +1981,7 @@ Does this look good? Reply YES to save or NO to edit.`);
 
               {/* Tool 6: Analytics Dashboard */}
               <button
-                onClick={() => {
-                  handleToolClick('Analytics Hub', 'analytics-hub', 'View detailed business analytics, sales trends, and performance metrics.');
-                  handleAnalyticsHubOpen();
-                }}
+                onClick={() => navigate('/automation/analytics-hub')}
                 className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
               >
                 <div className="flex items-start gap-3">

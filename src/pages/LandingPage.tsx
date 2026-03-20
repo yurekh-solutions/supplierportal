@@ -5,6 +5,7 @@ import { ArrowRight, Menu, X, Package, FileCheck, Zap, Users, Phone, ShieldCheck
 import { Button } from '@/pages/components/ui/button';
 import { Card } from '@/pages/components/ui/card';
 import LanguageSwitcher from './components/LanguageSwitcher';
+import SEOHead from '@/components/SEOHead';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ritzyardLogo from "@/assets/RITZYARD3.svg";
@@ -156,7 +157,7 @@ const LandingPage = () => {
     {
       name: 'Amit Patel',
       company: 'Patel Construction Supplies',
-      location: 'Pune',
+      location: 'Mumbai',
       rating: 5,
       text: 'Automated inventory management saved countless hours. We focus on expanding instead of paperwork now.',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
@@ -375,6 +376,25 @@ const LandingPage = () => {
 
 
   return (
+    <>
+      <SEOHead
+        title="RitzYard Supplier Portal - Grow Your Construction Materials Business | Free Registration"
+        description="Join India's #1 B2B marketplace for construction materials. Connect with 10,000+ verified buyers, get AI-powered business tools, and grow your revenue. Free supplier registration."
+        keywords="supplier registration India, construction material supplier, B2B marketplace, building materials wholesale, steel suppliers, cement distributors, verified buyers, supplier portal"
+        canonicalUrl="https://ritzyardseller.com"
+        structuredData={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "RitzYard Supplier Portal",
+          "url": "https://ritzyardseller.com",
+          "description": "India's leading B2B marketplace connecting construction material suppliers with verified buyers.",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://ritzyardseller.com/products?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }}
+      />
     <div className="min-h-screen bg-gradient-subtle overflow-x-hidden">
       {/* Navigation */}
       <header className="sticky top-0 z-50 glass-card border-b border-white/20">
@@ -987,7 +1007,7 @@ const LandingPage = () => {
               </p>
               <div className="flex items-center gap-2 text-sm text-white/80">
                 <MapPin className="w-4 h-4" />
-                <span>Pune, Maharashtra, India</span>
+                <span>Mumbai, Maharashtra, India</span>
               </div>
             </div>
 
@@ -1064,6 +1084,7 @@ const LandingPage = () => {
         </div>
       </footer>
     </div>
+    </>
   );
 };
 

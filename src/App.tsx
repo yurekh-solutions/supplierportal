@@ -27,8 +27,16 @@ import MiloAI from './pages/MiloAI';
 import TestPage from './pages/TestPage';
 import Profile from './pages/Profile';
 import SupplierStatus from './pages/SupplierStatus';
+import Orders from './pages/Orders';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
+// Automation Suite Pages
+import AutoReplyPage from './pages/AutoReplyPage';
+import LeadScoringPage from './pages/LeadScoringPage';
+import OrderAutomationPage from './pages/OrderAutomationPage';
+import SmartInventoryPage from './pages/SmartInventoryPage';
+import PriceOptimizerPage from './pages/PriceOptimizerPage';
+import AnalyticsHubPage from './pages/AnalyticsHubPage';
 
 function App() {
   const [isTranslating, setIsTranslating] = useState(false);
@@ -83,12 +91,20 @@ function App() {
             <Route path="/products" element={<ProductDashboard />} />
             <Route path="/products/inquiries" element={<ProductInquiries />} />
             <Route path="/products/add" element={<AddProduct />} />
+            <Route path="/orders" element={<Orders />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/intelligence" element={<AIBusinessIntelligence />} />
             <Route path="/milo" element={<MiloAI />} />
             <Route path="/test" element={<TestPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-of-service" element={<TermsOfService />} />
+            {/* Automation Suite Pages */}
+            <Route path="/automation/auto-reply" element={<AutoReplyPage />} />
+            <Route path="/automation/lead-scoring" element={<LeadScoringPage />} />
+            <Route path="/automation/order-automation" element={<OrderAutomationPage />} />
+            <Route path="/automation/smart-inventory" element={<SmartInventoryPage />} />
+            <Route path="/automation/price-optimizer" element={<PriceOptimizerPage />} />
+            <Route path="/automation/analytics-hub" element={<AnalyticsHubPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
