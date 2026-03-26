@@ -1,10 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Search, Filter, ShoppingCart, Star, MapPin, Package, ChevronRight, Menu, X, Globe } from 'lucide-react';
+import { Search, Filter, ShoppingCart, Star, MapPin, Package, ChevronRight, Menu, X, Globe, MessageSquare, CheckCircle, Loader } from 'lucide-react';
 import ritzyardLogo from "@/assets/RITZYARD3.svg";
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Card } from '@/pages/components/ui/card';
+import { Textarea } from '@/pages/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/pages/components/ui/dialog';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { getFixedImageUrl, handleImageErrorWithFallback, handleImageErrorWithRetry } from '@/lib/imageUtils';
@@ -53,6 +61,23 @@ const Marketplace = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [categories, setCategories] = useState<any[]>([]);
+
+  // Request Quote modal state
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+  const [quoteProduct, setQuoteProduct] = useState<Product | null>(null);
+  const [quoteForm, setQuoteForm] = useState({
+    customerName: '',
+    company: '',
+    email: '',
+    phone: '',
+    quantity: '',
+    unit: 'MT',
+    deliveryLocation: '',
+    message: '',
+  });
+  const [quoteSubmitting, setQuoteSubmitting] = useState(false);
+  const [quoteSuccess, setQuoteSuccess] = useState<{ inquiryNumber: string; chatUrl: string } | null>(null);
+  const [quoteError, setQuoteError] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -131,6 +156,69 @@ const Marketplace = () => {
     }
 
     setFilteredProducts(filtered);
+  };
+
+  const openQuoteModal = (product: Product) => {
+    setQuoteProduct(product);
+    setQuoteForm({ customerName: '', company: '', email: '', phone: '', quantity: '', unit: 'MT', deliveryLocation: '', message: '' });
+    setQuoteError('');
+    setQuoteSuccess(null);
+    setQuoteModalOpen(true);
+  };
+
+  const submitQuote = async () => {
+    if (!quoteProduct) return;
+    const { customerName, email, phone, quantity, deliveryLocation } = quoteForm;
+    if (!customerName.trim() || !email.trim() || !phone.trim() || !quantity || !deliveryLocation.trim()) {
+      setQuoteError('Please fill in Name, Email, Phone, Quantity and Delivery Location.');
+      return;
+    }
+    setQuoteError('');
+    setQuoteSubmitting(true);
+    try {
+      const res = await fetch(`${API_URL}/rfqs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: quoteForm.customerName.trim(),
+          company: quoteForm.company.trim() || undefined,
+          email: quoteForm.email.trim().toLowerCase(),
+          phone: quoteForm.phone.trim(),
+          location: quoteForm.deliveryLocation.trim(),
+          items: [{
+            productName: quoteProduct.name,
+            category: quoteProduct.category,
+            quantity: parseFloat(quoteForm.quantity) || 1,
+          }],
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const inquiryNum = data.rfqNumber || data.data?.[0]?.inquiryNumber || 'N/A';
+        // Generate buyer chat token
+        let chatUrl = `/chat/${inquiryNum}?email=${encodeURIComponent(quoteForm.email.trim().toLowerCase())}`;
+        try {
+          const tokenRes = await fetch(`${API_URL}/chat/${inquiryNum}/token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: quoteForm.email.trim().toLowerCase() }),
+          });
+          const tokenData = await tokenRes.json();
+          if (tokenData.success && tokenData.token) {
+            chatUrl = `/chat/${inquiryNum}?email=${encodeURIComponent(quoteForm.email.trim().toLowerCase())}&token=${tokenData.token}`;
+          }
+        } catch {
+          // token generation is non-blocking
+        }
+        setQuoteSuccess({ inquiryNumber: inquiryNum, chatUrl });
+      } else {
+        setQuoteError(data.message || 'Failed to submit inquiry. Please try again.');
+      }
+    } catch (err: any) {
+      setQuoteError('Network error. Please check connection and try again.');
+    } finally {
+      setQuoteSubmitting(false);
+    }
   };
 
   const getSupplierSuggestions = (productCategory: string) => {
@@ -354,11 +442,16 @@ const Marketplace = () => {
                       </div>
                     )}
 
-                    {/* Action Button */}
-                    <Button className="w-full mt-4 bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-lg transition-all rounded-xl">
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      View Details
-                    </Button>
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 mt-4">
+                      <Button
+                        className="flex-1 bg-gradient-to-r from-primary to-secondary text-white font-semibold hover:shadow-lg transition-all rounded-xl"
+                        onClick={() => openQuoteModal(product)}
+                      >
+                        <MessageSquare className="w-4 h-4 mr-2" />
+                        Request Quote
+                      </Button>
+                    </div>
                   </div>
                 </div>
               );
@@ -366,6 +459,118 @@ const Marketplace = () => {
           </div>
         )}
       </div>
+
+      {/* Request Quote Modal */}
+      <Dialog open={quoteModalOpen} onOpenChange={(open) => { if (!open) { setQuoteModalOpen(false); setQuoteSuccess(null); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-primary" />
+              Request Quote via RitzYard
+            </DialogTitle>
+            <DialogDescription>
+              {quoteProduct && (
+                <span>Requesting quote for <strong>{quoteProduct.name}</strong></span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          {quoteSuccess ? (
+            <div className="py-6 text-center space-y-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-foreground">Inquiry Submitted!</p>
+                <p className="text-sm text-muted-foreground mt-1">Your inquiry number is:</p>
+                <p className="text-2xl font-black text-primary mt-1">{quoteSuccess.inquiryNumber}</p>
+              </div>
+              <p className="text-xs text-muted-foreground">Suppliers will respond through the RitzYard platform. You can track your inquiry using the chat link below.</p>
+              <div className="flex flex-col gap-2">
+                <Button
+                  className="w-full bg-primary text-white"
+                  onClick={() => { setQuoteModalOpen(false); navigate(quoteSuccess.chatUrl); }}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Open Chat Thread
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => setQuoteModalOpen(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3 pt-2">
+              {quoteError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2">
+                  {quoteError}
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Your Name <span className="text-red-500">*</span></label>
+                  <Input placeholder="Full name" value={quoteForm.customerName} onChange={e => setQuoteForm(f => ({ ...f, customerName: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Company</label>
+                  <Input placeholder="Company name" value={quoteForm.company} onChange={e => setQuoteForm(f => ({ ...f, company: e.target.value }))} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Email <span className="text-red-500">*</span></label>
+                  <Input type="email" placeholder="your@email.com" value={quoteForm.email} onChange={e => setQuoteForm(f => ({ ...f, email: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Phone <span className="text-red-500">*</span></label>
+                  <Input placeholder="+91 XXXXX XXXXX" value={quoteForm.phone} onChange={e => setQuoteForm(f => ({ ...f, phone: e.target.value }))} />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Quantity <span className="text-red-500">*</span></label>
+                  <Input type="number" min="1" placeholder="e.g. 10" value={quoteForm.quantity} onChange={e => setQuoteForm(f => ({ ...f, quantity: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Unit</label>
+                  <select
+                    className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={quoteForm.unit}
+                    onChange={e => setQuoteForm(f => ({ ...f, unit: e.target.value }))}
+                  >
+                    {['MT', 'KG', 'Ton', 'Pieces', 'Litre', 'Units'].map(u => <option key={u}>{u}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">Delivery Location <span className="text-red-500">*</span></label>
+                <Input placeholder="City, State" value={quoteForm.deliveryLocation} onChange={e => setQuoteForm(f => ({ ...f, deliveryLocation: e.target.value }))} />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-muted-foreground block mb-1">Additional Message</label>
+                <Textarea placeholder="Any specific grade, brand, specifications..." rows={2} value={quoteForm.message} onChange={e => setQuoteForm(f => ({ ...f, message: e.target.value }))} />
+              </div>
+              <p className="text-[10px] text-muted-foreground bg-amber-50 border border-amber-200 rounded-md px-2 py-1.5">
+                Your contact details are protected by RitzYard. Suppliers respond through the platform only.
+              </p>
+              <div className="flex gap-2 pt-1">
+                <Button variant="outline" className="flex-1" onClick={() => setQuoteModalOpen(false)}>Cancel</Button>
+                <Button
+                  className="flex-1 bg-primary text-white"
+                  onClick={submitQuote}
+                  disabled={quoteSubmitting}
+                >
+                  {quoteSubmitting ? (
+                    <><Loader className="w-4 h-4 mr-2 animate-spin" /> Submitting...</>
+                  ) : (
+                    <><MessageSquare className="w-4 h-4 mr-2" /> Submit Inquiry</>
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

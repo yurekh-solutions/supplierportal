@@ -71,7 +71,7 @@ const MiloAI = () => {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [language, setLanguage] = useState<"en-IN" | "hi-IN">("en-IN");
+  const [language, setLanguage] = useState<"en-IN" | "hi-IN">("hi-IN");
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [contextData, setContextData] = useState<MiloContextData>({})
   const [hasGreeted, setHasGreeted] = useState(false);
@@ -108,6 +108,10 @@ const MiloAI = () => {
         const transcript = event.results[0][0].transcript;
         setInputText(transcript);
         setIsListening(false);
+        // Auto-detect Hindi from transcribed text and switch language
+        if (/[\u0900-\u097F]/.test(transcript)) {
+          setLanguage("hi-IN");
+        }
       };
 
       recognitionRef.current.onerror = () => {
@@ -125,6 +129,13 @@ const MiloAI = () => {
       }
     };
   }, []);
+
+  // Sync speech recognition language when language toggle changes
+  useEffect(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = language;
+    }
+  }, [language]);
 
   // Load training data on mount
   useEffect(() => {
@@ -181,13 +192,20 @@ const MiloAI = () => {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
       
-      // Announce language change
-      const langChangeText = language === "en-IN"
-        ? "Switched to English. How can I help you?"
-        : "हिंदी में बदल गया। मैं आपकी कैसे मदद कर सकता हूं?";
+      // Re-greet in the new language so user hears proper Hindi/English
+      const langGreeting = language === "en-IN"
+        ? "Hello! I'm Milo. Switched to English. How can I help you?"
+        : "नमस्ते! मैं मिलो हूं। हिंदी में आ गया। मैं आपकी कैसे मदद कर सकता हूं?";
+      
+      const greetMsg: Message = {
+        role: "milo",
+        content: langGreeting,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, greetMsg]);
       
       setTimeout(() => {
-        speakText(langChangeText, language);
+        speakText(langGreeting, language);
       }, 300);
     }
   }, [language]);
@@ -209,110 +227,83 @@ const MiloAI = () => {
     }
   };
 
-  // Speak text using Web Speech API with MALE voice ONLY
-  const speakText = (text: string, lang: string) => {
-    if (!soundEnabled) return;
-    
-    // Cancel any ongoing speech to prevent looping
-    window.speechSynthesis.cancel();
-    
-    synthesisRef.current = new SpeechSynthesisUtterance(text);
-    synthesisRef.current.lang = lang;
-    synthesisRef.current.rate = 0.95;
-    synthesisRef.current.pitch = 0.6; // Lower pitch for male voice
-    synthesisRef.current.volume = 1.0;
-    
-    // FORCE male voice selection - enhanced for Hindi support
-    const setMaleVoice = () => {
-      const voices = window.speechSynthesis.getVoices();
-      const langCode = lang.split("-")[0]; // 'en' or 'hi'
-      
-      console.log('Available voices:', voices.map(v => `${v.name} (${v.lang})`));
-      
-      // Priority 1: Find explicit male voice for the language
-      let maleVoice = voices.find(voice => {
-        const nameLower = voice.name.toLowerCase();
-        const langMatch = voice.lang.toLowerCase().startsWith(langCode);
-        
-        // Male voice indicators (expanded for Hindi)
-        const isMale = nameLower.includes('male') || 
-                       nameLower.includes('man') ||
-                       nameLower.includes('rishi') || // Hindi male
-                       nameLower.includes('david') ||
-                       nameLower.includes('james') ||
-                       nameLower.includes('daniel') ||
-                       nameLower.includes('tom') ||
-                       nameLower.includes('alex') ||
-                       nameLower.includes('google हिन्दी') || // Google Hindi (usually male)
-                       (langCode === 'hi' && nameLower.includes('hindi') && !nameLower.includes('female'));
-        
-        return langMatch && isMale;
-      });
-      
-      // Priority 2: Exclude female voices
-      if (!maleVoice) {
-        maleVoice = voices.find(voice => {
-          const nameLower = voice.name.toLowerCase();
-          const langMatch = voice.lang.toLowerCase().startsWith(langCode);
-          
-          const isFemale = nameLower.includes('female') || 
-                          nameLower.includes('woman') ||
-                          nameLower.includes('lekha') || // Hindi female
-                          nameLower.includes('samantha') ||
-                          nameLower.includes('victoria') ||
-                          nameLower.includes('kate') ||
-                          nameLower.includes('siri') ||
-                          nameLower.includes('zira');
-          
-          return langMatch && !isFemale;
-        });
-      }
-      
-      // Priority 3: Any voice matching language
-      if (!maleVoice) {
-        maleVoice = voices.find(v => v.lang.toLowerCase().startsWith(langCode));
-      }
-      
-      if (maleVoice) {
-        synthesisRef.current!.voice = maleVoice;
-        console.log('✅ Selected voice:', maleVoice.name, '(', maleVoice.lang, ')');
-      } else {
-        console.warn('⚠️ No suitable voice found for', lang);
-      }
-    };
-
-    // Handle voice loading with proper initialization
+  // ── MALE VOICE SELECTOR ── picks best male voice for given lang code
+  const pickMaleVoice = (langCode: string): SpeechSynthesisVoice | null => {
     const voices = window.speechSynthesis.getVoices();
-    if (voices.length > 0) {
-      setMaleVoice();
-    } else {
-      window.speechSynthesis.onvoiceschanged = () => {
-        setMaleVoice();
-      };
-    }
 
-    synthesisRef.current.onstart = () => setIsSpeaking(true);
-    synthesisRef.current.onend = () => {
-      setIsSpeaking(false);
-      // Ensure speech is fully stopped
-      window.speechSynthesis.cancel();
-    };
-    synthesisRef.current.onerror = () => {
-      setIsSpeaking(false);
-      window.speechSynthesis.cancel();
-    };
-    
-    // Small delay to ensure voice is set
-    setTimeout(() => {
-      window.speechSynthesis.speak(synthesisRef.current!);
-    }, 100);
+    // Known male voice names by priority (browser-agnostic)
+    const MALE_HINDI  = ['rishi', 'hemant', 'deepak', 'google हिन्दी', 'google hindi', 'hindi male', 'hi-in male'];
+    const MALE_ENGLISH = ['david', 'mark', 'daniel', 'james', 'richard', 'george', 'alex', 'fred', 'tom', 'google us english', 'microsoft david', 'microsoft mark', 'en-in male', 'en-us male'];
+    const FEMALE_NAMES = ['aditi', 'kalpana', 'lekha', 'priya', 'zira', 'samantha', 'victoria', 'karen', 'moira', 'tessa', 'fiona', 'female', 'woman', 'girl'];
+
+    const isFemale = (name: string) => FEMALE_NAMES.some(f => name.toLowerCase().includes(f));
+    const langVoices = voices.filter(v => v.lang.toLowerCase().startsWith(langCode));
+
+    // Pass 1: exact known male name match
+    const maleNames = langCode === 'hi' ? MALE_HINDI : MALE_ENGLISH;
+    let pick = langVoices.find(v => maleNames.some(m => v.name.toLowerCase().includes(m)));
+    if (pick) return pick;
+
+    // Pass 2: name contains 'male' keyword
+    pick = langVoices.find(v => v.name.toLowerCase().includes('male'));
+    if (pick) return pick;
+
+    // Pass 3: not a known female name
+    pick = langVoices.find(v => !isFemale(v.name));
+    if (pick) return pick;
+
+    // Pass 4: fallback to first available voice for that language
+    return langVoices[0] || null;
   };
 
-  // Smart hash generator for detecting similar queries
+  // Speak text using Web Speech API with MALE voice for both Hindi & English
+  const speakText = (text: string, lang: string) => {
+    if (!soundEnabled) return;
+
+    window.speechSynthesis.cancel();
+
+    const langCode = lang.split('-')[0]; // 'hi' or 'en'
+
+    const doSpeak = () => {
+      const utt = new SpeechSynthesisUtterance(text);
+      utt.lang  = lang;
+      utt.rate  = langCode === 'hi' ? 0.82 : 0.92;  // Hindi needs slower pace
+      utt.pitch = 0.55;   // deep male pitch
+      utt.volume = 1.0;
+
+      const voice = pickMaleVoice(langCode);
+      if (voice) {
+        utt.voice = voice;
+        console.log(`✅ Milo voice [${lang}]: ${voice.name} (${voice.lang})`);
+      } else {
+        console.warn(`⚠️ No voice found for lang: ${lang}`);
+      }
+
+      utt.onstart = () => setIsSpeaking(true);
+      utt.onend   = () => { setIsSpeaking(false); window.speechSynthesis.cancel(); };
+      utt.onerror = () => { setIsSpeaking(false); window.speechSynthesis.cancel(); };
+
+      synthesisRef.current = utt;
+      window.speechSynthesis.speak(utt);
+    };
+
+    // Voices may not be loaded yet on first call — wait for them
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      setTimeout(doSpeak, 80);  // tiny delay prevents Chrome clipping
+    } else {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.onvoiceschanged = null; // fire only once
+        setTimeout(doSpeak, 80);
+      };
+    }
+  };
+
+  // Smart hash generator for detecting similar queries (supports Hindi)
   const generateQueryHash = (query: string): string => {
-    // Normalize query: lowercase, remove punctuation, trim
+    // Normalize query: lowercase, remove punctuation but KEEP Hindi (Devanagari) chars, trim
     const normalized = query.toLowerCase()
-      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/[^a-z0-9\s\u0900-\u097F]/g, '') // keep Devanagari (\u0900-\u097F)
       .trim()
       .split(/\s+/)
       .sort() // Sort words to catch reordered questions
@@ -320,96 +311,142 @@ const MiloAI = () => {
     return normalized;
   };
 
-  // Get AI response - Smart intelligent fallback system
+  // ─── FULL RITZYARD PLATFORM KNOWLEDGE BASE ───────────────────────────────
   const getMiloResponse = async (userMessage: string): Promise<string> => {
-    // Generate hash for this query
     const queryHash = generateQueryHash(userMessage);
-    
-    // Check if this is a repeated question
-    const isRepeatedQuery = queryHash === lastQueryHash;
-    
-    console.log('🚀 RitzYard AI processing:', userMessage);
-    
-    // Build smart context for better responses
-    const conversationHistory = messages.slice(-3)
-      .map(m => `${m.role === 'user' ? 'User' : 'Milo'}: ${m.content}`)
-      .join('\n');
-    
     setLastQueryHash(queryHash);
-    
-    // Smart contextual responses based on keywords (instant, no API needed)
-    const lowerMessage = userMessage.toLowerCase();
-    
-    // Geography questions
-    if (lowerMessage.includes('china')) {
-      const responses = [
-        "China is the world's most populous country and second-largest economy. It's located in East Asia and is known for its rich history, manufacturing prowess, and as a major exporter of construction materials like cement, steel, and TMT bars to countries like India.",
-        "China, officially the People's Republic of China, is a major global economic power. Key cities include Beijing (capital), Shanghai (financial hub), and Shenzhen (tech center). It's also a leading supplier of construction materials worldwide.",
-      ];
-      return responses[Math.floor(Math.random() * responses.length)];
-    }
-    
-    if (lowerMessage.includes('dubai')) {
-      const responses = [
-        "Dubai is the most populous city in the United Arab Emirates (UAE). Famous for the Burj Khalifa (world's tallest building), luxury shopping, and modern architecture. It's a major business and tourism hub in the Middle East.",
-        "Dubai is a global city and business hub in the UAE, known for innovation in construction and real estate. Home to landmarks like Palm Jumeirah, Burj Al Arab, and Dubai Mall. A key center for international trade and commerce.",
-      ];
-      return responses[Math.floor(Math.random() * responses.length)];
-    }
-    
-    if (lowerMessage.includes('india')) {
-      const responses = [
-        "India is the world's largest democracy and seventh-largest country by area. With 1.4+ billion people, it's incredibly diverse with 28 states, multiple languages, and a rapidly growing economy focused on services, manufacturing, and agriculture.",
-        "India is a South Asian nation with rich cultural heritage and diversity. Major cities include New Delhi (capital), Mumbai (financial capital), and Bangalore (tech hub). Known for its IT industry, construction boom, and growing infrastructure projects.",
-      ];
-      return responses[Math.floor(Math.random() * responses.length)];
-    }
-    
-    if (lowerMessage.includes('ss') || lowerMessage.includes('stainless steel')) {
-      return "SS (Stainless Steel) is a corrosion-resistant alloy containing chromium. Common grades: SS 304 (₹180-220/kg) for general use, SS 316 (₹250-300/kg) for marine/chemical environments. Used in pipes, tanks, utensils, and construction. RitzYard can help source verified SS suppliers. Need a specific grade?";
-    }
-    
-    if (lowerMessage.includes('price') || lowerMessage.includes('cost') || lowerMessage.includes('मूल्य') || lowerMessage.includes('कीमत')) {
-      return "मैं निर्माण सामग्री के लिए रीयल-टाइम मूल्य निर्धारण प्रदान कर सकता हूं। RitzYard 500+ सत्यापित आपूर्तिकर्ताओं से प्रतिस्पर्धी उद्धरण प्रदान करता है। आप किन सामग्रियों के लिए मूल्य निर्धारण की आवश्यकता है? (सीमेंट, स्टील, टीएमटी बार, ईंटें, आदि)";
-    }
-    
-    if (lowerMessage.includes('cement') || lowerMessage.includes('सीमेंट')) {
-      return "सीमेंट कई प्रकारों में उपलब्ध है: ओपीसी 43/53 ग्रेड ₹340-420/बैग, पीपीसी ₹320-400/बैग, पीएससी ₹330-410/बैग। ब्रांड: UltraTech, ACC, Ambuja, JK Cement। बल्क ऑर्डर पर 5-12% छूट। विस्तृत उद्धरण चाहिए?";
+    const m = userMessage.toLowerCase();
+    const isHindi = /[\u0900-\u097F]/.test(userMessage) || language === 'hi-IN';
+
+    // ── GREETINGS ──
+    if (/^(hello|hi|hey|helo|namaste|namaskar|नमस्ते|हाय|हेलो)\b/.test(m)) {
+      return isHindi
+        ? "नमस्ते! मैं मिलो हूं — RitzYard का आवाज़ सहायक। 🙏\n\nमैं दोनों — खरीदार (Buyer) और आपूर्तिकर्ता (Supplier) — की मदद करता हूं।\n\nआप बताइए:\n• क्या आप सामग्री खरीदना चाहते हैं? → 'मैं खरीदार हूं' कहें\n• क्या आप अपना सामान बेचना चाहते हैं? → 'मैं सप्लायर हूं' कहें\n\nया सीधे पूछें — मैं हिंदी में जवाब दूंगा! 😊"
+        : "Hello! I'm Milo — RitzYard's voice AI assistant. 👋\n\nI guide both Buyers and Suppliers on this platform.\n\nTell me:\n• Are you looking to BUY materials? Say 'I am a buyer'\n• Do you want to SELL your products? Say 'I am a supplier'\n\nOr just ask your question — I'll help you step by step!";
     }
 
-    if (lowerMessage.includes("steel") || lowerMessage.includes("tmt") || lowerMessage.includes("स्टील")) {
-      return "टीएमटी स्टील बार Fe 415, Fe 500, Fe 550 ग्रेड में उपलब्ध हैं। वर्तमान बाजार दरें: 8मिमी ₹52-58/किग्रा, 10मिमी ₹51-57/किग्रा, 12मिमी ₹50-56/किग्रा। शीर्ष ब्रांड: Tata Tiscon, JSW, SAIL। 3-5 दिन में डिलीवरी। उद्धरण चाहिए?";
+    // ── WHAT IS RITZYARD ──
+    if (/ritzyard|platform|what is|kya hai|क्या है|यह क्या|what does/.test(m)) {
+      return isHindi
+        ? "🏗️ RitzYard एक B2B procurement marketplace है — यानी एक ऐसा platform जहाँ:\n\n🛒 खरीदार (Buyer): निर्माण सामग्री जैसे सीमेंट, स्टील, TMT बार, ईंट, आदि के लिए quotation मांग सकते हैं।\n\n🏭 आपूर्तिकर्ता (Supplier): अपने products list करके buyers को quote दे सकते हैं और orders पा सकते हैं।\n\n🔒 RitzYard middleman की तरह काम करता है — दोनों का contact safe रहता है, सब chat platform के through होता है।\n\nआप buyer हैं या supplier? 😊"
+        : "🏗️ RitzYard is a B2B Procurement Marketplace — a trusted platform where:\n\n🛒 Buyers: Search and request quotes for construction materials (Cement, Steel, TMT, Bricks, etc.)\n\n🏭 Suppliers: List their products, receive buyer inquiries, and respond with quotes.\n\n🔒 RitzYard acts as a secure middleman — both sides communicate only through our chat. No direct contact sharing!\n\nAre you a Buyer or Supplier? I'll guide you from there!";
     }
 
-    if (lowerMessage.includes("brick") || lowerMessage.includes("ईंट")) {
-      return "हम आपूर्ति करते हैं: लाल मिट्टी की ईंटें (₹6-9/पीस), फ्लाई एश ईंटें (₹3.5-5.5/पीस), AAC ब्लॉक (₹45-70/ब्लॉक)। न्यूनतम आदेश 5000 पीस, मुफ्त डिलीवरी। कौन सी प्रकार की ईंटें आप चाहते हैं?";
+    // ── BUYER FLOW — HOW TO BUY ──
+    if (/buyer|buy|purchase|kharidna|khareedna|खरीदना|खरीदार|मुझे.*चाहिए|i .*buy|i am.*buyer|i want.*buy|material.*need|need.*material/.test(m)) {
+      return isHindi
+        ? "🛒 खरीदार के लिए RitzYard पर खरीदारी कैसे करें:\n\n📍 Step 1 — Products देखें\nWebsite: ritzyard.com पर जाएं → 'Products' या 'Categories' पर click करें → अपनी सामग्री खोजें (सीमेंट, स्टील, आदि)\n\n📝 Step 2 — Inquiry भेजें\nProduct page पर 'Get Quote' या 'Send Inquiry' button दबाएं → अपना नाम, मोबाइल, quantity, delivery location भरें → Submit करें\n\n🔔 Step 3 — Notification मिलेगी\nआपकी inquiry system में save होगी। RitzYard matched suppliers को alert भेजता है।\n\n💬 Step 4 — Supplier से Chat करें\nSupplier आपको quote देगा — आप platform के chat में उनसे बात कर सकते हैं। आपका contact number safe रहता है।\n\n✅ Step 5 — Best Quote चुनें\nकई suppliers के quotes compare करें और best deal लें!\n\nकोई step में problem है? बताइए! 🙏"
+        : "🛒 How to BUY on RitzYard — Step by Step:\n\n📍 Step 1 — Browse Products\nVisit ritzyard.com → Click 'Products' or browse 'Categories' → Find your material (Cement, Steel, TMT, etc.)\n\n📝 Step 2 — Send an Inquiry / RFQ\nOn the product page, click 'Get Quote' or 'Send Inquiry' → Fill your name, phone, quantity, delivery location → Submit\n\n🔔 Step 3 — You Get Notified\nYour inquiry is saved in the system. RitzYard automatically matches it with verified suppliers.\n\n💬 Step 4 — Chat with Suppliers\nSuppliers respond with quotes via RitzYard chat. Your phone number stays private — all communication is safe.\n\n✅ Step 5 — Choose Best Quote\nCompare quotes from multiple suppliers and pick the best deal!\n\nStuck at any step? Just ask me! 😊";
     }
 
-    if (lowerMessage.includes("supplier") || lowerMessage.includes("आपूर्तिकर्ता")) {
-      return "RitzYard के पास 28 राज्यों में 500+ सत्यापित आपूर्तिकर्ता हैं। सभी गुणवत्ता जांच से गुजरते हैं, सत्यापित जीएसटी हैं, और 98% समय पर डिलीवरी बनाए रखते हैं। आप क्या सामग्री खरीद रहे हैं?";
+    // ── BUYER — HOW TO SUBMIT INQUIRY / RFQ ──
+    if (/inquiry|rfq|quote|quotation|inquiry.*submit|inquiry.*kaise|inquiry.*bhejo|inquiry.*send|इंक्वायरी|inquiry कैसे|quotation.*kaise/.test(m)) {
+      return isHindi
+        ? "📝 Inquiry / RFQ कैसे भेजें:\n\n1️⃣ ritzyard.com पर जाएं\n2️⃣ कोई भी product page खोलें\n3️⃣ 'Get Quote' या 'Send Inquiry' button दबाएं\n4️⃣ यह जानकारी भरें:\n   • आपका नाम\n   • मोबाइल नंबर\n   • कंपनी का नाम (optional)\n   • सामग्री का नाम\n   • Quantity (कितना चाहिए)\n   • Delivery का पता\n5️⃣ Submit दबाएं ✅\n\nआपकी inquiry तुरंत save होगी और matched suppliers को WhatsApp alert भेजा जाएगा!\n\nध्यान रहे: आपका mobile number suppliers को नहीं दिखता — सब RitzYard chat के through होता है। 🔒"
+        : "📝 How to Submit an Inquiry / RFQ:\n\n1️⃣ Go to ritzyard.com\n2️⃣ Open any product page\n3️⃣ Click 'Get Quote' or 'Send Inquiry'\n4️⃣ Fill in:\n   • Your name\n   • Mobile number\n   • Company name (optional)\n   • Material name\n   • Quantity needed\n   • Delivery address\n5️⃣ Click Submit ✅\n\nYour inquiry is instantly saved and matched suppliers get WhatsApp alerts!\n\nNote: Your mobile number is NEVER shown to suppliers — all communication is through RitzYard chat. 🔒";
     }
 
-    if (lowerMessage.includes("rfq") || lowerMessage.includes("quotation") || lowerMessage.includes("अनुरोध")) {
-      return "मैं तुरंत एक RFQ बना सकता हूं! बस मुझे बताएं: 1) सामग्री का प्रकार, 2) आवश्यक मात्रा, 3) डिलीवरी स्थान, 4) समयसीमा। आपको 2 घंटे में कई आपूर्तिकर्ताओं से प्रतिस्पर्धी उद्धरण मिलेंगे।";
+    // ── SUPPLIER FLOW — HOW TO REGISTER ──
+    if (/supplier.*register|register.*supplier|sign up|signup|join.*supplier|supplier.*join|सप्लायर.*रजिस्टर|रजिस्ट्रेशन|supplier banna|सप्लायर बनना|how.*supplier|supplier.*kaise/.test(m)) {
+      return isHindi
+        ? "🏭 Supplier बनने के लिए RitzYard पर Registration कैसे करें:\n\n📍 Step 1 — Sign Up\nSupplier Portal: supplierportal.ritzyard.com → 'Register' button दबाएं\n\n📋 Step 2 — Company Details भरें\n• Company का नाम\n• GST Number\n• Business Type\n• आप कौन-कौन से products बेचते हैं (categories)\n• Contact details\n\n📄 Step 3 — Documents Upload करें\n• GST Certificate\n• PAN Card\n• Bank Proof\n\n⏳ Step 4 — Admin Approval का इंतज़ार करें\nRitzYard admin 24 घंटे में आपकी application verify करेगा।\n\n✅ Step 5 — Approved!\nApproval के बाद आप:\n→ Products add कर सकते हैं\n→ Buyer inquiries देख सकते हैं\n→ Chat कर के quotes दे सकते हैं\n\nRegistration में कोई problem है? बताइए! 🙏"
+        : "🏭 How to Register as a Supplier on RitzYard:\n\n📍 Step 1 — Sign Up\nGo to Supplier Portal → Click 'Register / Join as Supplier'\n\n📋 Step 2 — Fill Company Details\n• Company name\n• GST Number\n• Business Type\n• What products you sell (categories)\n• Contact details\n\n📄 Step 3 — Upload Documents\n• GST Certificate\n• PAN Card\n• Bank Proof\n\n⏳ Step 4 — Wait for Admin Approval\nRitzYard admin verifies your application within 24 hours.\n\n✅ Step 5 — You're Approved!\nAfter approval you can:\n→ Add your products\n→ See buyer inquiries\n→ Chat and send quotes to buyers\n\nStuck at any step? Just tell me! 😊";
     }
 
-    if (lowerMessage.includes("delivery") || lowerMessage.includes("shipping") || lowerMessage.includes("डिलीवरी")) {
-      return "RitzYard पूरे भारत में डिलीवरी प्रदान करता है रीयल-टाइम ट्रैकिंग के साथ। मानक डिलीवरी: 3-7 दिन, एक्सप्रेस: 24-48 घंटे (मेट्रो शहर)। ₹50,000 से ऊपर के ऑर्डर पर मुफ्त डिलीवरी। बीमा और गुणवत्ता जांच शामिल। हमें कहां डिलीवर करना चाहिए?";
+    // ── SUPPLIER — HOW TO ADD PRODUCT ──
+    if (/add.*product|product.*add|apna.*product|list.*product|product.*list|product.*kaise.*add|प्रोडक्ट.*add|add.*karo|product.*daalo/.test(m)) {
+      return isHindi
+        ? "📦 Product कैसे Add करें (Supplier के लिए):\n\n1️⃣ Supplier Portal में Login करें\n2️⃣ Left menu में 'Products' → '+ Add Product' click करें\n3️⃣ Product form भरें:\n   • Product का नाम (e.g., TMT Bars Fe 500)\n   • Category select करें (Steel, Cement, etc.)\n   • Description लिखें\n   • Price, Minimum Order, Delivery Time\n   • Grades, Brands, Certifications\n   • Product की photo upload करें\n4️⃣ 'Add to Account' button दबाएं\n5️⃣ Admin 24 घंटे में approve करेगा, फिर product live हो जाएगा!\n\n💡 Pro Tip: जब आप product add करते हैं, Right side में 'Recommended Buyers' दिखता है — वो buyers जो पहले से वैसा product ढूंढ रहे हैं! उनसे chat करें और deal करें। 🎯"
+        : "📦 How to Add a Product (For Suppliers):\n\n1️⃣ Login to Supplier Portal\n2️⃣ Click 'Products' → '+ Add Product' in the menu\n3️⃣ Fill the product form:\n   • Product name (e.g., TMT Bars Fe 500)\n   • Select Category (Steel, Cement, etc.)\n   • Write Description\n   • Price, Min Order, Delivery Time\n   • Grades, Brands, Certifications\n   • Upload product photo\n4️⃣ Click 'Add to Account'\n5️⃣ Admin approves within 24 hours → Product goes LIVE!\n\n💡 Pro Tip: While adding a product, the right side shows 'Recommended Buyers' — buyers already searching for that product! Chat with them directly. 🎯";
     }
 
-    if (lowerMessage.includes("hello") || lowerMessage.includes("hi") || lowerMessage.includes("नमस्ते")) {
-      return "नमस्ते! मैं Milo हूं, आपका एआई खरीद विशेषज्ञ। मैं सामग्री मूल्य निर्धारण, आपूर्तिकर्ता चयन, RFQ निर्माण, डिलीवरी ट्रैकिंग और बाजार बुद्धिमत्ता में आपकी मदद कर सकता हूं। आज आप कौन सी निर्माण सामग्री खोज रहे हैं?";
+    // ── SUPPLIER — HOW TO SEE INQUIRIES ──
+    if (/see.*inquiry|view.*inquiry|inquiry.*kahan|inquiry.*dekhe|inquiry.*kaise|buyer.*inquiry|inquiries.*supplier|notification|unread|badge|इंक्वायरी.*कहाँ|notification.*kaise/.test(m)) {
+      return isHindi
+        ? "🔔 Buyer की Inquiries कैसे देखें (Supplier के लिए):\n\n1️⃣ Supplier Portal में Login करें\n2️⃣ Menu में 'Products' → 'Buyer Inquiries' click करें\n3️⃣ आपको सभी inquiries दिखेंगी:\n   • 🔴 NEW — जो अभी तक नहीं देखी\n   • 🟡 RESPONDED — जिन पर reply दे दिया\n   • 🟣 QUOTED — जिन्हें quote दे दिया\n   • 🟢 CONVERTED — जो order बन गए\n\n🔢 Unread Badge: जब नई inquiry आती है, Menu icon पर लाल नंबर दिखता है।\n\n📱 WhatsApp Alert: जब buyer inquiry submit करता है, RitzYard आपको WhatsApp पर automatically notify करता है!\n\nChat खोलने के लिए 'Open Chat & Quote' button दबाएं। 💬"
+        : "🔔 How to See Buyer Inquiries (For Suppliers):\n\n1️⃣ Login to Supplier Portal\n2️⃣ Click 'Products' → 'Buyer Inquiries' in menu\n3️⃣ You see all inquiries:\n   • 🔴 NEW — Not responded yet\n   • 🟡 RESPONDED — You replied\n   • 🟣 QUOTED — You sent a quote\n   • 🟢 CONVERTED — Became an order\n\n🔢 Unread Badge: Red number on menu icon shows new unread inquiries.\n\n📱 WhatsApp Alert: When a buyer submits an inquiry, RitzYard automatically alerts you on WhatsApp!\n\nClick 'Open Chat & Quote' to start chatting with the buyer. 💬";
     }
 
-    if (lowerMessage.includes("thank") || lowerMessage.includes("धन्यवाद")) {
-      return "आपका स्वागत है! निर्माण सामग्री, मूल्य निर्धारण, या आपूर्तिकर्ताओं के बारे में कुछ भी पूछने के लिए स्वतंत्र महसूस करें। मैं आपकी खरीद आवश्यकताओं में मदद करने के लिए 24/7 यहां हूं!";
+    // ── HOW CHAT WORKS ──
+    if (/chat|message|contact|buyer.*contact|supplier.*contact|baat.*karna|communicate|chat.*kaise|chat कैसे/.test(m)) {
+      return isHindi
+        ? "💬 RitzYard Chat कैसे काम करता है:\n\n🔒 Privacy-First Design:\n• Buyer का phone number suppliers को नहीं दिखता\n• Supplier का phone number buyers को नहीं दिखता\n• सब कुछ RitzYard के secure chat से होता है\n\n📩 Buyer के लिए:\nInquiry submit करने के बाद आपको एक chat link मिलेगी जहाँ आप supplier के quotes देख सकते हैं।\n\n🏭 Supplier के लिए:\n1. 'Buyer Inquiries' page पर जाएं\n2. Inquiry card पर 'Open Chat & Quote' दबाएं\n3. Chat panel खुलेगा — Buyer की पूरी requirement दिखेगी (product, quantity, budget, location)\n4. अपना quote type करें → Enter दबाएं → भेज दिया! ✅\n\nChat में messages automatically refresh होते हैं हर 8 seconds! 🔄"
+        : "💬 How RitzYard Chat Works:\n\n🔒 Privacy-First:\n• Buyer's phone is NEVER visible to suppliers\n• Supplier's contact is NEVER visible to buyers\n• All communication is through RitzYard's secure chat\n\n📩 For Buyers:\nAfter submitting inquiry, you get a chat link where you see supplier quotes.\n\n🏭 For Suppliers:\n1. Go to 'Buyer Inquiries' page\n2. Click 'Open Chat & Quote' on any inquiry card\n3. Chat panel opens — shows full buyer requirement (product, qty, budget, location)\n4. Type your quote → Press Enter → Sent! ✅\n\nMessages auto-refresh every 8 seconds! 🔄";
     }
 
-    if (lowerMessage.includes("how are you") || lowerMessage.includes("आप कैसे हैं")) {
-      return "मैं बिल्कुल ठीक हूं और आपकी सहायता के लिए तैयार हूं! मेरा एआई निर्माण सामग्री और बाजार प्रवृत्तियों के बारे में लगातार सीख रहा है। मैं आपकी खरीद आवश्यकताओं में क्या मदद कर सकता हूं?";
+    // ── SUPPLIER APPROVAL / STATUS ──
+    if (/approv|status|pending|rejected|verify|verified|application|approve.*kab|approve.*kaise|status.*kaise|application.*status|अप्रूवल|स्टेटस/.test(m)) {
+      return isHindi
+        ? "⏳ Application Status कैसे Check करें:\n\n1️⃣ Supplier Portal पर जाएं\n2️⃣ 'Check Status' या 'Supplier Status' page पर click करें\n3️⃣ अपना registered email डालें → Status check करें\n\nStatus के मतलब:\n🟡 Pending — Admin review कर रहा है (24 घंटे)\n✅ Approved — आप login कर सकते हैं!\n❌ Rejected — Reason देखें और documents ठीक करें\n\nApproval के बाद:\n• Products add करें\n• Buyer inquiries देखें\n• Chat से orders पाएं\n\nKoi problem hai? Mujhe batao! 🙏"
+        : "⏳ How to Check Your Application Status:\n\n1️⃣ Go to Supplier Portal\n2️⃣ Click 'Check Status' or 'Supplier Status'\n3️⃣ Enter your registered email → View status\n\nStatus meanings:\n🟡 Pending — Admin is reviewing (within 24 hours)\n✅ Approved — You can login!\n❌ Rejected — Check reason and fix your documents\n\nAfter approval:\n• Add your products\n• View buyer inquiries\n• Get orders through chat\n\nAny issue? Just ask! 😊";
     }
 
-    return `यह एक दिलचस्प सवाल है। RitzYard के एआई सहायक के रूप में, मैं निर्माण सामग्री खरीद में विशेषज्ञता रखता हूं। मैं आपको मूल्य निर्धारण, आपूर्तिकर्ता, RFQ, डिलीवरी लॉजिस्टिक्स, और बाजार बुद्धिमत्ता में सीमेंट, स्टील, टीएमटी बार, ईंटें, रेत, आदि के लिए मदद कर सकता हूं। क्या आप अपकी विशिष्ट आवश्यकताओं के बारे में और बता सकते हैं?`;
+    // ── HOW RITZYARD MATCHES BUYER → SUPPLIER ──
+    if (/match|how.*work|kaise.*kaam|kaam.*kaise|routing|automatic|system.*kaise|platform.*kaise|यह कैसे|काम कैसे/.test(m)) {
+      return isHindi
+        ? "⚙️ RitzYard का System कैसे काम करता है:\n\n1️⃣ Buyer एक inquiry submit करता है (product + quantity + location)\n\n2️⃣ RitzYard का AI system automatically उन suppliers को ढूंढता है जो उस category के products बेचते हैं\n\n3️⃣ Matched suppliers को:\n   • Supplier Portal में नई inquiry दिखती है (red badge)\n   • WhatsApp पर automatic alert आता है\n\n4️⃣ Supplier portal में login करके:\n   • Inquiry details देखें\n   • Chat खोलें\n   • Quote भेजें\n\n5️⃣ Buyer को quote मिलता है → वो best deal choose करता है\n\n🔒 पूरे process में दोनों का contact number protected रहता है। सब safe है! ✅"
+        : "⚙️ How RitzYard's System Works:\n\n1️⃣ Buyer submits an inquiry (product + quantity + location)\n\n2️⃣ RitzYard's AI automatically finds suppliers who sell products in that category\n\n3️⃣ Matched suppliers receive:\n   • New inquiry in Supplier Portal (red badge)\n   • Automatic WhatsApp alert\n\n4️⃣ Supplier logs in → Views inquiry details → Opens chat → Sends quote\n\n5️⃣ Buyer receives the quote → Chooses the best deal\n\n🔒 Throughout this entire process, both buyer and supplier contact info stays completely protected. 100% safe! ✅";
+    }
+
+    // ── FORGOT PASSWORD / LOGIN ISSUES ──
+    if (/forgot.*password|password.*forgot|login.*problem|login.*issue|can't.*login|password.*reset|पासवर्ड.*भूल|login.*nahi|password.*change/.test(m)) {
+      return isHindi
+        ? "🔑 Password भूल गए? ऐसे reset करें:\n\n1️⃣ Login page पर जाएं\n2️⃣ 'Forgot Password' link दबाएं\n3️⃣ अपना registered email डालें\n4️⃣ Email में reset link आएगा\n5️⃣ Link दबाएं → नया password set करें\n\nAbhi bhi problem hai? Support से contact करें:\n📧 Email: support@ritzyard.com\n📱 WhatsApp: +91 95592 62525"
+        : "🔑 Forgot Password? Here's how to reset:\n\n1️⃣ Go to Login page\n2️⃣ Click 'Forgot Password'\n3️⃣ Enter your registered email\n4️⃣ You'll receive a reset link by email\n5️⃣ Click link → Set new password\n\nStill having issues? Contact support:\n📧 Email: support@ritzyard.com\n📱 WhatsApp: +91 95592 62525";
+    }
+
+    // ── MATERIALS — CEMENT ──
+    if (/cement|सीमेंट/.test(m)) {
+      return isHindi
+        ? "🏗️ Cement के बारे में जानकारी:\n\nTypes:\n• OPC 43 Grade — सामान्य निर्माण के लिए ₹340-380/बैग\n• OPC 53 Grade — High strength के लिए ₹360-420/बैग\n• PPC — Road & bridges के लिए ₹320-400/बैग\n\nTop Brands: UltraTech, ACC, Ambuja, JK Cement, Shree Cement\n\nBulk (50+ bags) पर 5-12% discount!\n\nRitzYard पर cement के लिए inquiry कैसे दें? बताइए! 🙏"
+        : "🏗️ Cement Information:\n\nTypes:\n• OPC 43 Grade — General construction ₹340-380/bag\n• OPC 53 Grade — High strength ₹360-420/bag\n• PPC — Roads & bridges ₹320-400/bag\n\nTop Brands: UltraTech, ACC, Ambuja, JK Cement, Shree Cement\n\n5-12% discount on bulk orders (50+ bags)!\n\nWant to buy cement on RitzYard? I'll guide you!";
+    }
+
+    // ── MATERIALS — STEEL / TMT ──
+    if (/steel|tmt|स्टील|टीएमटी/.test(m)) {
+      return isHindi
+        ? "⚙️ TMT Steel Bars की जानकारी:\n\nGrades:\n• Fe 415 — ₹50-55/kg\n• Fe 500 — ₹52-57/kg\n• Fe 550 — ₹54-59/kg\n\nSizes: 8mm, 10mm, 12mm, 16mm, 20mm, 25mm\n\nTop Brands: Tata Tiscon, JSW Neosteel, SAIL, Jindal, Kamdhenu\n\nDelivery: 3-5 दिन pan-India\nBulk (10+ tons): 3-5% extra discount\n\nRitzYard पर steel inquiry submit करें? 🔧"
+        : "⚙️ TMT Steel Bars Information:\n\nGrades:\n• Fe 415 — ₹50-55/kg\n• Fe 500 — ₹52-57/kg\n• Fe 550 — ₹54-59/kg\n\nSizes: 8mm, 10mm, 12mm, 16mm, 20mm, 25mm\n\nTop Brands: Tata Tiscon, JSW Neosteel, SAIL, Jindal, Kamdhenu\n\nDelivery: 3-5 days pan-India\nBulk (10+ tons): 3-5% extra discount\n\nWant to submit a steel inquiry on RitzYard? 🔧";
+    }
+
+    // ── MATERIALS — BRICKS ──
+    if (/brick|ईंट/.test(m)) {
+      return isHindi
+        ? "🧱 Bricks की जानकारी:\n\n• Red Clay Bricks — ₹6-9/piece\n• Fly Ash Bricks — ₹3.5-5.5/piece (eco-friendly)\n• AAC Blocks — ₹45-70/block (lightweight)\n• Concrete Blocks — ₹18-35/piece\n\nMin Order: 5,000 pieces\nFree delivery: ₹50,000+ orders पर\n\nRitzYard पर brick suppliers ढूंढें! 🏗️"
+        : "🧱 Bricks Information:\n\n• Red Clay Bricks — ₹6-9/piece\n• Fly Ash Bricks — ₹3.5-5.5/piece (eco-friendly)\n• AAC Blocks — ₹45-70/block (lightweight)\n• Concrete Blocks — ₹18-35/piece\n\nMin Order: 5,000 pieces\nFree delivery on orders above ₹50,000\n\nFind brick suppliers on RitzYard! 🏗️";
+    }
+
+    // ── ORDERS ──
+    if (/order|track.*order|order.*track|order.*kahan|order.*status|ऑर्डर/.test(m)) {
+      return isHindi
+        ? "📦 Orders RitzYard पर कैसे काम करते हैं:\n\nBuyer के लिए:\n• Supplier quote accept करने के बाद order create होता है\n• Supplier Portal → Orders page पर सब दिखता है\n\nSupplier के लिए:\n1. Portal में 'Orders' menu पर click करें\n2. Pending, Processing, Delivered — सब status दिखेगी\n3. Delivery details update करें\n\nOrder tracking और updates RitzYard chat के through होते हैं। 🚚"
+        : "📦 How Orders Work on RitzYard:\n\nFor Buyers:\n• Order is created after accepting a supplier quote\n• Track via Supplier Portal → Orders page\n\nFor Suppliers:\n1. Click 'Orders' in portal menu\n2. See Pending, Processing, Delivered statuses\n3. Update delivery details\n\nAll order tracking and updates happen through RitzYard chat. 🚚";
+    }
+
+    // ── HELP / SUPPORT ──
+    if (/help|support|problem|issue|stuck|samajh.*nahi|samajh.*na|problem.*hai|kuch.*samajh|मदद|मैं.*फंस|मुझे.*मदद/.test(m)) {
+      return isHindi
+        ? "🆘 मैं आपकी मदद के लिए यहाँ हूं! बताइए:\n\n• 'मैं खरीदार हूं' — अगर आप कुछ खरीदना चाहते हैं\n• 'मैं सप्लायर हूं' — अगर आप बेचना चाहते हैं\n• 'Registration' — कैसे join करें\n• 'Inquiry' — Quote कैसे मांगें\n• 'Chat' — Suppliers से कैसे बात करें\n• 'Product add' — अपना product कैसे list करें\n• 'Status check' — Application status\n\nया सीधे अपनी problem बताइए — मैं step by step guide करूंगा! 🙏"
+        : "🆘 I'm here to help! Tell me what you need:\n\n• 'I am a buyer' — If you want to purchase materials\n• 'I am a supplier' — If you want to sell\n• 'Registration' — How to join\n• 'Inquiry' — How to request a quote\n• 'Chat' — How to talk to suppliers\n• 'Add product' — How to list your product\n• 'Status' — Check application status\n\nOr just describe your problem — I'll guide you step by step! 😊";
+    }
+
+    // ── GREETINGS (thank you, etc.) ──
+    if (/thank|thanks|shukriya|dhanyawad|धन्यवाद|शुक्रिया/.test(m)) {
+      return isHindi
+        ? "आपका स्वागत है! 🙏 RitzYard पर खुशी से काम करने के लिए मैं हमेशा यहाँ हूं। कोई और सवाल हो तो बताइए!"
+        : "You're welcome! 😊 I'm always here to help you on RitzYard. Feel free to ask anything anytime!";
+    }
+
+    if (/how are you|kaisa ho|aap kaise|आप कैसे/.test(m)) {
+      return isHindi
+        ? "मैं बिल्कुल ठीक हूं और आपकी मदद के लिए तैयार! 😊 RitzYard platform के बारे में कुछ जानना है?"
+        : "I'm doing great and ready to help! 😊 What would you like to know about RitzYard?";
+    }
+
+    // ── DEFAULT — SMART FALLBACK ──
+    return isHindi
+      ? `मैं समझ रहा हूं आप "${userMessage}" के बारे में पूछ रहे हैं। 🤔\n\nमैं इन topics में मदद कर सकता हूं:\n\n🛒 खरीदारी के लिए → 'मैं खरीदार हूं'\n🏭 बेचने के लिए → 'मैं सप्लायर हूं'\n📝 Inquiry कैसे दें\n💬 Chat कैसे करें\n📦 Product कैसे add करें\n✅ Approval status\n🔑 Login / Password help\n\nकृपया थोड़ा और detail में बताएं — मैं पूरा step-by-step guide करूंगा! 🙏`
+      : `I see you're asking about "${userMessage}". 🤔\n\nI can help with:\n\n🛒 Buying materials → Say 'I am a buyer'\n🏭 Selling products → Say 'I am a supplier'\n📝 How to submit an inquiry\n💬 How chat works\n📦 How to add a product\n✅ Approval status check\n🔑 Login / Password help\n\nPlease tell me a bit more and I'll guide you step by step! 😊`;
   };
 
   // ENHANCEMENT 1: Analyze market trends and generate recommendations
@@ -426,7 +463,7 @@ const MiloAI = () => {
     };
     
     const supplierInsights = {
-      count: contextData.marketInsights?.suppliersCount || 500,
+      count: (contextData.marketInsights?.suppliersCount as number) || 500,
       topSuppliers: ['Tata Steel', 'ACC Cement', 'UltraTech', 'JSW Steel', 'Ambuja'],
       avgRating: 4.6
     };
@@ -588,14 +625,24 @@ const MiloAI = () => {
   };
 
   // Quick material actions
-  const quickActions = [
-    { label: "TMT Bars", icon: "🔩" },
-    { label: "Cement", icon: "🏗️" },
-    { label: "Bricks", icon: "🧱" },
+  const quickActions = language === 'hi-IN' ? [
+    { label: "मैं खरीदार हूं", icon: "🛒", query: "मैं खरीदार हूं — मुझे सामग्री खरीदनी है" },
+    { label: "मैं सप्लायर हूं", icon: "🏭", query: "मैं सप्लायर हूं — मुझे join करना है" },
+    { label: "Inquiry कैसे दें", icon: "📝", query: "Inquiry या RFQ कैसे submit करें" },
+    { label: "Chat कैसे करें", icon: "💬", query: "Buyer और Supplier chat कैसे करते हैं" },
+    { label: "Product Add करें", icon: "📦", query: "Supplier product कैसे add करें" },
+    { label: "RitzYard क्या है", icon: "🏗️", query: "RitzYard platform क्या है और कैसे काम करता है" },
+  ] : [
+    { label: "I'm a Buyer", icon: "🛒", query: "I am a buyer — how do I buy materials on RitzYard?" },
+    { label: "I'm a Supplier", icon: "🏭", query: "I am a supplier — how do I register and sell on RitzYard?" },
+    { label: "Submit Inquiry", icon: "📝", query: "How do I submit an inquiry or RFQ?" },
+    { label: "How Chat Works", icon: "💬", query: "How does the buyer-supplier chat work?" },
+    { label: "Add Product", icon: "📦", query: "How does a supplier add a product?" },
+    { label: "What is RitzYard", icon: "🏗️", query: "What is RitzYard and how does it work?" },
   ];
 
-  const handleQuickAction = (material: string) => {
-    setInputText(`Tell me about ${material}`);
+  const handleQuickAction = (query: string) => {
+    setInputText(query);
   };
 
   return (
@@ -741,18 +788,18 @@ const MiloAI = () => {
                   </p>
                   
                   {/* Quick Action Cards */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 w-full max-w-2xl">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 md:gap-4 w-full max-w-2xl">
                     {quickActions.map((action, index) => (
                       <button
                         key={index}
-                        onClick={() => handleQuickAction(action.label)}
+                        onClick={() => handleQuickAction(action.query)}
                         className="group glass-card-hover p-4 md:p-5 transition-all duration-300"
                       >
                         <div className="flex flex-col items-center gap-3">
                           <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 border border-primary/20">
                             <span className="text-3xl md:text-4xl">{action.icon}</span>
                           </div>
-                          <span className="text-sm md:text-base font-semibold text-foreground group-hover:text-primary transition-colors">
+                          <span className="text-xs md:text-sm font-semibold text-foreground group-hover:text-primary transition-colors text-center leading-tight">
                             {action.label}
                           </span>
                         </div>

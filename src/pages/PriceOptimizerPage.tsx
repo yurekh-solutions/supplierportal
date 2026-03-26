@@ -103,7 +103,7 @@ export default function PriceOptimizerPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-red-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-[#f3f0ec] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Header */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -203,7 +203,7 @@ export default function PriceOptimizerPage() {
           ].map(tab => (
             <button key={tab.key}
               onClick={() => setActiveTab(tab.key as any)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-lg' : 'bg-white/60 dark:bg-white/5 text-muted-foreground hover:bg-white/80'}`}>
+              className={`px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${activeTab === tab.key ? 'bg-primary text-white shadow-lg' : 'bg-white/60 dark:bg-white/5 text-muted-foreground hover:bg-white/80'}`}>
               {tab.label}
             </button>
           ))}
@@ -249,7 +249,7 @@ export default function PriceOptimizerPage() {
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={e => { e.currentTarget.src = `https://placehold.co/400x200/f3f0ec/c1482b?text=${encodeURIComponent(product.name.slice(0, 15))}`; }} />
                       ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-rose-50 to-pink-50 dark:from-rose-500/10 dark:to-pink-500/10">
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-white/60 dark:from-rose-500/10 dark:to-pink-500/10">
                           <Package className="w-12 h-12 text-rose-300 dark:text-rose-500/50" />
                           <p className="text-xs text-muted-foreground/60 mt-2">No image</p>
                         </div>
@@ -288,7 +288,7 @@ export default function PriceOptimizerPage() {
                           <p className="text-xs text-muted-foreground bg-yellow-50 dark:bg-yellow-500/10 rounded-lg p-2">
                             Market rate: ₹{benchmark.min.toLocaleString()}–₹{benchmark.max.toLocaleString()} {benchmark.unit}
                           </p>
-                          <Button size="sm" variant="outline" className="w-full h-7 text-xs text-rose-600 border-rose-200"
+                    <Button size="sm" variant="outline" className="w-full h-7 text-xs text-primary border-primary/30"
                             onClick={() => navigate('/products')}>
                             + Add Price
                           </Button>
@@ -304,7 +304,7 @@ export default function PriceOptimizerPage() {
                 <CardContent className="p-16 text-center">
                   <Package className="w-12 h-12 mx-auto text-muted-foreground/30 mb-3" />
                   <p className="text-muted-foreground">No products yet. Add products to start pricing.</p>
-                  <Button className="mt-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white" onClick={() => navigate('/products')}>
+                  <Button className="mt-4 bg-primary hover:bg-primary/90 text-white" onClick={() => navigate('/products')}>
                     Add Products
                   </Button>
                 </CardContent>
@@ -368,7 +368,7 @@ export default function PriceOptimizerPage() {
                 <p className="text-muted-foreground mb-4 text-sm max-w-sm mx-auto">
                   Set prices on your products to get AI-powered suggestions on optimal pricing based on market data and category benchmarks.
                 </p>
-                <Button onClick={() => navigate('/products')} className="bg-gradient-to-r from-rose-500 to-pink-500 text-white">
+                <Button onClick={() => navigate('/products')} className="bg-primary hover:bg-primary/90 text-white">
                   Manage Products & Set Prices
                 </Button>
               </CardContent>
@@ -392,7 +392,7 @@ export default function PriceOptimizerPage() {
                       const b = getCategoryBenchmark(cat);
                       const catProducts = products.filter(p => p.category === cat);
                       return (
-                        <div key={cat} className="p-4 bg-gray-50/80 dark:bg-white/5 rounded-xl">
+                    <div key={cat} className="p-4 bg-white/60 backdrop-blur-sm dark:bg-white/5 rounded-xl">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-semibold text-foreground capitalize text-sm">{cat.replace(/-/g, ' ')}</span>
                             <Badge variant="outline" className="text-xs">{catProducts.length} product{catProducts.length > 1 ? 's' : ''}</Badge>
@@ -404,9 +404,9 @@ export default function PriceOptimizerPage() {
                               <span className="text-muted-foreground text-xs ml-1">{b.unit}</span>
                             </div>
                           </div>
-                          <div className="flex items-start gap-2 bg-rose-50/80 dark:bg-rose-500/10 rounded-lg p-2">
+                        <div className="flex items-start gap-2 bg-white/80 dark:bg-white/10 rounded-lg p-2">
                             <Lightbulb className="w-3.5 h-3.5 text-rose-500 flex-shrink-0 mt-0.5" />
-                            <p className="text-xs text-rose-700 dark:text-rose-400">{b.tip}</p>
+                            <p className="text-xs text-foreground/70 dark:text-rose-400">{b.tip}</p>
                           </div>
                         </div>
                       );
@@ -428,7 +428,7 @@ export default function PriceOptimizerPage() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {PRICING_TIPS.map((tip, i) => (
-                    <div key={i} className="flex items-start gap-3 p-4 bg-gradient-to-r from-rose-50 to-pink-50 dark:from-rose-500/10 dark:to-pink-500/10 rounded-xl">
+                    <div key={i} className="flex items-start gap-3 p-4 bg-white/60 dark:from-rose-500/10 dark:to-pink-500/10 rounded-xl">
                       <span className="text-2xl flex-shrink-0">{tip.icon}</span>
                       <div>
                         <p className="font-semibold text-foreground text-sm mb-1">{tip.title}</p>
@@ -441,7 +441,7 @@ export default function PriceOptimizerPage() {
             </Card>
 
             {/* Quick action */}
-            <div className="glass-card border border-rose-200/50 bg-gradient-to-r from-rose-500 to-pink-500 rounded-2xl p-6 text-white text-center">
+            <div className="glass-card border border-primary/20 bg-primary rounded-2xl p-6 text-white text-center">
               <Star className="w-8 h-8 mx-auto mb-2 opacity-80" />
               <h3 className="text-lg font-bold mb-1">Ready to Price Your Products?</h3>
               <p className="text-white/80 text-sm mb-4">Add pricing to all {withoutPricing.length} unpriced products and start receiving orders from buyers on RitzYard.</p>

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, X, Upload, Send, Package, Home, Zap, Award, TrendingUp, CheckCircle, MapPin, Clock, Lightbulb, Star, Globe } from 'lucide-react';
+import { ArrowLeft, X, Upload, Send, Package, Home, Zap, Award, TrendingUp, CheckCircle, MapPin, Clock, Lightbulb, Star, Globe, Users, MessageSquare, IndianRupee, Scale, Tag, Sparkles } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
@@ -39,6 +39,7 @@ const AddProduct = () => {
   const [otherCategoryInput, setOtherCategoryInput] = useState('');
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [submissionType, setSubmissionType] = useState<'product' | 'category'>('product');
+  const [allInquiries, setAllInquiries] = useState<any[]>([]);
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -60,6 +61,29 @@ const AddProduct = () => {
     imagePreview: '',
   });
 
+  // ─── Keyword-match buyer inquiries against current product name/category ───
+  const matchedBuyers = useMemo(() => {
+    const nameTerm = productForm.name.trim().toLowerCase();
+    const catTerm = productForm.category.trim().toLowerCase();
+    if (!nameTerm && !catTerm) return [];
+
+    return allInquiries.filter((inq) => {
+      const haystack = [
+        inq.productName,
+        inq.description,
+        ...(inq.tags || []),
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      // Match any word from product name (min 3 chars to avoid noise)
+      const nameWords = nameTerm.split(/\s+/).filter((w) => w.length >= 3);
+      const nameMatch = nameWords.some((w) => haystack.includes(w));
+      const catMatch = catTerm.length > 0 && haystack.includes(catTerm);
+      return nameMatch || catMatch;
+    });
+  }, [productForm.name, productForm.category, allInquiries]);
+
   const token = localStorage.getItem('supplierToken');
 
   useEffect(() => {
@@ -70,6 +94,7 @@ const AddProduct = () => {
     fetchCategories();
     fetchSuppliers();
     fetchUserProducts();
+    fetchAllInquiries();
   
     // Handle auto-fill from ProductDashboard navigation
     const state = location.state as any;
@@ -106,6 +131,21 @@ const AddProduct = () => {
       }
     } catch (error) {
       console.error('Failed to fetch user products:', error);
+    }
+  };
+
+  const fetchAllInquiries = async () => {
+    if (!token) return;
+    try {
+      const response = await fetch(`${API_URL}/supplier/inquiries`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAllInquiries(data.inquiries || []);
+      }
+    } catch {
+      // silent — not critical
     }
   };
 
@@ -808,6 +848,139 @@ const AddProduct = () => {
 
               {/* Products Column - 1/3 width, Hidden on mobile */}
               <div className="hidden lg:block bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 h-fit sticky top-8" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+
+                {/* ─── RECOMMENDED BUYERS PANEL ─── hidden */}
+                {false && (
+                  <div className="mb-6 rounded-2xl border-2 overflow-hidden" style={{ borderColor: '#c1482b' }}>
+                    {/* Header */}
+                    <div className="px-4 py-3 flex items-center gap-2" style={{ background: 'linear-gradient(135deg, #c1482b 0%, #e05a38 100%)' }}>
+                      <Sparkles className="w-4 h-4 text-white flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-white leading-tight">Recommended Buyers</p>
+                        <p className="text-[10px] text-white/80">Buyers already looking for this product</p>
+                      </div>
+                      {matchedBuyers.length > 0 && (
+                        <span className="bg-white text-[#c1482b] text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                          {matchedBuyers.length}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Body */}
+                    <div className="p-3" style={{ backgroundColor: '#fff8f6' }}>
+                      {matchedBuyers.length === 0 ? (
+                        <div className="text-center py-5 px-2">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-2" style={{ backgroundColor: '#ffe4d4' }}>
+                            <Users className="w-5 h-5" style={{ color: '#c1482b' }} />
+                          </div>
+                          <p className="text-xs font-semibold" style={{ color: '#c1482b' }}>No buyers matched yet</p>
+                          <p className="text-[10px] mt-1" style={{ color: '#6b5d54' }}>
+                            As buyers submit inquiries matching your product, they'll appear here
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {matchedBuyers.slice(0, 5).map((inq, idx) => (
+                            <div
+                              key={inq._id || idx}
+                              className="rounded-xl border p-3 cursor-pointer hover:shadow-md transition-all group"
+                              style={{ borderColor: '#e8dcd0', backgroundColor: 'white' }}
+                              onClick={() => navigate('/products/inquiries')}
+                            >
+                              {/* Type badge + product name */}
+                              <div className="flex items-start justify-between gap-1 mb-2">
+                                <p className="font-bold text-xs text-foreground leading-tight flex-1 truncate group-hover:text-[#c1482b] transition-colors">
+                                  {inq.productName}
+                                </p>
+                                <span
+                                  className="text-[9px] px-1.5 py-0.5 rounded-full flex-shrink-0 font-semibold"
+                                  style={{
+                                    backgroundColor:
+                                      inq.sourceType === 'rfq' ? '#fff3e0' :
+                                      inq.sourceType === 'material_inquiry' ? '#f3e5f5' : '#e3f2fd',
+                                    color:
+                                      inq.sourceType === 'rfq' ? '#e65100' :
+                                      inq.sourceType === 'material_inquiry' ? '#7b1fa2' : '#1565c0',
+                                  }}
+                                >
+                                  {inq.sourceType === 'rfq' ? 'RFQ' :
+                                   inq.sourceType === 'material_inquiry' ? 'Inquiry' : 'Lead'}
+                                </span>
+                              </div>
+
+                              {/* Quantity + Budget row */}
+                              <div className="flex items-center gap-3 text-[10px]">
+                                <span className="flex items-center gap-1" style={{ color: '#1565c0' }}>
+                                  <Scale className="w-2.5 h-2.5" />
+                                  <span className="font-semibold">{inq.quantity} {inq.unit}</span>
+                                </span>
+                                <span className="flex items-center gap-1" style={{ color: '#2e7d32' }}>
+                                  <IndianRupee className="w-2.5 h-2.5" />
+                                  <span className="font-semibold truncate max-w-[70px]">{inq.budget}</span>
+                                </span>
+                              </div>
+
+                              {/* Buyer name */}
+                              <div className="flex items-center justify-between mt-2">
+                                <span className="flex items-center gap-1 text-[10px]" style={{ color: '#6b5d54' }}>
+                                  <Users className="w-2.5 h-2.5" />
+                                  {inq.buyerName}
+                                  {inq.buyerCompany && inq.buyerCompany !== 'Individual' && (
+                                    <span>· {inq.buyerCompany}</span>
+                                  )}
+                                </span>
+                                <span
+                                  className="text-[9px] font-semibold flex items-center gap-0.5 group-hover:underline"
+                                  style={{ color: '#c1482b' }}
+                                >
+                                  <MessageSquare className="w-2.5 h-2.5" />
+                                  Chat
+                                </span>
+                              </div>
+
+                              {/* Tags */}
+                              {inq.tags && inq.tags.length > 0 && (
+                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                  {inq.tags.slice(0, 3).map((tag: string, i: number) => (
+                                    <span
+                                      key={i}
+                                      className="text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5"
+                                      style={{ backgroundColor: '#e8dcd0', color: '#6b5d54' }}
+                                    >
+                                      <Tag className="w-2 h-2" />
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+
+                          {/* See all link */}
+                          {matchedBuyers.length > 5 && (
+                            <button
+                              onClick={() => navigate('/products/inquiries')}
+                              className="w-full py-2 text-xs font-semibold rounded-lg border transition-all hover:shadow-sm"
+                              style={{ borderColor: '#c1482b', color: '#c1482b', backgroundColor: 'white' }}
+                            >
+                              +{matchedBuyers.length - 5} more buyers → View All
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => navigate('/products/inquiries')}
+                            className="w-full py-2 text-xs font-semibold rounded-lg text-white flex items-center justify-center gap-1 transition-all hover:shadow-lg"
+                            style={{ background: 'linear-gradient(135deg, #c1482b 0%, #e05a38 100%)' }}
+                          >
+                            <MessageSquare className="w-3 h-3" />
+                            Open Inquiry Chat
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <h4 className="text-lg sm:text-2xl font-bold mb-4 sm:mb-6" style={{ color: '#c1482b' }}>Popular Products</h4>
                 <div className="space-y-3 sm:space-y-4">
                   {predefinedProducts.slice(0, 6).map((product, idx) => {

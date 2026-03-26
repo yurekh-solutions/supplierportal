@@ -100,7 +100,7 @@ export default function OrderAutomationPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-[#f3f0ec] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Header */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -189,7 +189,7 @@ export default function OrderAutomationPage() {
         </div>
 
         {/* Active Automations Banner */}
-        <div className="glass-card border border-purple-200/50 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-500/10 dark:to-indigo-500/10 rounded-2xl p-4 mb-6">
+        <div className="glass-card border border-white/30 bg-white/40 backdrop-blur-xl rounded-2xl p-4 mb-6">
           <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2 text-sm">
             <TrendingUp className="w-4 h-4 text-purple-500" /> Active Order Automations
           </h3>
@@ -219,7 +219,7 @@ export default function OrderAutomationPage() {
           <div className="flex gap-2 flex-wrap">
             {statusTabs.map(tab => (
               <Button key={tab.key} size="sm" variant={statusFilter === tab.key ? 'default' : 'outline'}
-                className={statusFilter === tab.key ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white' : ''}
+                className={statusFilter === tab.key ? 'bg-primary text-white' : ''}
                 onClick={() => setStatusFilter(tab.key)}>
                 {tab.label} {tab.count > 0 && <span className="ml-1 text-xs opacity-80">({tab.count})</span>}
               </Button>

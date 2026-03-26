@@ -131,6 +131,10 @@ const SupplierProductDashboard = () => {
   const [analyticsHubInput, setAnalyticsHubInput] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+
+  // ── LIVE LEADS ──
+  const [liveLeads, setLiveLeads] = useState<any[]>([]);
+  const [leadsLoading, setLeadsLoading] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const productInputRef = useRef<HTMLDivElement>(null);
 
@@ -198,6 +202,35 @@ const getRecommendedProducts = () => {
         }
       }
     });
+  };
+
+  // Fetch live leads (buyer inquiries) for this supplier
+  const fetchLiveLeads = async () => {
+    if (!token) return;
+    try {
+      setLeadsLoading(true);
+      const res = await fetch(`${API_URL}/supplier/inquiries`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.success) setLiveLeads((data.inquiries || []).slice(0, 6));
+    } catch (e) {
+      console.warn('Leads fetch failed', e);
+    } finally {
+      setLeadsLoading(false);
+    }
+  };
+
+  // Score a lead: Hot / Warm / Cold
+  const scoreLead = (inq: any): { label: string; color: string; bg: string; dot: string } => {
+    const budget = parseFloat(String(inq.budget || '').replace(/[^0-9.]/g, '')) || 0;
+    const qty    = parseFloat(String(inq.quantity || '').replace(/[^0-9.]/g, '')) || 0;
+    const isNew  = inq.status === 'new' || !inq.status;
+    if (budget > 50000 || qty > 500 || isNew)
+      return { label: '🔥 Hot',  color: '#b91c1c', bg: '#fef2f2', dot: '#ef4444' };
+    if (budget > 10000 || qty > 100)
+      return { label: '🌡️ Warm', color: '#92400e', bg: '#fffbeb', dot: '#f59e0b' };
+    return   { label: '❄️ Cold', color: '#1e3a5f', bg: '#eff6ff', dot: '#3b82f6' };
   };
 
   // Handle tool click and send to API
@@ -1239,6 +1272,7 @@ Does this look good? Reply YES to save or NO to edit.`);
     }
     fetchCategories();
     fetchProducts();
+    fetchLiveLeads();
   }, []);
 
   useEffect(() => {
@@ -1884,24 +1918,7 @@ Does this look good? Reply YES to save or NO to edit.`);
             {/* Tools Grid */}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Tool 1: Auto Reply Manager */}
-              <button
-                onClick={() => navigate('/automation/auto-reply')}
-                className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-blue-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors flex-shrink-0">
-                    <MessageSquare className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">Auto Reply Manager</h4>
-                    <p className="text-xs text-muted-foreground mb-3">Respond to inquiries instantly 24/7</p>
-                    <div className="flex items-center gap-1 text-xs text-blue-600 font-semibold">
-                      <span>↑ Response Rate +78%</span>
-                    </div>
-                  </div>
-                </div>
-              </button>
+              {/* Tool 1: Auto Reply Manager - hidden */}
 
               {/* Tool 2: Lead Scoring */}
               <button
@@ -1960,44 +1977,170 @@ Does this look good? Reply YES to save or NO to edit.`);
                 </div>
               </button>
 
-              {/* Tool 5: Price Optimizer */}
-              <button
-                onClick={() => navigate('/automation/price-optimizer')}
-                className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-rose-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center group-hover:bg-rose-500/30 transition-colors flex-shrink-0">
-                    <TrendingUp className="w-5 h-5 text-rose-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">Price Optimizer</h4>
-                    <p className="text-xs text-muted-foreground mb-3">Dynamic pricing based on demand</p>
-                    <div className="flex items-center gap-1 text-xs text-rose-600 font-semibold">
-                      <span>↑ Revenue +25%</span>
-                    </div>
-                  </div>
-                </div>
-              </button>
+              {/* Tool 5: Price Optimizer - hidden */}
 
-              {/* Tool 6: Analytics Dashboard */}
-              <button
-                onClick={() => navigate('/automation/analytics-hub')}
-                className="glass-card border-2 border-white/30 rounded-2xl p-5 hover:border-cyan-500/50 hover:shadow-xl hover:scale-105 transition-all duration-300 backdrop-blur-xl bg-white/20 dark:bg-white/5 group cursor-pointer text-left w-full"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors flex-shrink-0">
-                    <PieChart className="w-5 h-5 text-cyan-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-foreground mb-1">Analytics Hub</h4>
-                    <p className="text-xs text-muted-foreground mb-3">Real-time business insights & reports</p>
-                    <div className="flex items-center gap-1 text-xs text-cyan-600 font-semibold">
-                      <span>→ Data-Driven</span>
-                    </div>
-                  </div>
+              {/* Tool 6: Analytics Hub - hidden */}
+            </div>
+          </div>
+        </div>
+
+        {/* ─── YOUR LEADS ─── */}
+        <div className="glass-card border-2 border-white/30 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 rounded-3xl p-6 sm:p-8 backdrop-blur-3xl overflow-hidden relative mb-8">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-secondary/5 pointer-events-none"></div>
+          <div className="relative z-10">
+
+            {/* Section Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg flex-shrink-0">
+                  <Target className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
+                <div>
+                  <h3 className="text-gradient text-xl sm:text-2xl font-bold text-foreground">
+                    Your Leads
+                    {liveLeads.length > 0 && (
+                      <span className="ml-2 text-sm font-bold px-2.5 py-0.5 rounded-full text-white" style={{ background: 'linear-gradient(135deg,#c1482b,#e05a38)' }}>
+                        {liveLeads.length}
+                      </span>
+                    )}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Buyer inquiries matched to your products — respond fast to win deals</p>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/products/inquiries')}
+                className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-lg hover:scale-105"
+                style={{ background: 'linear-gradient(135deg,#c1482b 0%,#e05a38 100%)' }}
+              >
+                <MessageSquare className="w-4 h-4" />
+                View All
               </button>
             </div>
+
+            {/* Loading */}
+            {leadsLoading && (
+              <div className="flex items-center justify-center py-10 gap-3">
+                <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                <p className="text-muted-foreground text-sm">Loading your leads...</p>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {!leadsLoading && liveLeads.length === 0 && (
+              <div className="text-center py-12 px-4 rounded-2xl bg-white/30 border border-white/20">
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#ffe4d4' }}>
+                  <Target className="w-8 h-8" style={{ color: '#c1482b' }} />
+                </div>
+                <p className="font-semibold text-foreground">No leads yet</p>
+                <p className="text-xs text-muted-foreground mt-2 max-w-sm mx-auto">
+                  When buyers submit inquiries matching your products, they’ll appear here as scored leads.
+                </p>
+                <button
+                  onClick={() => navigate('/products/add')}
+                  className="mt-4 px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:shadow-lg"
+                  style={{ background: 'linear-gradient(135deg,#c1482b 0%,#e05a38 100%)' }}
+                >
+                  + Add Products to Attract Buyers
+                </button>
+              </div>
+            )}
+
+            {/* Lead Cards Grid */}
+            {!leadsLoading && liveLeads.length > 0 && (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {liveLeads.map((inq, idx) => {
+                    const score = scoreLead(inq);
+                    const timeAgo = inq.createdAt
+                      ? (() => {
+                          const diff = Date.now() - new Date(inq.createdAt).getTime();
+                          const h = Math.floor(diff / 3600000);
+                          const d = Math.floor(diff / 86400000);
+                          return h < 1 ? 'Just now' : h < 24 ? `${h}h ago` : `${d}d ago`;
+                        })()
+                      : '';
+
+                    return (
+                      <div
+                        key={inq._id || idx}
+                        onClick={() => navigate('/products/inquiries')}
+                        className="group cursor-pointer rounded-2xl border-2 p-4 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
+                        style={{ borderColor: '#e8dcd0', backgroundColor: 'white' }}
+                      >
+                        {/* Gradient accent bar */}
+                        <div className="absolute top-0 left-0 right-0 h-1 rounded-t-2xl" style={{ background: 'linear-gradient(90deg,#c1482b,#e05a38)' }}></div>
+
+                        {/* Top row: Score badge + time */}
+                        <div className="flex items-center justify-between mb-3">
+                          <span
+                            className="text-xs font-bold px-2.5 py-1 rounded-full"
+                            style={{ backgroundColor: score.bg, color: score.color }}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: score.dot }}></span>
+                              {score.label}
+                            </span>
+                          </span>
+                          {timeAgo && <span className="text-[10px] text-muted-foreground">{timeAgo}</span>}
+                        </div>
+
+                        {/* Product name */}
+                        <h4 className="font-bold text-sm text-foreground truncate mb-1 group-hover:text-primary transition-colors">
+                          {inq.productName}
+                        </h4>
+
+                        {/* Buyer */}
+                        <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
+                          <Star className="w-3 h-3 flex-shrink-0" style={{ color: '#c1482b' }} />
+                          {inq.buyerName}{inq.buyerCompany && inq.buyerCompany !== 'Individual' ? ` · ${inq.buyerCompany}` : ''}
+                        </p>
+
+                        {/* Stats row */}
+                        <div className="flex items-center gap-3 text-[11px] font-semibold mb-3">
+                          {inq.quantity && (
+                            <span className="flex items-center gap-1" style={{ color: '#1565c0' }}>
+                              <BarChart3 className="w-3 h-3" />
+                              {inq.quantity} {inq.unit || ''}
+                            </span>
+                          )}
+                          {inq.budget && (
+                            <span className="flex items-center gap-1" style={{ color: '#2e7d32' }}>
+                              <TrendingUp className="w-3 h-3" />
+                              ₹{inq.budget}
+                            </span>
+                          )}
+                          {inq.deliveryLocation && (
+                            <span className="text-muted-foreground truncate max-w-[80px]">
+                              📍 {inq.deliveryLocation}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* CTA */}
+                        <div
+                          className="w-full py-1.5 rounded-xl text-[11px] font-bold text-white text-center group-hover:opacity-90 transition-all"
+                          style={{ background: 'linear-gradient(135deg,#c1482b 0%,#e05a38 100%)' }}
+                        >
+                          <MessageSquare className="w-3 h-3 inline mr-1 -mt-0.5" />
+                          Open Chat & Quote
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Mobile View All */}
+                <div className="mt-4 sm:hidden">
+                  <button
+                    onClick={() => navigate('/products/inquiries')}
+                    className="w-full py-2.5 rounded-xl text-sm font-semibold text-white"
+                    style={{ background: 'linear-gradient(135deg,#c1482b 0%,#e05a38 100%)' }}
+                  >
+                    View All Leads →
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
 

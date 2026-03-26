@@ -102,7 +102,7 @@ export default function SmartInventoryPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-[#f3f0ec] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Header */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -123,7 +123,7 @@ export default function SmartInventoryPage() {
               <Button variant="outline" size="sm" onClick={fetchAll}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
-              <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white" onClick={() => navigate('/products/add')}>
+              <Button size="sm" className="bg-primary hover:bg-primary/90 text-white" onClick={() => navigate('/products/add')}>
                 <Plus className="w-4 h-4 mr-1" /> Add Product
               </Button>
               <Button variant="outline" size="sm" className="text-red-500 border-red-200" onClick={() => setShowLogoutModal(true)}>
@@ -159,7 +159,7 @@ export default function SmartInventoryPage() {
 
         {/* Analytics row */}
         {analytics && (
-          <div className="glass-card border border-amber-200/50 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/10 rounded-2xl p-5 mb-6">
+          <div className="glass-card border border-white/30 bg-white/40 backdrop-blur-xl rounded-2xl p-5 mb-6">
             <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-amber-500" /> Inventory Analytics
             </h3>
@@ -204,11 +204,11 @@ export default function SmartInventoryPage() {
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
           <button onClick={() => setActiveTab('products')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === 'products' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg' : 'bg-white/60 dark:bg-white/5 text-muted-foreground hover:bg-white/80'}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === 'products' ? 'bg-primary text-white shadow-lg' : 'bg-white/60 dark:bg-white/5 text-muted-foreground hover:bg-white/80'}`}>
             Products Catalog ({products.length})
           </button>
           <button onClick={() => setActiveTab('stock')}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === 'stock' ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg' : 'bg-white/60 dark:bg-white/5 text-muted-foreground hover:bg-white/80'}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeTab === 'stock' ? 'bg-primary text-white shadow-lg' : 'bg-white/60 dark:bg-white/5 text-muted-foreground hover:bg-white/80'}`}>
             Stock Records ({inventory.length})
           </button>
         </div>
@@ -225,7 +225,7 @@ export default function SmartInventoryPage() {
             <div className="flex gap-2">
               {(['all', 'active', 'pending', 'inactive'] as const).map(f => (
                 <Button key={f} size="sm" variant={filter === f ? 'default' : 'outline'}
-                  className={filter === f ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white' : ''}
+                  className={filter === f ? 'bg-primary text-white' : ''}
                   onClick={() => setFilter(f)}>
                   {f.charAt(0).toUpperCase() + f.slice(1)}
                 </Button>
@@ -251,7 +251,7 @@ export default function SmartInventoryPage() {
                   {products.length === 0 ? 'No Products Yet' : 'No Products Match Filter'}
                 </h3>
                 {products.length === 0 && (
-                  <Button onClick={() => navigate('/products/add')} className="mt-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+                  <Button onClick={() => navigate('/products/add')} className="mt-2 bg-primary hover:bg-primary/90 text-white">
                     <Plus className="w-4 h-4 mr-2" /> Add First Product
                   </Button>
                 )}

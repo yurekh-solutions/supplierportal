@@ -22,6 +22,7 @@ import ProductDashboard from './pages/ProductDashboard';
 import ProductInquiries from './pages/ProductInquiries';
 import AddProduct from './pages/AddProduct';
 import Marketplace from './pages/Marketplace';
+import BuyerChat from './pages/BuyerChat';
 import AIBusinessIntelligence from './pages/AIBusinessIntelligence';
 import MiloAI from './pages/MiloAI';
 import TestPage from './pages/TestPage';
@@ -82,6 +83,7 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/chat/:inquiryId" element={<BuyerChat />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />

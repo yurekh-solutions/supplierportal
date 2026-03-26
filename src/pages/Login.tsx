@@ -222,13 +222,7 @@ const SupplierLogin = () => {
                 <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#B85C38] to-[#8B4513] flex items-center justify-center shadow-xl overflow-hidden">
                   <img src={ritzLogo} alt="ritz yard logo" className="w-14 h-14 object-contain" />
                 </div>
-                <div className="text-center">
-                  <h2 className="text-2xl font-bold text-foreground notranslate">
-                    <span className="text-primary">r</span>
-                    <span className="text-[#452a21]">itz yard</span>
-                  </h2>
-                  <p className="text-sm text-muted-foreground notranslate">Where Value Meets Velocity</p>
-                </div>
+               
               </div>
               <h3 className="text-xl font-semibold text-center text-foreground mb-1">
                 Supplier Login

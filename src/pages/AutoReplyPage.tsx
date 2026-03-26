@@ -173,7 +173,7 @@ export default function AutoReplyPage() {
   const activeReplies = replies.filter(r => r.isActive);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-[#f3f0ec] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Header */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -194,7 +194,7 @@ export default function AutoReplyPage() {
               <Button variant="outline" size="sm" onClick={fetchReplies}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
-              <Button size="sm" className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white" onClick={() => setShowForm(!showForm)}>
+              <Button size="sm" className="bg-primary hover:bg-primary/90 text-white" onClick={() => setShowForm(!showForm)}>
                 <Plus className="w-4 h-4 mr-1" /> New Reply
               </Button>
               <Button variant="outline" size="sm" className="text-red-500 border-red-200" onClick={() => setShowLogoutModal(true)}>
@@ -230,7 +230,7 @@ export default function AutoReplyPage() {
 
         {/* How it works banner */}
         {replies.length === 0 && !showForm && (
-          <Card className="glass-card border border-blue-200/50 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-500/10 dark:to-indigo-500/10 backdrop-blur-xl shadow-lg mb-6">
+          <Card className="glass-card border border-white/30 bg-white/40 backdrop-blur-xl shadow-lg mb-6">
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-lg">
@@ -247,7 +247,7 @@ export default function AutoReplyPage() {
                       </div>
                     ))}
                   </div>
-                  <Button className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white" onClick={() => setShowForm(true)}>
+                  <Button className="bg-primary hover:bg-primary/90 text-white" onClick={() => setShowForm(true)}>
                     <Plus className="w-4 h-4 mr-2" /> Create First Auto-Reply
                   </Button>
                 </div>
@@ -315,7 +315,7 @@ export default function AutoReplyPage() {
                 />
               </div>
               <div className="flex gap-3">
-                <Button onClick={handleSave} disabled={saving} className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white flex-1">
+                <Button onClick={handleSave} disabled={saving} className="bg-primary hover:bg-primary/90 text-white flex-1">
                   {saving ? <Loader className="w-4 h-4 animate-spin mr-2" /> : null}
                   {saving ? 'Saving...' : 'Save Auto-Reply'}
                 </Button>

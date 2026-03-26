@@ -95,7 +95,7 @@ export default function LeadScoringPage() {
   const totalPotential = leads.reduce((s, l) => s + (l.potential || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-[#f3f0ec] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Header */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -150,7 +150,7 @@ export default function LeadScoringPage() {
 
         {/* Potential Revenue Banner */}
         {totalPotential > 0 && (
-          <div className="glass-card border border-green-200/50 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-500/10 dark:to-emerald-500/10 rounded-2xl p-5 mb-6 flex items-center gap-4">
+          <div className="glass-card border border-white/30 bg-white/40 backdrop-blur-xl rounded-2xl p-5 mb-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-lg">
               <DollarSign className="w-6 h-6 text-white" />
             </div>
@@ -178,7 +178,7 @@ export default function LeadScoringPage() {
               { key: 'cold', label: `❄️ Cold (${cold})` },
             ].map(f => (
               <Button key={f.key} size="sm" variant={filter === f.key ? 'default' : 'outline'}
-                className={filter === f.key ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : ''}
+                className={filter === f.key ? 'bg-primary text-white' : ''}
                 onClick={() => setFilter(f.key as any)}>
                 {f.label}
               </Button>

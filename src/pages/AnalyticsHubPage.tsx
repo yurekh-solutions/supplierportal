@@ -107,7 +107,7 @@ export default function AnalyticsHubPage() {
     .slice(0, 3);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-teal-50 to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-[#f3f0ec] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       {/* Header */}
       <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-white/20 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -352,7 +352,7 @@ export default function AnalyticsHubPage() {
                   ) : (
                     <div className="text-center py-6">
                       <p className="text-sm text-muted-foreground mb-3">No products yet</p>
-                      <Button size="sm" className="bg-gradient-to-r from-cyan-500 to-teal-500 text-white" onClick={() => navigate('/products')}>
+                      <Button size="sm" className="bg-primary hover:bg-primary/90 text-white" onClick={() => navigate('/products')}>
                         Add First Product
                       </Button>
                     </div>
@@ -394,7 +394,7 @@ export default function AnalyticsHubPage() {
             )}
 
             {/* Actionable Insights */}
-            <Card className="glass-card border border-cyan-200/50 bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-500/10 dark:to-teal-500/10 backdrop-blur-xl shadow-lg mb-6">
+            <Card className="glass-card border border-cyan-200/50 bg-white/40 backdrop-blur-xl shadow-lg mb-6">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Lightbulb className="w-4 h-4 text-yellow-500" /> Key Insights & Next Actions
@@ -473,15 +473,20 @@ export default function AnalyticsHubPage() {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {BUSINESS_TIPS.map((tip, i) => (
-                    <div key={i} className="flex items-start gap-3 p-4 bg-gradient-to-r from-cyan-50 to-teal-50 dark:from-cyan-500/10 dark:to-teal-500/10 rounded-xl">
-                      <span className="text-2xl flex-shrink-0">{tip.icon}</span>
-                      <div className="flex-1">
-                        <p className="font-semibold text-foreground text-sm mb-1">{tip.title}</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed mb-2">{tip.desc}</p>
-                        <button onClick={() => navigate(tip.route)}
-                          className="text-xs text-cyan-600 hover:text-cyan-700 font-medium flex items-center gap-1">
+                    <div key={i}
+                      onClick={() => navigate(tip.route)}
+                      className="flex flex-col gap-3 p-4 bg-white/70 border border-white/40 rounded-xl cursor-pointer hover:bg-white/90 hover:shadow-md transition-all group">
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl flex-shrink-0">{tip.icon}</span>
+                        <div className="flex-1">
+                          <p className="font-semibold text-foreground text-sm mb-1">{tip.title}</p>
+                          <p className="text-xs text-muted-foreground leading-relaxed">{tip.desc}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-end">
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors">
                           {tip.action} <ArrowUpRight className="w-3 h-3" />
-                        </button>
+                        </span>
                       </div>
                     </div>
                   ))}
