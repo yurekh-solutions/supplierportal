@@ -7,6 +7,7 @@ import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useToast } from '@/hooks/use-toast';
+import { wakeUpServer, fetchWithTimeout } from '@/lib/apiUtils';
 
 // Get API URL - use production URL from env or Render backend
 const getApiUrl = () => {
@@ -41,11 +42,15 @@ const SupplierLogin = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/supplier/login`, {
+      // Wake up the Render free tier server before login (sleeps after 15 min)
+      console.log('🔐 Supplier Login - Waking up backend server first...');
+      await wakeUpServer();
+
+      const response = await fetchWithTimeout(`${API_URL}/auth/supplier/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
-      });
+      }, 90000);
 
       const data = await response.json();
 
@@ -102,14 +107,14 @@ const SupplierLogin = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/supplier/setup-password`, {
+      const response = await fetchWithTimeout(`${API_URL}/auth/supplier/setup-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email,
           password: newPassword,
         }),
-      });
+      }, 90000);
 
       const data = await response.json();
 

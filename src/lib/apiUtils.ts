@@ -36,3 +36,45 @@ export const getApiUrl = (): string => {
 };
 
 export const API_BASE_URL = getApiUrl();
+
+/**
+ * Wake up the Render free tier server before making API calls.
+ * Render sleeps after 15 min of inactivity; cold start takes 30-60s.
+ */
+export const wakeUpServer = async (): Promise<boolean> => {
+  try {
+    console.log('⏳ Waking up backend server...');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
+    await fetch(`${API_BASE_URL}/health`, {
+      method: 'GET',
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    console.log('✅ Server is awake');
+    return true;
+  } catch {
+    console.log('⚠️ Wake-up ping failed, server may still be booting...');
+    return false;
+  }
+};
+
+/**
+ * Fetch wrapper with timeout support for Render cold starts.
+ */
+export const fetchWithTimeout = async (
+  url: string,
+  options: RequestInit,
+  timeoutMs: number = 90000
+): Promise<Response> => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timeout);
+    return response;
+  } catch (err) {
+    clearTimeout(timeout);
+    throw err;
+  }
+};

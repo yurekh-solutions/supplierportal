@@ -16,8 +16,9 @@ import {
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from 'react-i18next';
 import { getFixedImageUrl, handleImageErrorWithFallback, handleImageErrorWithRetry } from '@/lib/imageUtils';
+import { wakeUpServer } from '@/lib/apiUtils';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://backendmatrix-cox3.onrender.com/api';
 
 interface Product {
   _id: string;
@@ -80,9 +81,14 @@ const Marketplace = () => {
   const [quoteError, setQuoteError] = useState('');
 
   useEffect(() => {
-    fetchProducts();
-    fetchSuppliers();
-    fetchCategories();
+    // Wake up Render backend (sleeps after 15 min) before loading marketplace data
+    const init = async () => {
+      await wakeUpServer();
+      fetchProducts();
+      fetchSuppliers();
+      fetchCategories();
+    };
+    init();
   }, []);
 
   useEffect(() => {

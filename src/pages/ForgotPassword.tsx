@@ -5,6 +5,7 @@ import { Button } from '@/pages/components/ui/button';
 import { Input } from '@/pages/components/ui/input';
 import { Label } from '@/pages/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { wakeUpServer, fetchWithTimeout } from '@/lib/apiUtils';
 
 // Get API URL
 const getApiUrl = () => {
@@ -34,11 +35,12 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/supplier/forgot-password`, {
+      await wakeUpServer();
+      const response = await fetchWithTimeout(`${API_URL}/auth/supplier/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
-      });
+      }, 90000);
 
       const data = await response.json();
 
