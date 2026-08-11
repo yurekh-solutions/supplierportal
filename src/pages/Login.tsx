@@ -16,7 +16,7 @@ const getApiUrl = () => {
   }
   // For production deployment (Vercel, custom domain, etc.)
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-    return 'https://backendmatrix.onrender.com/api';
+    return 'https://backendmatrix-cox3.onrender.com/api';
   }
   // Fallback to localhost for local development
   return 'http://localhost:5000/api';

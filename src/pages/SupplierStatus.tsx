@@ -9,7 +9,7 @@ const getApiUrl = () => {
     return import.meta.env.VITE_API_URL;
   }
   if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
-    return 'https://backendmatrix.onrender.com/api';
+    return 'https://backendmatrix-cox3.onrender.com/api';
   }
   return 'http://localhost:5000/api';
 };

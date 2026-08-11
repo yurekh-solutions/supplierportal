@@ -1,4 +1,9 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "env": {
+    "VITE_API_URL": "https://backendmatrix-cox3.onrender.com/api"
+  },
   "rewrites": [
     {
       "source": "/(.*)",
