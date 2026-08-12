@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { getFixedImageUrl, handleImageErrorWithFallback, handleImageErrorWithRetry } from '@/lib/imageUtils';
 import { wakeUpServer } from '@/lib/apiUtils';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://backendmatrix-cox3.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://backendmatrix-9q18.onrender.com/api';
 
 interface Product {
   _id: string;

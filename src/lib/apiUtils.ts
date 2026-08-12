@@ -21,7 +21,7 @@ export const getApiUrl = (): string => {
   // Production: Vercel deployments
   if (hostname.includes('vercel.app') || hostname === 'ritzyard.com' || hostname === 'www.ritzyard.com') {
     console.log('✅ Production mode: Using Render backend');
-    return 'https://backendmatrix-cox3.onrender.com/api';
+    return 'https://backendmatrix-9q18.onrender.com/api';
   }
 
   // Fallback to environment variable

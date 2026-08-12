@@ -13,7 +13,7 @@ export const getBackendBaseUrl = (): string => {
                       window.location.hostname.includes('vercel.com');
   
   return isProduction 
-    ? 'https://backendmatrix-cox3.onrender.com'
+    ? 'https://backendmatrix-9q18.onrender.com'
     : 'http://localhost:5000';
 };
 
@@ -66,7 +66,7 @@ export const getFixedImageUrl = (imageUrl?: string | null): string => {
     const isProduction = window.location.hostname.includes('vercel.app') || 
                         window.location.hostname.includes('vercel.com');
     
-    if (isProduction && !imageUrl.includes('backendmatrix-cox3.onrender.com')) {
+    if (isProduction && !imageUrl.includes('backendmatrix-9q18.onrender.com')) {
       // Replace any backend domain with the correct one
       return imageUrl.replace(/https?:\/\/[^/]+/, backendBaseUrl);
     }
