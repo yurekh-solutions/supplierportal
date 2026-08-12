@@ -257,8 +257,7 @@ const SupplierOnboarding = () => {
         }
       });
 
-      console.log('🚀 Submitting application to:', `${API_URL}/supplier/submit`);
-      console.log('📋 API_URL from env:', import.meta.env.VITE_API_URL);
+      // Submit application
       console.log('📦 Form Data:', {
         companyName: formData.companyName,
         email: formData.email,

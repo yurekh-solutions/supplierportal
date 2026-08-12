@@ -26,12 +26,10 @@ export const getApiUrl = (): string => {
 
   // Fallback to environment variable
   if (import.meta.env.VITE_API_URL) {
-    console.log('⚙️ Using VITE_API_URL:', import.meta.env.VITE_API_URL);
     return import.meta.env.VITE_API_URL;
   }
-
+  
   // Last resort: localhost
-  console.log('⚠️ Defaulting to localhost backend');
   return 'http://localhost:5000/api';
 };
 
