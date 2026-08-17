@@ -49,3 +49,4 @@ dist-ssr
 # TypeScript
 *.tsbuildinfo
 .vercel
+\"commit_msg.txt\"  
