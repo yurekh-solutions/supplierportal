@@ -22,6 +22,8 @@ import {
   ChevronUp,
   IndianRupee,
   Info,
+  Phone,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/pages/components/ui/button';
 import {
@@ -32,6 +34,7 @@ import { Badge } from '@/pages/components/ui/badge';
 import { Textarea } from '@/pages/components/ui/textarea';
 import LogoutModal from '@/components/LogoutModal';
 import { useToast } from '@/hooks/use-toast';
+import socketClient from '@/lib/socketClient';
 
 const getApiUrl = () => {
   if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== 'http://localhost:5000/api') {
@@ -69,6 +72,8 @@ interface Inquiry {
   score?: number;
   tags?: string[];
   unreadMessages?: number;
+  // Step 1: pre-filled wa.me deep link (only present for sourceType === 'lead')
+  whatsappUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -111,6 +116,7 @@ const ProductInquiries = () => {
   const [sending, setSending] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showProductInfo, setShowProductInfo] = useState(true);
+  const [socketLive, setSocketLive] = useState(false);
 
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -128,6 +134,49 @@ const ProductInquiries = () => {
     }, 20000);
     return () => {
       if (listPollRef.current) clearInterval(listPollRef.current);
+    };
+  }, [token]);
+
+  // Step 2: Real-time lead notifications via WebSocket
+  useEffect(() => {
+    if (!token) return;
+
+    // Connect (or reuse) the supplier socket
+    socketClient.connect(token);
+
+    // On new lead -> silent refresh + toast
+    const offLead = socketClient.on('lead:new', (payload: any) => {
+      console.log('🆕 New lead event received:', payload);
+      fetchInquiriesSilent();
+      const material = payload?.materials?.[0]?.materialName || payload?.matchedCategories?.[0] || 'new product';
+      const location = payload?.deliveryLocation || 'India';
+      toast({
+        title: '🔔 New lead just arrived!',
+        description: `${payload?.customerName || 'A buyer'} wants ${material} for delivery in ${location}.`,
+        duration: 6000,
+      });
+    });
+
+    const offConn = socketClient.on('connected', () => {
+      console.log('✅ Live: receiving real-time lead alerts');
+      setSocketLive(true);
+    });
+
+    const offDisc = socketClient.on('disconnected', () => {
+      console.log('⚠️ Live connection lost, will auto-reconnect...');
+      setSocketLive(false);
+    });
+
+    const offErr = socketClient.on('connect_error', () => {
+      setSocketLive(false);
+    });
+
+    return () => {
+      offLead();
+      offConn();
+      offDisc();
+      offErr();
+      setSocketLive(false);
     };
   }, [token]);
 
@@ -340,6 +389,7 @@ const ProductInquiries = () => {
 
   const handleLogoutClick = () => setShowLogoutModal(true);
   const handleConfirmLogout = () => {
+    socketClient.disconnect();
     localStorage.removeItem('supplierToken');
     setShowLogoutModal(false);
     navigate('/login');
@@ -384,13 +434,24 @@ const ProductInquiries = () => {
                 </div>
               </div>
             </div>
-            <Button
-              className="bg-red-500 hover:bg-red-600 text-white"
-              onClick={handleLogoutClick}
-              size="sm"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
+            <div className="flex items-center gap-2">
+              {socketLive && (
+                <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-semibold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-full px-2.5 py-1">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                  </span>
+                  LIVE
+                </div>
+              )}
+              <Button
+                className="bg-red-500 hover:bg-red-600 text-white"
+                onClick={handleLogoutClick}
+                size="sm"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -586,6 +647,19 @@ const ProductInquiries = () => {
                           </span>
                         )}
                       </Button>
+                      {inquiry.whatsappUrl && (
+                        <a
+                          href={inquiry.whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium h-10 px-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-sm transition-all hover:shadow-md"
+                          title="Opens WhatsApp on your phone with a pre-filled message to the buyer"
+                        >
+                          <Phone className="w-4 h-4" />
+                          Open in WhatsApp
+                          <Sparkles className="w-3 h-3 ml-0.5" />
+                        </a>
+                      )}
                       <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-gray-100 dark:bg-gray-800 rounded-md px-3 py-1.5">
                         <ShieldCheck className="w-3 h-3 text-green-500" />
                         Via RitzYard only

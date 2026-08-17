@@ -48,3 +48,4 @@ dist-ssr
 
 # TypeScript
 *.tsbuildinfo
+.vercel

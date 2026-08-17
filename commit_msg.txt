@@ -1,0 +1,12 @@
+Add real-time lead notifications and WhatsApp button to supplier portal
+
+- Install socket.io-client@4.7.5 dependency
+- Create src/lib/socketClient.ts: WebSocket client with auto-reconnect
+- Update ProductInquiries.tsx:
+  - Connect to WebSocket on mount with supplier JWT
+  - Listen for lead:new events -> trigger silent refresh + toast
+  - Show LIVE indicator in header (green pulse)
+  - Add Open in WhatsApp button on each lead card (green gradient)
+  - Disconnect socket on logout
+- Update backend supplierController to return whatsappUrl in lead response
+- Fix pre-existing build blocker (whatsappUrl was saved but not returned)
