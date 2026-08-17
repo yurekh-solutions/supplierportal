@@ -29,6 +29,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [devResetLink, setDevResetLink] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +47,10 @@ const ForgotPassword = () => {
 
       if (response.ok) {
         setEmailSent(true);
+        // Dev mode: backend returns the reset link directly (SMTP not configured)
+        if (data.devResetLink) {
+          setDevResetLink(data.devResetLink);
+        }
         toast({
           title: 'Check Your Email',
           description: 'If an account exists, a reset link has been sent',
@@ -158,9 +163,29 @@ const ForgotPassword = () => {
                 </div>
                 <div className="bg-amber-50/80 border-2 border-amber-200/80 rounded-lg p-4 backdrop-blur-sm">
                   <p className="text-xs text-amber-800">
-                    📧 Check your spam folder if you don't see the email in your inbox. The link expires in 1 hour.
+                    Check your spam folder if you don't see the email in your inbox. The link expires in 1 hour.
                   </p>
                 </div>
+
+                {devResetLink && (
+                  <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4 backdrop-blur-sm text-left">
+                    <p className="text-xs font-semibold text-blue-900 mb-2">Dev Mode: Email not configured</p>
+                    <p className="text-[11px] text-blue-800 mb-2">Click below to test the reset flow:</p>
+                    <a
+                      href={devResetLink}
+                      className="block break-all text-[11px] text-blue-700 underline hover:text-blue-900 bg-white border border-blue-200 rounded p-2 mb-2"
+                    >
+                      {devResetLink}
+                    </a>
+                    <Button
+                      onClick={() => navigate(devResetLink.replace(/^https?:\/\/[^/]+/, ''))}
+                      className="w-full h-9 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Open Reset Page
+                    </Button>
+                  </div>
+                )}
+
                 <Button
                   onClick={() => navigate('/login')}
                   className="w-full h-12 bg-gradient-to-r from-primary via-primary-glow to-secondary hover:shadow-xl text-white font-semibold transition-all"
